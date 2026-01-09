@@ -17,14 +17,13 @@ export const WelcomeScreen = () => {
         <SafeAreaView>
             <Text >Welcome to Felinode</Text>
             <Text >Master English the right way.</Text>
-
+            <Text >Domina el inglés de la manera correcta.</Text>
             <View >
-                <TouchableOpacity onPress={navigateToLogin}>
-                    <Text >Log In</Text>
-                </TouchableOpacity>
-
                 <TouchableOpacity onPress={navigateToPlacement}>
                     <Text >Take Placement Test</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={navigateToLogin}>
+                    <Text >Log In</Text>
                 </TouchableOpacity>
             </View>
 

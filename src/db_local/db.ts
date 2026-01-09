@@ -23,6 +23,7 @@ export const initDatabase = async () => {
       description TEXT,
       status TEXT DEFAULT 'locked',
       order_index INTEGER,
+      children TEXT DEFAULT '[]', -- JSON Array of Lesson IDs
       FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
     );
 

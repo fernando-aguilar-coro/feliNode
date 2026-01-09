@@ -50,6 +50,28 @@ const mapDbExerciseToAppExercise = (dbExercise: any): Exercise | null => {
                 correctAnswer: content.correct_answer,
             } as FillInTheBlankExercise;
 
+        case 'scrambled_sentence':
+            // Logic:
+            // Content contains { segments: string[], correct_answer: string }
+            return {
+                id: dbExercise.id.toString(),
+                type: ExerciseType.SCRAMBLED_SENTENCE,
+                question: dbExercise.instruction,
+                segments: content.segments || [],
+                correctAnswer: content.correct_answer,
+            } as any; // Cast as any temporarily to avoid import loops if types aren't fully propagated yet, or just explicit cast
+
+        case 'translate':
+            // Logic:
+            // Content contains { phrase, correct_answer }
+            return {
+                id: dbExercise.id.toString(),
+                type: ExerciseType.TRANSLATE,
+                question: dbExercise.instruction,
+                phrase: content.phrase || '',
+                correctAnswer: content.correct_answer || '',
+            } as any;
+
         default:
             console.warn(`[ExerciseService] Unknown exercise type: ${dbExercise.type}`);
             // Returning null allows us to filter out unsupported types gracefully

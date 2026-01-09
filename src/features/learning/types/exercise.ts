@@ -2,6 +2,7 @@ export enum ExerciseType {
     MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
     FILL_IN_THE_BLANK = 'FILL_IN_THE_BLANK',
     TRANSLATE = 'TRANSLATE',
+    SCRAMBLED_SENTENCE = 'SCRAMBLED_SENTENCE',
 }
 
 export interface BaseExercise {
@@ -28,4 +29,10 @@ export interface TranslateExercise extends BaseExercise {
     correctAnswer: string;
 }
 
-export type Exercise = MultipleChoiceExercise | FillInTheBlankExercise | TranslateExercise;
+export interface ScrambledSentenceExercise extends BaseExercise {
+    type: ExerciseType.SCRAMBLED_SENTENCE;
+    segments: string[];
+    correctAnswer: string;
+}
+
+export type Exercise = MultipleChoiceExercise | FillInTheBlankExercise | TranslateExercise | ScrambledSentenceExercise;

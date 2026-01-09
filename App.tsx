@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { Navigation } from './src/navigation/Navigation';
-import { init, seedDatabase } from './src/db_local/api_local';
+import { init } from './src/db_local/api_local';
+import { seedDatabase } from './src/db_local/seed_db';
 
 export const App = () => {
     const [appIsReady, setAppIsReady] = useState(false);

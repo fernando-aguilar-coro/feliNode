@@ -88,88 +88,31 @@ export const getLessonStatus = async (lessonId: string) => {
     const res: any = await db!.getFirstAsync('SELECT status FROM lessons WHERE id = ?', [lessonId]);
     return res?.status || 'locked';
 };
-// Seed function for basic testing
-export const seedDatabase = async () => {
-    try {
-        if (!db) await init();
 
-        console.log('[DB_SEED] Starting seed process...');
+export interface LessonNode {
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+    children: string[];
+}
 
-        // 2. Create the Module (Unit)
-        // Check if module exists first
-        let moduleId: number | undefined;
-        const moduleCheck = await db!.getFirstAsync<{ id: number }>('SELECT id FROM modules WHERE title = ?', ['Unit 1: Basics']);
+export const getLessonNodes = async (): Promise<LessonNode[]> => {
+    if (!db) await init();
+    const rows: any[] = await db!.getAllAsync('SELECT id, title, description, status, children FROM lessons ORDER BY order_index ASC');
 
-        if (moduleCheck) {
-            moduleId = moduleCheck.id;
-        } else {
-            const moduleResult = await db!.runAsync('INSERT INTO modules (title, order_index) VALUES (?, ?)', ['Unit 1: Basics', 1]);
-            moduleId = moduleResult.lastInsertRowId;
-            console.log('[DB_SEED] Module created with ID:', moduleId);
+    const completedLessons = await getCompletedLessons();
+
+    return rows.map(row => {
+        let status = row.status;
+        if (completedLessons.includes(row.id)) {
+            status = 'completed';
         }
 
-        // 3. Create the Lesson
-        const lesson1Id = 'lesson_verbs_intro';
-        const lessonCheck = await db!.getFirstAsync<{ count: number }>('SELECT count(*) as count FROM lessons WHERE id = ?', [lesson1Id]);
-
-        if (!lessonCheck || lessonCheck.count === 0) {
-            await db!.runAsync(
-                'INSERT INTO lessons (id, module_id, title, description, status, order_index) VALUES (?, ?, ?, ?, ?, ?)',
-                [lesson1Id, moduleId, 'Lesson 1', 'Introduction to Verbs', 'available', 1]
-            );
-            console.log('[DB_SEED] Lesson created.');
-
-            // 4. Add Theory Content ONLY if lesson is new (simplified logic)
-            await db!.runAsync(
-                'INSERT INTO lesson_theory (lesson_id, content, order_index) VALUES (?, ?, ?)',
-                [lesson1Id, 'Verbs are action words.', 1]
-            );
-        } else {
-            console.log('[DB_SEED] Lesson already exists.');
-        }
-
-        // 5. Check and Create Exercises
-        const exercisesCheck = await db!.getFirstAsync<{ count: number }>('SELECT count(*) as count FROM exercises WHERE lesson_id = ?', [lesson1Id]);
-
-        // If no exercises exist for this lesson, we seed them. 
-        // This handles the "Partial Seed" case where Lesson exists but Exercises don't.
-        if (!exercisesCheck || exercisesCheck.count === 0) {
-            console.log('[DB_SEED] Seeding exercises...');
-
-            // --- Exercise 1: Fill in the Blanks ---
-            const ex1Content = JSON.stringify({
-                prefix_text: 'I ',
-                suffix_text: ' playing soccer.',
-                hint: 'am/is/are',
-                correct_answer: 'am'
-            });
-
-            await db!.runAsync(
-                'INSERT INTO exercises (lesson_id, type, instruction, content, order_index) VALUES (?, ?, ?, ?, ?)',
-                [lesson1Id, 'fill_blanks', 'Complete the sentence', ex1Content, 1]
-            );
-
-            // --- Exercise 2: Multiple Choice ---
-            const ex2Content = JSON.stringify({
-                options: [
-                    { option_text: 'is', is_correct: 1 },
-                    { option_text: 'are', is_correct: 0 }
-                ],
-                correctAnswer: 'is'
-            });
-
-            await db!.runAsync(
-                'INSERT INTO exercises (lesson_id, type, instruction, content, order_index) VALUES (?, ?, ?, ?, ?)',
-                [lesson1Id, 'multiple_choice', 'What is singular : ', ex2Content, 2]
-            );
-            console.log('[DB_SEED] Exercises seeded.');
-        } else {
-            console.log('[DB_SEED] Exercises already exist.');
-        }
-
-        console.log('[DB_SEED] Seeding complete successfully.');
-
-    } catch (error) {
-        console.error('[DB_SEED] Error during database seeding:', error);
-    }
+        return {
+            ...row,
+            status,
+            children: JSON.parse(row.children || '[]')
+        };
+    });
 };

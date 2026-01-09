@@ -4,6 +4,7 @@ import { Exercise, ExerciseType } from '../../types/exercise';
 import { MultipleChoiceExercise } from './MultipleChoiceExercise';
 import { FillInTheBlankExercise } from './FillInTheBlankExercise';
 import { TranslateExercise } from './TranslateExercise';
+import { ScrambledSentenceExercise } from './ScrambledSentenceExercise';
 
 interface Props {
     exercise: Exercise;
@@ -48,6 +49,14 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
             case ExerciseType.TRANSLATE:
                 return (
                     <TranslateExercise
+                        exercise={exercise}
+                        onAnswer={setUserAnswer}
+                        userAnswer={userAnswer}
+                    />
+                );
+            case ExerciseType.SCRAMBLED_SENTENCE:
+                return (
+                    <ScrambledSentenceExercise
                         exercise={exercise}
                         onAnswer={setUserAnswer}
                         userAnswer={userAnswer}
