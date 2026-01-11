@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, Button, ScrollView } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import { AppText, AppButton, Spacer } from '../../../components';
+import { theme } from '../../../theme';
 
 interface TheoryViewerProps {
     content: any[];
@@ -8,8 +10,9 @@ interface TheoryViewerProps {
 
 export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue }) => {
     return (
-        <ScrollView style={{ flex: 1, padding: 20 }}>
-            <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Theory</Text>
+        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+            <AppText variant="xxl" weight="bold" style={styles.title}>Theory</AppText>
+            <Spacer height={theme.spacing.lg} />
 
             {content.map((item, index) => {
                 // Determine how to render based on item structure or type
@@ -17,15 +20,34 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
                 const text = typeof item === 'string' ? item : (item.content || JSON.stringify(item));
 
                 return (
-                    <View key={index} style={{ marginBottom: 15 }}>
-                        <Text style={{ fontSize: 16 }}>{text}</Text>
+                    <View key={index} style={styles.paragraph}>
+                        <AppText variant="md" style={styles.text}>{text}</AppText>
+                        <Spacer height={theme.spacing.md} />
                     </View>
                 );
             })}
 
-            <View style={{ marginTop: 30 }}>
-                <Button title="Start Exercises" onPress={onContinue} />
-            </View>
+            <Spacer height={theme.spacing.xl} />
+            <AppButton title="Start Exercises" onPress={onContinue} variant="primary" />
+            <Spacer height={theme.spacing.xl} />
         </ScrollView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    contentContainer: {
+        padding: theme.spacing.lg,
+    },
+    title: {
+        marginBottom: theme.spacing.md,
+    },
+    paragraph: {
+        marginBottom: theme.spacing.sm,
+    },
+    text: {
+        lineHeight: 24,
+    },
+});

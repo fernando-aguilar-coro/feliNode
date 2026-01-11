@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useUserStore } from '../store/UserStore';
 import LoginScreen from '../features/auth/screens/LoginScreen';
+import RegisterScreen from '../features/auth/screens/RegisterScreen';
 import { WelcomeScreen } from '../features/auth/screens/WelcomeScreen';
 import { PlacementTestScreen } from '../features/learning/screens/PlacementTestScreen';
 import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
@@ -25,6 +26,10 @@ export const Navigation = () => {
                     <Stack.Screen
                         name="Login"
                         component={LoginScreen}
+                    />
+                    <Stack.Screen
+                        name="Register"
+                        component={RegisterScreen}
                     />
                     <Stack.Screen
                         name="PlacementEvaluation"

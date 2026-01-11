@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, TextInput } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { FillInTheBlankExercise as FillInTheBlankExerciseType } from '../../types/exercise';
+import { AppText, AppTextInput } from '../../../../components';
+import { theme } from '../../../../theme';
 
 interface Props {
     exercise: FillInTheBlankExerciseType;
@@ -11,19 +13,29 @@ interface Props {
 export const FillInTheBlankExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
     return (
         <View>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>{exercise.question}</Text>
-            <Text style={{ marginBottom: 10 }}>{exercise.sentence}</Text>
-            <TextInput
+            <AppText variant="lg" weight="medium" style={styles.question}>
+                {exercise.question}
+            </AppText>
+            <AppText variant="md" style={styles.sentence}>
+                {exercise.sentence}
+            </AppText>
+            <AppTextInput
                 value={userAnswer}
                 onChangeText={onAnswer}
                 placeholder="Type the missing word..."
-                style={{
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    padding: 10,
-                    marginBottom: 10,
-                }}
+                autoCapitalize="none"
             />
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    question: {
+        marginBottom: theme.spacing.lg,
+    },
+    sentence: {
+        marginBottom: theme.spacing.md,
+        fontStyle: 'italic',
+        color: theme.colors.textSecondary,
+    },
+});

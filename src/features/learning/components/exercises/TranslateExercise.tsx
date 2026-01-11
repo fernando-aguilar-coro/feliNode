@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, TextInput } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { TranslateExercise as TranslateExerciseType } from '../../types/exercise';
+import { AppText, AppTextInput } from '../../../../components';
+import { theme } from '../../../../theme';
 
 interface Props {
     exercise: TranslateExerciseType;
@@ -11,21 +13,35 @@ interface Props {
 export const TranslateExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
     return (
         <View>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>{exercise.question}</Text>
-            <Text style={{ fontStyle: 'italic', marginBottom: 10 }}>{exercise.phrase}</Text>
-            <TextInput
+            <AppText variant="lg" weight="medium" style={styles.question}>
+                {exercise.question}
+            </AppText>
+            <AppText variant="md" style={styles.phrase}>
+                {exercise.phrase}
+            </AppText>
+            <AppTextInput
                 value={userAnswer}
                 onChangeText={onAnswer}
                 placeholder="Translate this phrase..."
                 multiline
-                style={{
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    padding: 10,
-                    height: 100,
-                    textAlignVertical: 'top',
-                }}
+                style={styles.input}
             />
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    question: {
+        marginBottom: theme.spacing.lg,
+    },
+    phrase: {
+        marginBottom: theme.spacing.md,
+        fontStyle: 'italic',
+        color: theme.colors.textSecondary,
+    },
+    input: {
+        height: 100,
+        textAlignVertical: 'top',
+        paddingTop: theme.spacing.sm, // Add some top padding for multiline
+    },
+});

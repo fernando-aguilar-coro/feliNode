@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { useLessonSession } from '../hooks/useLessonSession';
 import { TheoryViewer } from '../components/TheoryViewer';
 import { ExerciseContainer } from '../components/exercises/ExerciseContainer';
 import { useExercises } from '../hooks/useExercises';
+import { Screen, AppText, AppButton, Spacer } from '../../../components';
+import { theme } from '../../../theme';
 
 type RootStackParamList = {
     Lesson: { lessonId: string };
@@ -45,37 +46,44 @@ export const LessonScreen = () => {
 
     if (status === 'loading') {
         return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" />
-            </SafeAreaView>
+            <Screen style={styles.centerContainer}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <Spacer height={theme.spacing.sm} />
+                <AppText>Loading Lesson...</AppText>
+            </Screen>
         );
     }
 
     if (status === 'completed') {
         return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 10 }}>Lesson Complete!</Text>
-                <Text style={{ marginBottom: 20 }}>Great job!</Text>
-                <TouchableOpacity
-                    style={styles.button}
+            <Screen style={styles.centerContainer}>
+                <AppText variant="xxl" weight="bold" color={theme.colors.success} align="center">
+                    Lesson Complete!
+                </AppText>
+                <Spacer height={theme.spacing.md} />
+                <AppText variant="lg" align="center">
+                    Great job! You've mastered this lesson.
+                </AppText>
+                <Spacer height={theme.spacing.xl} />
+                <AppButton
+                    title="Continue"
                     onPress={() => navigation.goBack()}
-                >
-                    <Text style={styles.buttonText}>Continue</Text>
-                </TouchableOpacity>
-            </SafeAreaView>
+                    style={styles.button}
+                />
+            </Screen>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <Screen>
             {status === 'theory' && (
                 <TheoryViewer content={theoryContent} onContinue={startExercises} />
             )}
 
             {status === 'exercises' && (
-                <View style={{ flex: 1 }}>
-                    <View style={{ padding: 10 }}>
-                        <Text>Exercises</Text>
+                <View style={styles.exercisesContainer}>
+                    <View style={styles.header}>
+                        <AppText variant="xl" weight="bold">Exercises</AppText>
                     </View>
                     {currentExercise ? (
                         <ExerciseContainer
@@ -85,24 +93,26 @@ export const LessonScreen = () => {
                             lastResult={lastResult}
                         />
                     ) : (
-                        <Text>No exercises found.</Text>
+                        <AppText align="center">No exercises found.</AppText>
                     )}
                 </View>
             )}
-        </SafeAreaView>
+        </Screen>
     );
 };
 
 const styles = StyleSheet.create({
-    button: {
-        backgroundColor: '#4CAF50',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 5,
+    centerContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    buttonText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
+    button: {
+        width: '100%',
+    },
+    exercisesContainer: {
+        flex: 1,
+    },
+    header: {
+        paddingVertical: theme.spacing.md,
     },
 });

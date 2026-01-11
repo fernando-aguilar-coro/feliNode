@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Button } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { MultipleChoiceExercise as MultipleChoiceExerciseType } from '../../types/exercise';
+import { AppText } from '../../../../components';
+import { theme } from '../../../../theme';
 
 interface Props {
     exercise: MultipleChoiceExerciseType;
@@ -11,22 +13,47 @@ interface Props {
 export const MultipleChoiceExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
     return (
         <View>
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>{exercise.question}</Text>
-            {exercise.options.map((option) => (
-                <TouchableOpacity
-                    key={option}
-                    onPress={() => onAnswer(option)}
-                    style={{
-                        padding: 10,
-                        marginVertical: 5,
-                        backgroundColor: userAnswer === option ? '#ddd' : '#f0f0f0',
-                        borderWidth: 1,
-                        borderColor: '#ccc',
-                    }}
-                >
-                    <Text>{option}</Text>
-                </TouchableOpacity>
-            ))}
+            <AppText variant="lg" weight="medium" style={styles.question}>
+                {exercise.question}
+            </AppText>
+            {exercise.options.map((option) => {
+                const isSelected = userAnswer === option;
+                return (
+                    <TouchableOpacity
+                        key={option}
+                        onPress={() => onAnswer(option)}
+                        style={[
+                            styles.option,
+                            isSelected && styles.optionSelected,
+                        ]}
+                    >
+                        <AppText
+                            color={isSelected ? theme.colors.primary : theme.colors.text}
+                            weight={isSelected ? 'bold' : 'regular'}
+                        >
+                            {option}
+                        </AppText>
+                    </TouchableOpacity>
+                );
+            })}
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    question: {
+        marginBottom: theme.spacing.lg,
+    },
+    option: {
+        padding: theme.spacing.md,
+        marginVertical: theme.spacing.xs,
+        backgroundColor: theme.colors.surface,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        borderRadius: 12,
+    },
+    optionSelected: {
+        borderColor: theme.colors.primary,
+        backgroundColor: theme.colors.primary + '10', // 10% opacity
+    },
+});

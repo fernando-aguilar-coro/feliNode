@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { ScrambledSentenceExercise as ScrambledSentenceExerciseType } from '../../types/exercise';
+import { AppText } from '../../../../components';
+import { theme } from '../../../../theme';
 
 interface Props {
     exercise: ScrambledSentenceExerciseType;
@@ -37,13 +39,17 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
 
     return (
         <View style={styles.container}>
-            <Text style={styles.question}>{exercise.question}</Text>
-            <Text style={styles.instruction}>Tap the words to form the correct sentence:</Text>
+            <AppText variant="lg" weight="medium" style={styles.question}>
+                {exercise.question}
+            </AppText>
+            <AppText variant="sm" color={theme.colors.textSecondary} style={styles.instruction}>
+                Tap the words to form the correct sentence:
+            </AppText>
 
             {/* Answer Area */}
             <View style={styles.answerArea}>
                 {selectedIndices.length === 0 && (
-                    <Text style={styles.placeholder}>Your answer here...</Text>
+                    <AppText style={styles.placeholder}>Your answer here...</AppText>
                 )}
                 {selectedIndices.map((segmentIndex, listIndex) => (
                     <TouchableOpacity
@@ -51,7 +57,9 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
                         onPress={() => handleRemove(listIndex)}
                         style={styles.wordBubbleSelected}
                     >
-                        <Text style={styles.wordText}>{exercise.segments[segmentIndex]}</Text>
+                        <AppText style={styles.wordText} color={theme.colors.primaryDark}>
+                            {exercise.segments[segmentIndex]}
+                        </AppText>
                     </TouchableOpacity>
                 ))}
             </View>
@@ -64,12 +72,10 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
                     const isSelected = selectedIndices.includes(index);
 
                     if (isSelected) {
-                        // Render a placeholder or invisible equivalent to keep layout stable, 
-                        // OR just render a "ghost" of it.
-                        // Let's render a ghost.
+                        // Render a ghost of it.
                         return (
                             <View key={`pool-${index}`} style={[styles.wordBubble, styles.wordBubbleGhost]}>
-                                <Text style={styles.wordTextGhost}>{word}</Text>
+                                <AppText style={styles.wordTextGhost}>{word}</AppText>
                             </View>
                         );
                     }
@@ -80,7 +86,7 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
                             onPress={() => handleSelect(index)}
                             style={styles.wordBubble}
                         >
-                            <Text style={styles.wordText}>{word}</Text>
+                            <AppText style={styles.wordText}>{word}</AppText>
                         </TouchableOpacity>
                     );
                 })}
@@ -90,53 +96,67 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
 };
 
 const styles = StyleSheet.create({
-    container: { padding: 10 },
-    question: { fontSize: 20, marginBottom: 10, fontWeight: 'bold', color: '#333' },
-    instruction: { fontSize: 14, color: '#666', marginBottom: 20 },
+    container: {},
+    question: {
+        marginBottom: theme.spacing.sm,
+    },
+    instruction: {
+        marginBottom: theme.spacing.lg,
+    },
     answerArea: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         minHeight: 80,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: theme.colors.background,
         borderRadius: 12,
-        padding: 10,
-        marginBottom: 30,
+        padding: theme.spacing.md,
+        marginBottom: theme.spacing.xl,
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#eee',
+        borderColor: theme.colors.border,
         borderStyle: 'dashed'
     },
-    placeholder: { color: '#ccc', fontStyle: 'italic', width: '100%', textAlign: 'center' },
+    placeholder: {
+        color: theme.colors.textLight,
+        fontStyle: 'italic',
+        width: '100%',
+        textAlign: 'center',
+    },
     divider: { height: 10 },
     wordBank: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
     wordBubble: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.surface,
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 16,
         margin: 6,
         borderWidth: 1,
-        borderColor: '#ddd',
-        shadowColor: "#000",
+        borderColor: theme.colors.border,
+        // Shadow
+        shadowColor: theme.colors.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 2
     },
     wordBubbleSelected: {
-        backgroundColor: '#e3f2fd',
+        backgroundColor: theme.colors.primaryLight + '40', // transparent primary
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 16,
         margin: 6,
         borderWidth: 1,
-        borderColor: '#2196f3',
+        borderColor: theme.colors.primary,
     },
     wordBubbleGhost: {
-        backgroundColor: '#f0f0f0',
-        borderColor: '#f0f0f0',
+        backgroundColor: theme.colors.background,
+        borderColor: theme.colors.background,
         shadowColor: 'transparent',
+        elevation: 0,
     },
-    wordText: { fontSize: 16, color: '#333', fontWeight: '500' },
+    wordText: {
+        fontSize: theme.typography.fontSizes.md,
+        fontWeight: '500',
+    },
     wordTextGhost: { color: 'transparent' }
 });

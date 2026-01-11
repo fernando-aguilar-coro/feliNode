@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Exercise, ExerciseType } from '../../types/exercise';
 import { MultipleChoiceExercise } from './MultipleChoiceExercise';
 import { FillInTheBlankExercise } from './FillInTheBlankExercise';
 import { TranslateExercise } from './TranslateExercise';
 import { ScrambledSentenceExercise } from './ScrambledSentenceExercise';
+import { Card, AppButton, AppText, Spacer } from '../../../../components';
+import { theme } from '../../../../theme';
 
 interface Props {
     exercise: Exercise;
@@ -63,25 +65,69 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
                     />
                 );
             default:
-                return <Text>Unknown exercise type</Text>;
+                return <AppText>Unknown exercise type</AppText>;
         }
     };
 
     return (
-        <View style={{ padding: 20 }}>
-            {renderContent()}
+        <View style={styles.container}>
+            <Card style={styles.card}>
+                {renderContent()}
+            </Card>
+
+            <Spacer height={theme.spacing.lg} />
 
             {lastResult && hasChecked && (
-                <View style={{ marginVertical: 20, padding: 10, backgroundColor: lastResult.correct ? '#d4edda' : '#f8d7da' }}>
-                    <Text style={{ color: lastResult.correct ? '#155724' : '#721c24' }}>{lastResult.message}</Text>
+                <View
+                    style={[
+                        styles.feedback,
+                        {
+                            backgroundColor: lastResult.correct
+                                ? theme.colors.success + '20' // 20% opacity
+                                : theme.colors.error + '20',
+                        },
+                    ]}
+                >
+                    <AppText
+                        weight="bold"
+                        color={lastResult.correct ? theme.colors.success : theme.colors.error}
+                    >
+                        {lastResult.message}
+                    </AppText>
                 </View>
             )}
 
+            <Spacer height={theme.spacing.md} />
+
             {!hasChecked ? (
-                <Button title="Check Answer" onPress={handleCheck} disabled={!userAnswer} />
+                <AppButton
+                    title="Check Answer"
+                    onPress={handleCheck}
+                    disabled={!userAnswer}
+                    variant="primary"
+                />
             ) : (
-                <Button title="Next" onPress={onNext} />
+                <AppButton
+                    title="Next"
+                    onPress={onNext}
+                    variant="secondary"
+                />
             )}
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        padding: theme.spacing.md,
+    },
+    card: {
+        minHeight: 200,
+        justifyContent: 'center',
+    },
+    feedback: {
+        padding: theme.spacing.md,
+        borderRadius: 12,
+        marginBottom: theme.spacing.md,
+    },
+});
