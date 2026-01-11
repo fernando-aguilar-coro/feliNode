@@ -61,6 +61,36 @@ export const saveUserProgress = async (lessonId: string, score: number) => {
 
             // 3. Save back
             await db!.runAsync('UPDATE user_progress SET lessons_completed = ? WHERE id = ?', [json, profile.id || 1]);
+
+            // 4. Unlock next lessons
+            // Find all lessons that depend on this one
+            const dependents: any[] = await db!.getAllAsync(
+                'SELECT lesson_id FROM lesson_dependencies WHERE prerequisite_id = ?',
+                [lessonId]
+            );
+
+            for (const dep of dependents) {
+                const targetLessonId = dep.lesson_id;
+
+                // Check if targetLessonId has OTHER prerequisites
+                const prerequisites: any[] = await db!.getAllAsync(
+                    'SELECT prerequisite_id FROM lesson_dependencies WHERE lesson_id = ?',
+                    [targetLessonId]
+                );
+
+                console.log(`[DEBUG] Checking unlocking for lesson ${targetLessonId}. Prerequisites: ${JSON.stringify(prerequisites)}. Completed: ${JSON.stringify(completed)}`);
+
+                const allMet = prerequisites.every(p => completed.includes(p.prerequisite_id));
+                console.log(`[DEBUG] All prerequisites met for ${targetLessonId}? ${allMet}`);
+
+                if (allMet) {
+                    // Unlock the lesson!
+                    await db!.runAsync(
+                        'UPDATE lessons SET status = ? WHERE id = ? AND status = ?',
+                        ['available', targetLessonId, 'locked']
+                    );
+                }
+            }
         }
     }
 };
@@ -94,16 +124,31 @@ export interface LessonNode {
     title: string;
     description: string;
     status: string;
-    children: string[];
+    parents: string[]; // List of parent IDs
 }
 
 export const getLessonNodes = async (): Promise<LessonNode[]> => {
     if (!db) await init();
-    const rows: any[] = await db!.getAllAsync('SELECT id, title, description, status, children FROM lessons ORDER BY order_index ASC');
 
+    // Fetch lessons
+    const lessons: any[] = await db!.getAllAsync('SELECT id, title, description, status FROM lessons ORDER BY order_index ASC');
+
+    // Fetch dependencies
+    const dependencies: any[] = await db!.getAllAsync('SELECT lesson_id, prerequisite_id FROM lesson_dependencies');
+
+    // Map dependencies to lessons
+    const dependencyMap = new Map<string, string[]>();
+    dependencies.forEach(dep => {
+        if (!dependencyMap.has(dep.lesson_id)) {
+            dependencyMap.set(dep.lesson_id, []);
+        }
+        dependencyMap.get(dep.lesson_id)?.push(dep.prerequisite_id);
+    });
+
+    // Check completed status
     const completedLessons = await getCompletedLessons();
 
-    return rows.map(row => {
+    return lessons.map(row => {
         let status = row.status;
         if (completedLessons.includes(row.id)) {
             status = 'completed';
@@ -112,7 +157,7 @@ export const getLessonNodes = async (): Promise<LessonNode[]> => {
         return {
             ...row,
             status,
-            children: JSON.parse(row.children || '[]')
+            parents: dependencyMap.get(row.id) || []
         };
     });
 };

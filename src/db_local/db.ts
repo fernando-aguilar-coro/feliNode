@@ -23,10 +23,17 @@ export const initDatabase = async () => {
       description TEXT,
       status TEXT DEFAULT 'locked',
       order_index INTEGER,
-      children TEXT DEFAULT '[]', -- JSON Array of Lesson IDs
       FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS lesson_dependencies (
+      lesson_id TEXT,
+      prerequisite_id TEXT,
+      FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
+      FOREIGN KEY (prerequisite_id) REFERENCES lessons(id) ON DELETE CASCADE,
+      PRIMARY KEY (lesson_id, prerequisite_id)
+    );
+ 
     CREATE TABLE IF NOT EXISTS lesson_theory (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       lesson_id TEXT,

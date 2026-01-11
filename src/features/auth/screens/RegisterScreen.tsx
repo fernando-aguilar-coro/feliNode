@@ -3,12 +3,12 @@ import { Text, Button } from 'react-native';
 import { useUserStore } from '../../../store/UserStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
     const login = useUserStore((state) => state.login);
 
     return (
         <SafeAreaView>
-            <Button title="Login" onPress={login} />
+            <Button title="Register" onPress={login} />
         </SafeAreaView>
     );
 }

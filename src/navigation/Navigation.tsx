@@ -4,8 +4,7 @@ import { useUserStore } from '../store/UserStore';
 import LoginScreen from '../features/auth/screens/LoginScreen';
 import { WelcomeScreen } from '../features/auth/screens/WelcomeScreen';
 import { PlacementTestScreen } from '../features/learning/screens/PlacementTestScreen';
-import { HomeScreen } from '../screens/HomeScreen';
-import { LessonScreen } from '../features/learning/screens/LessonScreen';
+import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,10 +15,7 @@ export const Navigation = () => {
         <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
             {isAuthenticated ? (
                 // App Stack
-                <Stack.Group>
-                    <Stack.Screen name="Home" component={HomeScreen} />
-                    <Stack.Screen name="Lesson" component={LessonScreen} />
-                </Stack.Group>
+                <Stack.Screen name="Home" component={HomeNavigation} />
             ) : (
                 <Stack.Group>
                     <Stack.Screen

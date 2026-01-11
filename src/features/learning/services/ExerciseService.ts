@@ -104,14 +104,6 @@ export const ExerciseService = {
     },
 
     /**
-     * Retrieves the initial placement test exercises.
-     * Currently maps to 'lesson_verbs_intro' as a proxy for the placement test.
-     */
-    getPlacementExercises: async (): Promise<Exercise[]> => {
-        return await ExerciseService.getExercisesForLesson('lesson_verbs_intro');
-    },
-
-    /**
      * Validates the user's answer against the correct answer.
      * Performs a case-insensitive trim comparison.
      */
