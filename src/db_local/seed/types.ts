@@ -1,6 +1,7 @@
 export interface SeedOption {
     option_text: string;
-    is_correct: number; // 0 or 1
+    is_correct: boolean;
+    icon?: string;
 }
 
 export interface SeedExerciseContent {
@@ -34,7 +35,7 @@ export interface SeedLesson {
     desc: string;
     status: string;
     order: number;
-    theory?: SeedTheory;
+    theory?: string; // Markdown content
     exercises?: SeedExercise[];
 }
 

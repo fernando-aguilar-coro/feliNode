@@ -1,8 +1,8 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useUserStore } from '../store/UserStore';
-import LoginScreen from '../features/auth/screens/LoginScreen';
-import RegisterScreen from '../features/auth/screens/RegisterScreen';
+import LoginScreen from '../features/auth/screens/OTP Screen';
+
 import { WelcomeScreen } from '../features/auth/screens/WelcomeScreen';
 import { PlacementTestScreen } from '../features/learning/screens/PlacementTestScreen';
 import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
@@ -10,7 +10,11 @@ import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
 const Stack = createNativeStackNavigator();
 
 export const Navigation = () => {
-    const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+    const { isAuthenticated, checkSession } = useUserStore();
+
+    React.useEffect(() => {
+        checkSession();
+    }, [checkSession]);
 
     return (
         <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
@@ -27,10 +31,7 @@ export const Navigation = () => {
                         name="Login"
                         component={LoginScreen}
                     />
-                    <Stack.Screen
-                        name="Register"
-                        component={RegisterScreen}
-                    />
+
                     <Stack.Screen
                         name="PlacementEvaluation"
                         component={PlacementTestScreen}

@@ -9,27 +9,27 @@ export const WelcomeScreen = () => {
 
     return (
         <Screen style={styles.container}>
-            {/* Header Section */}
+            {/* Sección de encabezado */}
             <View style={styles.header}>
-                <AppText variant="xxl" weight="bold" align="center" style={styles.title}>
-                    Welcome to Felinode
+                <AppText variant="xl" weight="bold" align="center" style={styles.title}>
+                    Bienvenido a Felinode
                 </AppText>
                 <Spacer height={theme.spacing.sm} />
                 <AppText variant="lg" color={theme.colors.textSecondary} align="center">
-                    Master English the right way.
+                    Domina el inglés de la manera correcta.
                 </AppText>
             </View>
 
-            {/* Button Section */}
+            {/* Sección de botones */}
             <View style={styles.buttonContainer}>
                 <AppButton
-                    title="Take Placement Test / Register"
+                    title="Prueba de Nivel"
                     onPress={() => navigation.navigate('PlacementEvaluation')}
                     variant="primary"
                 />
                 <Spacer height={theme.spacing.md} />
                 <AppButton
-                    title="Log In"
+                    title="Entrar / Registrarse"
                     onPress={() => navigation.navigate('Login')}
                     variant="secondary"
                 />

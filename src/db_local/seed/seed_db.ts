@@ -41,7 +41,7 @@ export const seedDatabase = async () => {
             // OR just insert it with dependency on the module we just processed.
 
             // To keep it simple and robust: Let's find "Unit 1: Foundations" id.
-            const moduleCheck = await dbInstance.getFirstAsync<{ id: number }>('SELECT id FROM modules WHERE title = ?', ['Unit 1: Foundations']);
+            const moduleCheck = await dbInstance.getFirstAsync<{ id: number }>('SELECT id FROM modules WHERE title = ?', ['Unidad 1: Verbos Modales']);
             if (moduleCheck) {
                 // We treat placement test as a lesson but with special handling if needed
                 // The original code did:

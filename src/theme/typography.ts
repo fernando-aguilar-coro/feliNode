@@ -14,9 +14,4 @@ export const typography = {
         bold: '700',
         extraBold: '800',
     } as const,
-    // If you add custom fonts later, define fontFamilies here
-    // fontFamilies: {
-    //   primary: 'Inter-Regular',
-    //   ...
-    // }
 };

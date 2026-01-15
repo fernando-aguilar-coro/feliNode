@@ -65,7 +65,8 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
                     />
                 );
             default:
-                return <AppText>Unknown exercise type</AppText>;
+                /* Tipo de ejercicio desconocido o no implementado */
+                return <AppText>Tipo de ejercicio desconocido</AppText>;
         }
     };
 
@@ -100,15 +101,17 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
             <Spacer height={theme.spacing.md} />
 
             {!hasChecked ? (
+                /* Botón para comprobar la respuesta */
                 <AppButton
-                    title="Check Answer"
+                    title="Comprobar Respuesta"
                     onPress={handleCheck}
                     disabled={!userAnswer}
                     variant="primary"
                 />
             ) : (
+                /* Botón para pasar al siguiente ejercicio */
                 <AppButton
-                    title="Next"
+                    title="Siguiente"
                     onPress={onNext}
                     variant="secondary"
                 />

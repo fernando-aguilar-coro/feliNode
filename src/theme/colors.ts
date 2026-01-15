@@ -1,28 +1,28 @@
 export const colors = {
-    primary: '#6C63FF', // "Felinode" purple
-    primaryLight: '#A39EFF',
-    primaryDark: '#3F3D56',
+    // Brand
+    primary: '#7db0b0ff',
+    secondary: '#5d554f74',
 
-    secondary: '#FF6584', // Pink/Coral
-    secondaryLight: '#FF9EAF',
-    secondaryDark: '#C13E59',
+    // Neutral
+    background: '#FFFFFF', // White
+    surface: '#F5F6FA', // Very light grey for slight contrast
 
-    background: '#F8F9FA', // Light gray background
-    surface: '#FFFFFF', // White cards/inputs
+    // Text
+    text: '#2D3436', // Black-ish
+    textSecondary: '#636E72', // Dark Grey
+    textLight: '#B2BEC3', // Light Grey
 
-    text: '#2D3436', // Dark text
-    textSecondary: '#636E72', // Grey text
-    textLight: '#B2BEC3', // Light grey text
-
-    border: '#DFE6E9',
+    // Base
+    white: '#FFFFFF',
+    black: '#000000',
+    transparent: 'transparent',
 
     // Status
     success: '#00B894',
-    error: '#D63031',
-    warning: '#FDCB6E',
-    info: '#0984E3',
+    error: '#FF7675',
+    warning: '#FFEAA7',
+    info: '#74B9FF',
 
-    transparent: 'transparent',
-    white: '#FFFFFF',
-    black: '#000000',
+    // Border
+    border: '#DFE6E9',
 };

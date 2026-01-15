@@ -6,7 +6,7 @@ export type LessonStatus = 'loading' | 'theory' | 'exercises' | 'completed';
 
 export const useLessonSession = (lessonId: string) => {
     const [status, setStatus] = useState<LessonStatus>('loading');
-    const [theoryContent, setTheoryContent] = useState<any[]>([]);
+    const [theoryContent, setTheoryContent] = useState<string>('');
     const [exercises, setExercises] = useState<Exercise[]>([]);
 
     useEffect(() => {
@@ -21,7 +21,7 @@ export const useLessonSession = (lessonId: string) => {
                 setTheoryContent(theory);
                 setExercises(exList);
 
-                if (theory.length > 0) {
+                if (theory && theory.length > 0) {
                     setStatus('theory');
                 } else if (exList.length > 0) {
                     setStatus('exercises');

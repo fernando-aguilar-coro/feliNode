@@ -4,4 +4,9 @@ adb reverse tcp:8081 tcp:8081
 
 #shortCut 
 
+
 npx expo start --localhost
+
+eas build --platform android --profile preview --local
+
+/kkp7#X$_eZ7PsH

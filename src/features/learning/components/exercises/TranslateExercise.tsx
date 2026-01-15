@@ -22,7 +22,8 @@ export const TranslateExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
             <AppTextInput
                 value={userAnswer}
                 onChangeText={onAnswer}
-                placeholder="Translate this phrase..."
+                /* Sugerencia para la traducción */
+                placeholder="Traduce esta frase..."
                 multiline
                 style={styles.input}
             />

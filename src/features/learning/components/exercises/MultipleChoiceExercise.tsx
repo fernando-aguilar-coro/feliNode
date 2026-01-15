@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { MultipleChoiceExercise as MultipleChoiceExerciseType } from '../../types/exercise';
 import { AppText } from '../../../../components';
 import { theme } from '../../../../theme';
@@ -16,23 +17,34 @@ export const MultipleChoiceExercise = ({ exercise, onAnswer, userAnswer }: Props
             <AppText variant="lg" weight="medium" style={styles.question}>
                 {exercise.question}
             </AppText>
+            {/* Mapeo de las opciones disponibles para el ejercicio */}
             {exercise.options.map((option) => {
-                const isSelected = userAnswer === option;
+                const isSelected = userAnswer === option.text;
                 return (
                     <TouchableOpacity
-                        key={option}
-                        onPress={() => onAnswer(option)}
+                        key={option.text}
+                        onPress={() => onAnswer(option.text)}
                         style={[
                             styles.option,
                             isSelected && styles.optionSelected,
                         ]}
                     >
-                        <AppText
-                            color={isSelected ? theme.colors.primary : theme.colors.text}
-                            weight={isSelected ? 'bold' : 'regular'}
-                        >
-                            {option}
-                        </AppText>
+                        <View style={styles.optionContent}>
+                            {option.icon && (
+                                <Ionicons
+                                    name={option.icon as any} // Cast to any to avoid strict icon name checks for now
+                                    size={24}
+                                    color={isSelected ? theme.colors.primary : theme.colors.text}
+                                    style={styles.icon}
+                                />
+                            )}
+                            <AppText
+                                color={isSelected ? theme.colors.primary : theme.colors.text}
+                                weight={isSelected ? 'bold' : 'regular'}
+                            >
+                                {option.text}
+                            </AppText>
+                        </View>
                     </TouchableOpacity>
                 );
             })}
@@ -55,5 +67,12 @@ const styles = StyleSheet.create({
     optionSelected: {
         borderColor: theme.colors.primary,
         backgroundColor: theme.colors.primary + '10', // 10% opacity
+    },
+    optionContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    icon: {
+        marginRight: theme.spacing.md,
     },
 });

@@ -13,7 +13,7 @@ export interface BaseExercise {
 
 export interface MultipleChoiceExercise extends BaseExercise {
     type: ExerciseType.MULTIPLE_CHOICE;
-    options: string[];
+    options: { text: string, icon?: string }[];
     correctAnswer: string;
 }
 

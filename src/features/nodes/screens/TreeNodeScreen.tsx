@@ -28,6 +28,7 @@ export const TreeNodeScreen = () => {
     if (isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                {/* Indicador de carga mientras se obtienen los nodos */}
                 <ActivityIndicator size="large" color="#0000ff" />
             </View>
         );
@@ -36,6 +37,7 @@ export const TreeNodeScreen = () => {
     if (error) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                {/* Mensaje de error si falla la carga */}
                 <Text>Error: {error}</Text>
             </View>
         );

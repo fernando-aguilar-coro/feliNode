@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useLessonSession } from '../hooks/useLessonSession';
 import { useExercises } from '../hooks/useExercises';
 import { ExerciseContainer } from '../components/exercises/ExerciseContainer';
+import { ProgressBar } from '../components/ProgressBar';
 import { useUserStore } from '../../../store/UserStore';
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { theme } from '../../../theme';
@@ -41,7 +42,8 @@ export const PlacementTestScreen = () => {
             <Screen style={styles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
                 <Spacer height={theme.spacing.sm} />
-                <AppText color={theme.colors.textSecondary}>Loading placement test...</AppText>
+                {/* Mensaje de carga de la prueba de nivel */}
+                <AppText color={theme.colors.textSecondary}>Cargando prueba de nivel...</AppText>
             </Screen>
         );
     }
@@ -50,23 +52,24 @@ export const PlacementTestScreen = () => {
         return (
             <Screen style={styles.centerContainer}>
                 <AppText variant="xxl" weight="bold" color={theme.colors.success} align="center">
-                    All set!
+                    ¡Todo listo!
                 </AppText>
                 <Spacer height={theme.spacing.sm} />
                 <AppText variant="lg" color={theme.colors.textSecondary} align="center">
-                    We've determined your level. Let's get started!
+                    Hemos determinado tu nivel. ¡Empecemos!
                 </AppText>
 
                 <Spacer height={theme.spacing.xl} />
                 <View style={styles.completionButtonContainer}>
                     <AppButton
-                        title="Register to save progress"
-                        onPress={() => navigation.navigate('Register')}
+                        title="Identifícate para guardar tu progreso"
+                        onPress={() => navigation.navigate('Login')}
                         variant="primary"
                     />
                     <Spacer height={theme.spacing.md} />
+                    {/* Opción para continuar sin cuenta */}
                     <AppButton
-                        title="Continue without registering"
+                        title="Continuar sin registrarse"
                         onPress={() => completeOnboarding()}
                         variant="secondary"
                     />
@@ -78,7 +81,11 @@ export const PlacementTestScreen = () => {
     return (
         <Screen>
             <View style={styles.header}>
-                <AppText variant="lg" weight="bold" align="center">Placement Test</AppText>
+                {/* Título de la pantalla de prueba de nivel */}
+                <AppText variant="lg" weight="bold" align="center">Prueba de Nivel</AppText>
+                {exercises.length > 0 && (
+                    <ProgressBar current={isFinished ? exercises.length : exercises.indexOf(currentExercise)} total={exercises.length} />
+                )}
             </View>
 
             <View style={styles.content}>
@@ -91,10 +98,11 @@ export const PlacementTestScreen = () => {
                     />
                 ) : (
                     <View style={styles.centerContainer}>
-                        <AppText align="center">No exercises found for the placement test.</AppText>
+                        {/* Mensaje de error si no hay ejercicios para el test */}
+                        <AppText align="center">No se encontraron ejercicios para la prueba de nivel.</AppText>
                         <Spacer height={theme.spacing.md} />
                         <AppButton
-                            title="Go Back"
+                            title="Volver"
                             onPress={() => navigation.navigate('Welcome')}
                             variant="primary"
                         />

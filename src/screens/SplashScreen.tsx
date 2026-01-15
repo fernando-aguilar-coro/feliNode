@@ -5,7 +5,7 @@ export const SplashScreen = () => {
     return (
         <SafeAreaView>
             <View>
-                <Text> SplashScreen </Text>
+                <Text> loading ... </Text>
             </View>
         </SafeAreaView>
     );

@@ -22,7 +22,8 @@ export const FillInTheBlankExercise = ({ exercise, onAnswer, userAnswer }: Props
             <AppTextInput
                 value={userAnswer}
                 onChangeText={onAnswer}
-                placeholder="Type the missing word..."
+                /* Sugerencia para el campo de entrada */
+                placeholder="Escribe la palabra que falta..."
                 autoCapitalize="none"
             />
         </View>

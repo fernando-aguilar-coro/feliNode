@@ -3,7 +3,7 @@ import { SeedModule, SeedLesson, SeedDependency, SeedExercise } from './types';
 
 export const ensureModule = async (db: SQLite.SQLiteDatabase, moduleData: SeedModule): Promise<number> => {
     let moduleId: number | undefined;
-    const moduleCheck = await db.getFirstAsync<{ id: number }>('SELECT id FROM modules WHERE title = ?', [moduleData.title]);
+    const moduleCheck = await db.getFirstAsync<{ id: number }>('SELECT id FROM modules WHERE title = ?', ['Unidad 1: Verbos Modales']);
 
     if (moduleCheck) {
         moduleId = moduleCheck.id;
@@ -17,23 +17,15 @@ export const ensureModule = async (db: SQLite.SQLiteDatabase, moduleData: SeedMo
 
 export const ensureLessons = async (db: SQLite.SQLiteDatabase, moduleId: number, lessons: SeedLesson[]) => {
     for (const l of lessons) {
-        const existing = await db.getFirstAsync<{ count: number }>('SELECT count(*) as count FROM lessons WHERE id = ?', [l.id]);
-        if (!existing || existing.count === 0) {
-            await db.runAsync(
-                'INSERT INTO lessons (id, module_id, title, description, status, order_index) VALUES (?, ?, ?, ?, ?, ?)',
-                [l.id, moduleId, l.title, l.desc, l.status, l.order]
-            );
+        // Overwrite or update: delete existing lesson and its children to re-seed fresh content
+        await db.runAsync(
+            'INSERT INTO lessons (id, module_id, title, description, theory, status, order_index) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [l.id, moduleId, l.title, l.desc, l.theory || '', l.status, l.order]
+        );
 
-            if (l.theory) {
-                await db.runAsync(
-                    'INSERT INTO lesson_theory (lesson_id, content, order_index) VALUES (?, ?, ?)',
-                    [l.id, JSON.stringify(l.theory), 1] // Assuming 1 theory entry for now
-                );
-            }
 
-            if (l.exercises) {
-                await ensureExercises(db, l.id, l.exercises);
-            }
+        if (l.exercises) {
+            await ensureExercises(db, l.id, l.exercises);
         }
     }
 };

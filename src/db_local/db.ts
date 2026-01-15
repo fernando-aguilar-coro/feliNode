@@ -21,6 +21,7 @@ export const initDatabase = async () => {
       module_id INTEGER,
       title TEXT NOT NULL,
       description TEXT,
+      theory TEXT, -- Markdown content
       status TEXT DEFAULT 'locked',
       order_index INTEGER,
       FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
@@ -34,13 +35,7 @@ export const initDatabase = async () => {
       PRIMARY KEY (lesson_id, prerequisite_id)
     );
  
-    CREATE TABLE IF NOT EXISTS lesson_theory (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      lesson_id TEXT,
-      content TEXT, -- JSON String
-      order_index INTEGER,
-      FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
-    );
+    -- lesson_theory table removed
 
     CREATE TABLE IF NOT EXISTS exercises (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

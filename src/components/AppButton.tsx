@@ -23,45 +23,31 @@ export const AppButton: React.FC<AppButtonProps> = ({
     disabled,
     ...props
 }) => {
-    const getBackgroundColor = () => {
-        if (variant === 'primary') return theme.colors.primary;
-        if (variant === 'secondary') return theme.colors.secondary;
-        return 'transparent';
-    };
-
-    const getTextColor = () => {
-        if (variant === 'outline') return theme.colors.primary;
-        if (variant === 'ghost') return theme.colors.text;
-        return theme.colors.white;
-    };
-
-    const getBorderColor = () => {
-        if (variant === 'outline') return theme.colors.primary;
-        return 'transparent';
-    };
+    const variantStyles = BUTTON_VARIANTS[variant] || BUTTON_VARIANTS.primary;
+    const isDisabled = disabled || loading;
 
     return (
         <TouchableOpacity
             style={[
                 styles.button,
                 {
-                    backgroundColor: getBackgroundColor(),
-                    borderColor: getBorderColor(),
+                    backgroundColor: variantStyles.backgroundColor,
+                    borderColor: variantStyles.borderColor,
                     borderWidth: variant === 'outline' ? 1 : 0,
-                    opacity: disabled || loading ? 0.6 : 1,
+                    opacity: isDisabled ? 0.6 : 1,
                 },
                 style,
             ]}
-            disabled={disabled || loading}
+            disabled={isDisabled}
             {...props}
         >
             {loading ? (
-                <ActivityIndicator color={getTextColor()} />
+                <ActivityIndicator color={variantStyles.textColor} />
             ) : (
                 <AppText
                     variant="md"
                     weight="bold"
-                    color={getTextColor()}
+                    color={variantStyles.textColor}
                     style={styles.text}
                 >
                     {title}
@@ -69,6 +55,29 @@ export const AppButton: React.FC<AppButtonProps> = ({
             )}
         </TouchableOpacity>
     );
+};
+
+const BUTTON_VARIANTS = {
+    primary: {
+        backgroundColor: theme.colors.primary,
+        borderColor: 'transparent',
+        textColor: theme.colors.white,
+    },
+    secondary: {
+        backgroundColor: theme.colors.secondary,
+        borderColor: 'transparent',
+        textColor: theme.colors.white,
+    },
+    outline: {
+        backgroundColor: 'transparent',
+        borderColor: theme.colors.primary,
+        textColor: theme.colors.primary,
+    },
+    ghost: {
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        textColor: theme.colors.text,
+    },
 };
 
 const styles = StyleSheet.create({

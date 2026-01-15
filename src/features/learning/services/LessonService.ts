@@ -1,4 +1,4 @@
-import { getTheoryByLessonId, saveUserProgress } from '../../../db_local/api_local';
+import { getLessonById, saveUserProgress } from '../../../db_local/api_local';
 import { ExerciseService } from './ExerciseService';
 
 export const LessonService = {
@@ -6,16 +6,8 @@ export const LessonService = {
      * Fetches theory content for a specific lesson.
      */
     getTheory: async (lessonId: string) => {
-        const theoryRows: any[] = await getTheoryByLessonId(lessonId);
-        // Combine all theory rows into a single content array or object
-        // Assuming 'content' is a JSON string in the DB.
-        return theoryRows.map(row => {
-            try {
-                return JSON.parse(row.content);
-            } catch (e) {
-                return { type: 'text', content: row.content };
-            }
-        });
+        const lesson: any = await getLessonById(lessonId);
+        return lesson?.theory || '';
     },
 
     /**

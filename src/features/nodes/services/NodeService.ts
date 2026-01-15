@@ -8,7 +8,9 @@ export const NodeService = {
      * Uses d3.stratify() since the DB now provides a strict parent_id relationship.
      */
     async getLayout(width: number = 400, height: number = 600): Promise<{ nodes: TreeNode[], links: TreeLink[] }> {
-        const lessons = await getLessonNodes();
+        const allLessons = await getLessonNodes();
+        // Filter out placement_test from the tree view
+        const lessons = allLessons.filter(l => l.id !== 'placement_test');
 
         if (lessons.length === 0) {
             return { nodes: [], links: [] };
@@ -44,28 +46,30 @@ export const NodeService = {
             });
 
             // 4. Calculate Layout
-            const treeLayout = d3.tree<any>().size([width, height]);
+            const LEVEL_HEIGHT = 160; // Distance between levels
+            const TOP_PADDING = 100;  // Padding from the top of the canvas
+
+            const treeLayout = d3.tree<any>()
+                .size([width, height]); // We still use size for horizontal distribution, but we'll override Y
+
             const rootWithPositions = treeLayout(hierarchy);
 
-            // 5. Deduplicate Nodes (DAG Handling)
-            // d3.tree duplicates nodes with multiple parents. 
-            // We want ONE visual node for 'Conjugation', even if it has 2 parents.
-            // We'll traverse the D3 result and keep the FIRST occurrence of each unique ID.
-
+            // 5. Deduplicate Nodes (DAG Handling) and Adjust Vertical Position
             const uniqueNodesMap = new Map<string, TreeNode>();
 
             rootWithPositions.descendants().forEach(d => {
                 if (d.data.isVirtual) return;
 
-                // If we haven't seen this node ID yet, add it.
-                // If we HAVE seen it, we skip adding a new visual node, 
-                // effectively "merging" the second branch into the first position.
                 if (!uniqueNodesMap.has(d.data.id)) {
+                    // We override d.y with a fixed vertical step based on depth
+                    // Depth 1 (actual roots) will be at TOP_PADDING
+                    // Depth 2 at TOP_PADDING + LEVEL_HEIGHT, etc.
+                    const nodeY = (d.depth - 1) * LEVEL_HEIGHT + TOP_PADDING;
+
                     uniqueNodesMap.set(d.data.id, {
                         ...d.data,
                         x: d.x,
-                        y: d.y,
-                        // Only visual nodes need specific props
+                        y: nodeY,
                     });
                 }
             });

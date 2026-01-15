@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { initDatabase } from './db';
+import { syncUserProgress } from '../api/sync';
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -24,10 +25,7 @@ export const getLessonById = async (lessonId: string) => {
     return await db!.getFirstAsync('SELECT * FROM lessons WHERE id = ?', [lessonId]);
 };
 
-export const getTheoryByLessonId = async (lessonId: string) => {
-    if (!db) await init();
-    return await db!.getAllAsync('SELECT * FROM lesson_theory WHERE lesson_id = ? ORDER BY order_index ASC', [lessonId]);
-}
+
 
 export const getExercisesByLessonId = async (lessonId: string) => {
     if (!db) await init();
@@ -92,6 +90,11 @@ export const saveUserProgress = async (lessonId: string, score: number) => {
                 }
             }
         }
+
+        // [SYNC] Attempt to sync with backend (non-blocking)
+        syncUserProgress(completed).catch(err => {
+            console.log('[Sync] Background sync failed (harmless for local usage):', err);
+        });
     }
 };
 

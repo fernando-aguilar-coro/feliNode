@@ -5,6 +5,7 @@ import { useLessonSession } from '../hooks/useLessonSession';
 import { TheoryViewer } from '../components/TheoryViewer';
 import { ExerciseContainer } from '../components/exercises/ExerciseContainer';
 import { useExercises } from '../hooks/useExercises';
+import { ProgressBar } from '../components/ProgressBar';
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { theme } from '../../../theme';
 
@@ -49,7 +50,8 @@ export const LessonScreen = () => {
             <Screen style={styles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
                 <Spacer height={theme.spacing.sm} />
-                <AppText>Loading Lesson...</AppText>
+                {/* Mensaje de carga de la lección */}
+                <AppText>Cargando lección...</AppText>
             </Screen>
         );
     }
@@ -58,15 +60,16 @@ export const LessonScreen = () => {
         return (
             <Screen style={styles.centerContainer}>
                 <AppText variant="xxl" weight="bold" color={theme.colors.success} align="center">
-                    Lesson Complete!
+                    ¡Lección Completada!
                 </AppText>
                 <Spacer height={theme.spacing.md} />
                 <AppText variant="lg" align="center">
-                    Great job! You've mastered this lesson.
+                    ¡Buen trabajo! Has dominado esta lección.
                 </AppText>
                 <Spacer height={theme.spacing.xl} />
+                {/* Botón para continuar tras completar la lección */}
                 <AppButton
-                    title="Continue"
+                    title="Continuar"
                     onPress={() => navigation.goBack()}
                     style={styles.button}
                 />
@@ -83,7 +86,9 @@ export const LessonScreen = () => {
             {status === 'exercises' && (
                 <View style={styles.exercisesContainer}>
                     <View style={styles.header}>
-                        <AppText variant="xl" weight="bold">Exercises</AppText>
+                        {/* Título de la sección de ejercicios */}
+                        <AppText variant="xl" weight="bold">Ejercicios</AppText>
+                        <ProgressBar current={isFinished ? exercises.length : exercises.indexOf(currentExercise)} total={exercises.length} />
                     </View>
                     {currentExercise ? (
                         <ExerciseContainer
@@ -93,7 +98,8 @@ export const LessonScreen = () => {
                             lastResult={lastResult}
                         />
                     ) : (
-                        <AppText align="center">No exercises found.</AppText>
+                        /* Mensaje si no se encuentran ejercicios */
+                        <AppText align="center">No se encontraron ejercicios.</AppText>
                     )}
                 </View>
             )}

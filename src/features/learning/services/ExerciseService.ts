@@ -1,4 +1,4 @@
-import { Exercise, ExerciseType, MultipleChoiceExercise, FillInTheBlankExercise } from '../types/exercise';
+import { Exercise, ExerciseType, MultipleChoiceExercise, FillInTheBlankExercise, ScrambledSentenceExercise, TranslateExercise } from '../types/exercise';
 import { getExercisesByLessonId } from '../../../db_local/api_local';
 
 /**
@@ -35,18 +35,27 @@ const mapDbExerciseToAppExercise = (dbExercise: any): Exercise | null => {
                 id: dbExercise.id.toString(),
                 type: ExerciseType.MULTIPLE_CHOICE,
                 question: dbExercise.instruction,
-                options: content.options?.map((o: any) => o.option_text) || [],
+                options: content.options?.map((o: any) => ({
+                    text: o.option_text,
+                    icon: o.icon
+                })) || [],
                 correctAnswer: correctOption?.option_text || '',
             } as MultipleChoiceExercise;
 
+        case 'fill_blank':
         case 'fill_blanks':
             // Logic:
-            // Content contains { prefix_text, suffix_text, hint, correct_answer }
+            // Content contains { phrase, correct_answer } OR { prefix_text, suffix_text, hint, correct_answer }
+            let sentence = content.phrase || '';
+            if (!sentence && (content.prefix_text || content.suffix_text)) {
+                sentence = `${content.prefix_text || ''} ___ ${content.suffix_text || ''}`;
+            }
+
             return {
                 id: dbExercise.id.toString(),
                 type: ExerciseType.FILL_IN_THE_BLANK,
                 question: dbExercise.instruction,
-                sentence: `${content.prefix_text || ''} ___ ${content.suffix_text || ''}`,
+                sentence: sentence,
                 correctAnswer: content.correct_answer,
             } as FillInTheBlankExercise;
 
@@ -59,7 +68,7 @@ const mapDbExerciseToAppExercise = (dbExercise: any): Exercise | null => {
                 question: dbExercise.instruction,
                 segments: content.segments || [],
                 correctAnswer: content.correct_answer,
-            } as any; // Cast as any temporarily to avoid import loops if types aren't fully propagated yet, or just explicit cast
+            } as ScrambledSentenceExercise;
 
         case 'translate':
             // Logic:
@@ -70,7 +79,7 @@ const mapDbExerciseToAppExercise = (dbExercise: any): Exercise | null => {
                 question: dbExercise.instruction,
                 phrase: content.phrase || '',
                 correctAnswer: content.correct_answer || '',
-            } as any;
+            } as TranslateExercise;
 
         default:
             console.warn(`[ExerciseService] Unknown exercise type: ${dbExercise.type}`);

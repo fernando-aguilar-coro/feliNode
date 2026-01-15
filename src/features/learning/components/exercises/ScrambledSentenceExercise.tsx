@@ -42,14 +42,16 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
             <AppText variant="lg" weight="medium" style={styles.question}>
                 {exercise.question}
             </AppText>
+            {/* Instrucción para el usuario */}
             <AppText variant="sm" color={theme.colors.textSecondary} style={styles.instruction}>
-                Tap the words to form the correct sentence:
+                Toca las palabras para formar la oración correcta:
             </AppText>
 
-            {/* Answer Area */}
+            {/* Área donde se construye la respuesta */}
             <View style={styles.answerArea}>
                 {selectedIndices.length === 0 && (
-                    <AppText style={styles.placeholder}>Your answer here...</AppText>
+                    /* Texto marcador si no se han seleccionado palabras */
+                    <AppText style={styles.placeholder}>Tu respuesta aparecerá aquí...</AppText>
                 )}
                 {selectedIndices.map((segmentIndex, listIndex) => (
                     <TouchableOpacity
@@ -57,7 +59,7 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
                         onPress={() => handleRemove(listIndex)}
                         style={styles.wordBubbleSelected}
                     >
-                        <AppText style={styles.wordText} color={theme.colors.primaryDark}>
+                        <AppText style={styles.wordText} color={theme.colors.primary}>
                             {exercise.segments[segmentIndex]}
                         </AppText>
                     </TouchableOpacity>
@@ -66,7 +68,7 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
 
             <View style={styles.divider} />
 
-            {/* Word Bank */}
+            {/* Banco de palabras disponibles */}
             <View style={styles.wordBank}>
                 {exercise.segments.map((word, index) => {
                     const isSelected = selectedIndices.includes(index);
@@ -140,7 +142,7 @@ const styles = StyleSheet.create({
         elevation: 2
     },
     wordBubbleSelected: {
-        backgroundColor: theme.colors.primaryLight + '40', // transparent primary
+        backgroundColor: theme.colors.primary + '40', // transparent primary
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 16,

@@ -10,7 +10,8 @@ export const HomeScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Button title="Logout" onPress={logout} color="#FF6347" />
+                {/* Botón para cerrar sesión */}
+                <Button title="Cerrar Sesión" onPress={logout} color="#FF6347" />
             </View>
             <View style={styles.content}>
                 <TreeNodeScreen />
