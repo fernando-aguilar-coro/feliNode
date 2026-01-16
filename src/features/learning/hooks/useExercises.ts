@@ -12,10 +12,15 @@ export const useExercises = (initialExercises: Exercise[]) => {
     const [exercises, setExercises] = useState<Exercise[]>(initialExercises);
     const [isFinished, setIsFinished] = useState(false);
     const [lastResult, setLastResult] = useState<{ correct: boolean; message?: string } | null>(null);
+    const [completedCount, setCompletedCount] = useState(0);
 
     // Sync local state with prop updates (e.g. when async fetch completes)
     useEffect(() => {
         setExercises(initialExercises);
+        setCurrentIndex(0);
+        setIsFinished(false);
+        setLastResult(null);
+        setCompletedCount(0);
     }, [initialExercises]);
 
     const currentExercise = exercises[currentIndex];
@@ -29,6 +34,13 @@ export const useExercises = (initialExercises: Exercise[]) => {
 
         // Simple case-insensitive check for now
         const isCorrect = userAnswer.trim().toLowerCase() === currentExercise.correctAnswer.trim().toLowerCase();
+
+        if (isCorrect) {
+            setCompletedCount(prev => prev + 1);
+        } else {
+            // Si te equivocas, el ejercicio se añade al final de la cola para repetirlo
+            setExercises(prev => [...prev, currentExercise]);
+        }
 
         setLastResult({
             correct: isCorrect,
@@ -53,7 +65,9 @@ export const useExercises = (initialExercises: Exercise[]) => {
     return {
         currentExercise,
         currentIndex,
-        totalExercises: exercises.length,
+        totalExercises: exercises.length, // List length might grow
+        initialTotal: initialExercises.length, // Fixed initial length for progress bar
+        completedCount, // Actual progress
         isFinished,
         checkAnswer,
         nextExercise,

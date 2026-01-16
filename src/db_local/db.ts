@@ -50,7 +50,8 @@ export const initDatabase = async () => {
     CREATE TABLE IF NOT EXISTS user_progress (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       lessons_completed TEXT DEFAULT '[]', -- JSON Array of completed lesson IDs
-      is_synced BOOLEAN DEFAULT 0
+      is_synced BOOLEAN DEFAULT 0,
+      updated_at TEXT
     );
   `);
 

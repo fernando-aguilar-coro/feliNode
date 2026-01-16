@@ -3,6 +3,7 @@ export enum ExerciseType {
     FILL_IN_THE_BLANK = 'FILL_IN_THE_BLANK',
     TRANSLATE = 'TRANSLATE',
     SCRAMBLED_SENTENCE = 'SCRAMBLED_SENTENCE',
+    PRONUNCIATION = 'PRONUNCIATION',
 }
 
 export interface BaseExercise {
@@ -35,4 +36,10 @@ export interface ScrambledSentenceExercise extends BaseExercise {
     correctAnswer: string;
 }
 
-export type Exercise = MultipleChoiceExercise | FillInTheBlankExercise | TranslateExercise | ScrambledSentenceExercise;
+export interface PronunciationExercise extends BaseExercise {
+    type: ExerciseType.PRONUNCIATION;
+    phrase: string;
+    correctAnswer: string;
+}
+
+export type Exercise = MultipleChoiceExercise | FillInTheBlankExercise | TranslateExercise | ScrambledSentenceExercise | PronunciationExercise;

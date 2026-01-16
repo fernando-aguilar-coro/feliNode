@@ -5,6 +5,7 @@ import { MultipleChoiceExercise } from './MultipleChoiceExercise';
 import { FillInTheBlankExercise } from './FillInTheBlankExercise';
 import { TranslateExercise } from './TranslateExercise';
 import { ScrambledSentenceExercise } from './ScrambledSentenceExercise';
+import { PronunciationExercise } from './PronunciationExercise';
 import { Card, AppButton, AppText, Spacer } from '../../../../components';
 import { theme } from '../../../../theme';
 
@@ -59,6 +60,14 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
             case ExerciseType.SCRAMBLED_SENTENCE:
                 return (
                     <ScrambledSentenceExercise
+                        exercise={exercise}
+                        onAnswer={setUserAnswer}
+                        userAnswer={userAnswer}
+                    />
+                );
+            case ExerciseType.PRONUNCIATION:
+                return (
+                    <PronunciationExercise
                         exercise={exercise}
                         onAnswer={setUserAnswer}
                         userAnswer={userAnswer}

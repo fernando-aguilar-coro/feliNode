@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { authService } from '../features/auth/services/authService';
+import { syncUserProgress } from '../api/sync';
 
 interface UserState {
     isAuthenticated: boolean;
@@ -22,6 +23,8 @@ export const useUserStore = create<UserState>((set) => ({
             const session = await authService.getSession();
             if (session) {
                 set({ isAuthenticated: true, user: { name: session.user.email || 'User' } });
+                // Trigger sync on session load
+                syncUserProgress().catch(err => console.error('Sync failed on session check:', err));
             }
         } catch (error) {
             console.error('Check session error:', error);
@@ -49,6 +52,8 @@ export const useUserStore = create<UserState>((set) => ({
                     isAuthenticated: true,
                     user: { name: session.user.email || 'User' }
                 });
+                // Trigger sync on successful login
+                syncUserProgress().catch(err => console.error('Sync failed on login:', err));
             }
         } catch (error) {
             console.error('Verify OTP error:', error);

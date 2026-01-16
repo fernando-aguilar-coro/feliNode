@@ -13,13 +13,20 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to access speech recognition"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "edgeToEdgeEnabled": true,
       "package": "com.felinode.felinode"
     },
@@ -30,6 +37,28 @@
       "eas": {
         "projectId": "fe4e1cd6-70e5-4d20-8d2c-56aac93f74f9"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableDangerousExperimentalAndUnstableBuildTimeOptsDontUseUnlessYouKnowWhatYoureDoing": {
+              "android.useAndroidX": true,
+              "android.enableJetifier": true
+            }
+          }
+        }
+      ],
+      [
+        "@react-native-voice/voice",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to access speech recognition"
+        }
+      ],
+      "expo-font",
+      "./plugins/withAndroidResolutionStrategy"
+    ]
   }
 }

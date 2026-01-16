@@ -1,6 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { initDatabase } from './db';
-import { syncUserProgress } from '../api/sync';
+import { updateUser } from '../api/UpdateUser';
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -58,7 +58,8 @@ export const saveUserProgress = async (lessonId: string, score: number) => {
             const json = JSON.stringify(completed);
 
             // 3. Save back
-            await db!.runAsync('UPDATE user_progress SET lessons_completed = ? WHERE id = ?', [json, profile.id || 1]);
+            const now = new Date().toISOString();
+            await db!.runAsync('UPDATE user_progress SET lessons_completed = ?, updated_at = ? WHERE id = ?', [json, now, profile.id || 1]);
 
             // 4. Unlock next lessons
             // Find all lessons that depend on this one
@@ -92,7 +93,7 @@ export const saveUserProgress = async (lessonId: string, score: number) => {
         }
 
         // [SYNC] Attempt to sync with backend (non-blocking)
-        syncUserProgress(completed).catch(err => {
+        updateUser(completed).catch(err => {
             console.log('[Sync] Background sync failed (harmless for local usage):', err);
         });
     }
@@ -104,6 +105,21 @@ export const getCompletedLessons = async (): Promise<string[]> => {
     const profile: any = await db!.getFirstAsync('SELECT lessons_completed FROM user_progress LIMIT 1');
     if (!profile) return [];
     return JSON.parse(profile.lessons_completed);
+};
+
+export const setCompletedLessons = async (completedLessons: string[]) => {
+    if (!db) await init();
+    const json = JSON.stringify(completedLessons);
+    const now = new Date().toISOString();
+
+    // Check if profile exists
+    const profile: any = await db!.getFirstAsync('SELECT id FROM user_progress LIMIT 1');
+
+    if (profile) {
+        await db!.runAsync('UPDATE user_progress SET lessons_completed = ?, updated_at = ? WHERE id = ?', [json, now, profile.id]);
+    } else {
+        await db!.runAsync('INSERT INTO user_progress (lessons_completed, updated_at) VALUES (?, ?)', [json, now]);
+    }
 };
 
 export const isLessonCompleted = async (lessonId: string) => {

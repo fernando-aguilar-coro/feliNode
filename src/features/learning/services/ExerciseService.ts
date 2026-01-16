@@ -1,4 +1,4 @@
-import { Exercise, ExerciseType, MultipleChoiceExercise, FillInTheBlankExercise, ScrambledSentenceExercise, TranslateExercise } from '../types/exercise';
+import { Exercise, ExerciseType, MultipleChoiceExercise, FillInTheBlankExercise, ScrambledSentenceExercise, TranslateExercise, PronunciationExercise } from '../types/exercise';
 import { getExercisesByLessonId } from '../../../db_local/api_local';
 
 /**
@@ -80,6 +80,15 @@ const mapDbExerciseToAppExercise = (dbExercise: any): Exercise | null => {
                 phrase: content.phrase || '',
                 correctAnswer: content.correct_answer || '',
             } as TranslateExercise;
+
+        case 'pronunciation':
+            return {
+                id: dbExercise.id.toString(),
+                type: ExerciseType.PRONUNCIATION,
+                question: dbExercise.instruction,
+                phrase: content.phrase || '',
+                correctAnswer: content.correct_answer || content.phrase || '',
+            } as PronunciationExercise;
 
         default:
             console.warn(`[ExerciseService] Unknown exercise type: ${dbExercise.type}`);

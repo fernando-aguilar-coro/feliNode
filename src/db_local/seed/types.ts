@@ -17,7 +17,7 @@ export interface SeedExercise {
     type: string;
     instruction: string;
     content: SeedExerciseContent;
-    order_index: number;
+    order_index?: number;
 }
 
 export interface SeedTheorySection {
@@ -34,7 +34,7 @@ export interface SeedLesson {
     title: string;
     desc: string;
     status: string;
-    order: number;
+    order?: number;
     theory?: string; // Markdown content
     exercises?: SeedExercise[];
 }
@@ -46,7 +46,7 @@ export interface SeedDependency {
 
 export interface SeedModule {
     title: string;
-    order_index: number;
+    order_index?: number;
     lessons: SeedLesson[];
     dependencies: SeedDependency[];
 }
