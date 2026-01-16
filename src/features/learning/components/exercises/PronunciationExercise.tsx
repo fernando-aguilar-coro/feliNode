@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, PermissionsAndroid } from 'react-native';
+import React, { useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Voice, { SpeechResultsEvent, SpeechErrorEvent } from '@react-native-voice/voice';
 import { PronunciationExercise as PronunciationExerciseType } from '../../types/exercise';
 import { AppText, Spacer } from '../../../../components';
 import { theme } from '../../../../theme';
@@ -17,94 +16,6 @@ export const PronunciationExercise = ({ exercise, onAnswer, userAnswer }: Props)
     const [isProcessing, setIsProcessing] = useState(false);
     const [partialResult, setPartialResult] = useState('');
     const [error, setError] = useState<string | null>(null);
-
-    // 1. Handlers con useCallback para estabilidad
-    const onSpeechStart = useCallback(() => {
-        setIsListening(true);
-        setError(null);
-    }, []);
-
-    const onSpeechEnd = useCallback(() => {
-        setIsListening(false);
-        setIsProcessing(true); // El usuario dejó de hablar, ahora el motor procesa
-    }, []);
-
-    const onSpeechResults = useCallback((e: SpeechResultsEvent) => {
-        if (e.value && e.value[0]) {
-            const finalResult = e.value[0];
-            onAnswer(finalResult);
-            setPartialResult(''); // Limpiamos el texto temporal
-        }
-        setIsProcessing(false);
-    }, [onAnswer]);
-
-    const onSpeechPartialResults = useCallback((e: SpeechResultsEvent) => {
-        if (e.value && e.value[0]) {
-            setPartialResult(e.value[0]); // feedback en tiempo real
-        }
-    }, []);
-
-    const onSpeechError = useCallback((e: SpeechErrorEvent) => {
-        setIsListening(false);
-        setIsProcessing(false);
-
-        // Mapeo de errores amigables
-        const errorCode = e.error?.message || '';
-        if (errorCode.includes('7')) setError('No te escuché bien, ¿puedes repetir?');
-        else if (errorCode.includes('9')) setError('Permiso de micrófono denegado');
-        else setError('Hubo un problema con el micrófono');
-    }, []);
-
-    // 2. Setup y Cleanup
-    useEffect(() => {
-        Voice.onSpeechStart = onSpeechStart;
-        Voice.onSpeechEnd = onSpeechEnd;
-        Voice.onSpeechResults = onSpeechResults;
-        Voice.onSpeechPartialResults = onSpeechPartialResults;
-        Voice.onSpeechError = onSpeechError;
-
-        return () => {
-            // Cleanup total
-            Voice.destroy().then(Voice.removeAllListeners);
-        };
-    }, [onSpeechStart, onSpeechEnd, onSpeechResults, onSpeechPartialResults, onSpeechError]);
-
-    const requestMicrophonePermission = async () => {
-        if (Platform.OS === 'android') {
-            try {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
-                );
-                return granted === PermissionsAndroid.RESULTS.GRANTED;
-            } catch (err) {
-                console.warn(err);
-                return false;
-            }
-        }
-        return true; // iOS maneja permisos automáticamente al solicitar uso, o via Info.plist
-    };
-
-    const toggleListening = async () => {
-        try {
-            if (isListening) {
-                await Voice.stop();
-            } else {
-                setError(null);
-
-                const hasPermission = await requestMicrophonePermission();
-                if (!hasPermission) {
-                    setError('Se requiere permiso de micrófono');
-                    return;
-                }
-
-                setPartialResult('');
-                await Voice.start('en-US');
-            }
-        } catch (e) {
-            console.error(e);
-            setError('No se pudo iniciar el micrófono');
-        }
-    };
 
     return (
         <View style={styles.container}>
@@ -127,7 +38,6 @@ export const PronunciationExercise = ({ exercise, onAnswer, userAnswer }: Props)
                         styles.micButton,
                         isListening && styles.micButtonActive,
                     ]}
-                    onPress={toggleListening}
                     disabled={isProcessing}
                 >
                     {isListening || isProcessing ? (
