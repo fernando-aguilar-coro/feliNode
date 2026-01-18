@@ -4,12 +4,10 @@ import { AppText, Spacer } from '../../../../components';
 import { theme } from '../../../../theme';
 import { Microphone } from '../Microphone';
 import { PronunciationService, PronunciationResult } from '../../services/PronunciationService';
-// Assuming the types are defined in types/exercise.ts. If not, I'll use 'any' or define interface here for now to avoid errors.
-// But mostly the container imports Exercise from types.
-import { Exercise } from '../../types/exercise';
+import { PronunciationExercise as PronunciationExerciseType } from '../../types/exercise';
 
 interface Props {
-    exercise: Exercise;
+    exercise: PronunciationExerciseType;
     onAnswer: (answer: string) => void;
     userAnswer: string;
 }
@@ -25,9 +23,8 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
     const [processing, setProcessing] = useState(false);
     const [result, setResult] = useState<PronunciationResult | null>(null);
 
-    // Cast exercise to specific type if needed, or access properties safely (assuming 'targetSentence' exists on pronunciation exercise type)
-    // Using 'any' cast for safety if type definition isn't fully visible to me right now, but standard access is preferable.
-    const targetText = (exercise as any).targetSentence || (exercise as any).question || "Read the text";
+    // Use the correct property from the interface
+    const targetText = exercise.phrase;
 
     const handleRecordingComplete = async (uri: string | null) => {
         if (!uri) return;
@@ -41,15 +38,13 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
             setResult(comparisonData);
 
             // Determine if passed based on overall score (e.g., > 60)
-            // We pass the score as the "answer" so the container can validate it if needed,
-            // or simply pass "correct" if logic is here.
-            // For now, let's pass the score as a string so it's non-empty.
+            // We pass the score as the "answer" so the container can validate it if needed.
             onAnswer(comparisonData.overallScore.toString());
 
         } catch (error) {
             console.error(error);
-            Alert.alert("Error", "No se pudo analizar la pronunciación. Inténtalo de nuevo.");
-            onAnswer(""); // Reset answer so user can't submit empty
+            Alert.alert("Error", "No se pudo analizar la pronunciación. Verifique su conexión e inténtelo de nuevo.");
+            onAnswer(""); // Reset answer
         } finally {
             setProcessing(false);
         }
@@ -57,13 +52,13 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
 
     const getScoreColor = (score: number) => {
         if (score >= 80) return theme.colors.success;
-        if (score >= 40) return theme.colors.warning; // Assuming warning color exists, else orange
+        if (score >= 40) return '#F39C12'; // Darker orange/gold for better readability than theme.colors.warning
         return theme.colors.error;
     };
 
     return (
         <View style={styles.container}>
-            <AppText variant="h3" style={styles.question}>
+            <AppText variant="lg" style={styles.question}>
                 Lee esta frase:
             </AppText>
 
@@ -75,7 +70,7 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
                             <AppText
                                 key={index}
                                 style={[styles.word, { color: getScoreColor(word.accuracyScore) }]}
-                                variant="body1"
+                                variant="xl"
                                 weight="bold"
                             >
                                 {word.word}{' '}
@@ -83,7 +78,7 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
                         ))}
                     </View>
                 ) : (
-                    <AppText variant="h2" style={styles.targetText} align="center">
+                    <AppText variant="xl" style={styles.targetText} align="center">
                         {targetText}
                     </AppText>
                 )}
@@ -94,10 +89,11 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
             {/* Show Overall Score if available */}
             {result && (
                 <View style={styles.scoreContainer}>
-                    <AppText variant="label">Precisión General:</AppText>
+                    <AppText variant="sm" color={theme.colors.textSecondary}>Precisión General:</AppText>
                     <AppText
-                        variant="h2"
+                        variant="xxl"
                         style={{ color: getScoreColor(result.overallScore) }}
+                        weight="bold"
                     >
                         {result.overallScore.toFixed(0)}%
                     </AppText>
@@ -110,11 +106,11 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={theme.colors.primary} />
                     <Spacer height={theme.spacing.sm} />
-                    <AppText variant="caption">Analizando tu pronunciación...</AppText>
+                    <AppText variant="sm" color={theme.colors.textLight}>Analizando tu pronunciación...</AppText>
                 </View>
             ) : (
                 <Microphone
-                    maxTimeSeconds={10} // Short sentences usually
+                    maxTimeSeconds={15} // Increased slightly for comfort
                     onRecordingComplete={handleRecordingComplete}
                 />
             )}
@@ -132,7 +128,7 @@ const styles = StyleSheet.create({
         color: theme.colors.textSecondary,
     },
     sentenceContainer: {
-        minHeight: 60, // Avoid layout jump
+        minHeight: 80, // Avoid layout jump
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: theme.spacing.md,
@@ -144,9 +140,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
+        marginBottom: theme.spacing.sm,
     },
     word: {
-        marginHorizontal: 2,
+        marginHorizontal: 3,
     },
     scoreContainer: {
         alignItems: 'center',
