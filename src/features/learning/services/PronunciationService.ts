@@ -80,6 +80,7 @@ export const PronunciationService = {
 
             // 3. Send the POST request with the raw audio blob
             console.log('Sending audio to backend...', BASE_URL);
+            console.log("text", referenceText)
             const response = await fetch(BASE_URL, {
                 method: 'POST',
                 headers: {
@@ -96,7 +97,8 @@ export const PronunciationService = {
 
             // 4. Parse the response
             const azureResult: AzureResponse = await response.json();
-            console.log('Received response from backend', azureResult);
+            const result_raw: any = await response.json()
+            console.log('Received response from backend', result_raw);
 
             if (azureResult.RecognitionStatus !== 'Success' || !azureResult.NBest || azureResult.NBest.length === 0) {
                 throw new Error(`Recognition failed: ${azureResult.RecognitionStatus}`);
