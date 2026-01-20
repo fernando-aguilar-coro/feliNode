@@ -74,16 +74,17 @@ export const PronunciationService = {
             // 1. Fetch the file from the local URI to get a Blob
             const fileResponse = await fetch(audioUri);
             const audioBlob = await fileResponse.blob();
+            console.log('Audio blob created', audioBlob);
+            // 2. Construct the URL (reference text is now in header)
 
-            // 2. Construct the URL with query parameter
-            const url = `${BASE_URL}?text=${encodeURIComponent(referenceText)}`;
 
             // 3. Send the POST request with the raw audio blob
-            console.log('Sending audio to backend...');
-            const response = await fetch(url, {
+            console.log('Sending audio to backend...', BASE_URL);
+            const response = await fetch(BASE_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'audio/wav',
+                    'text': referenceText,
                 },
                 body: audioBlob,
             });
@@ -95,7 +96,7 @@ export const PronunciationService = {
 
             // 4. Parse the response
             const azureResult: AzureResponse = await response.json();
-            console.log('Received response from backend');
+            console.log('Received response from backend', azureResult);
 
             if (azureResult.RecognitionStatus !== 'Success' || !azureResult.NBest || azureResult.NBest.length === 0) {
                 throw new Error(`Recognition failed: ${azureResult.RecognitionStatus}`);

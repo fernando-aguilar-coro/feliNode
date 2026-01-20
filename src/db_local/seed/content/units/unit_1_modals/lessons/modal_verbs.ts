@@ -22,7 +22,7 @@ export const LESSON_MODAL_VERBS: SeedLesson = {
                 ],
                 correctAnswer: 'can'
             },
-            order_index: 1
+            order_index: 6
         },
         {
             type: 'scrambled_sentence',
@@ -71,7 +71,7 @@ export const LESSON_MODAL_VERBS: SeedLesson = {
                 phrase: 'I can speak English',
                 correct_answer: 'I can speak English'
             },
-            order_index: 6
+            order_index: 1
         }
     ]
 };

@@ -40,10 +40,12 @@
       }
     },
     "plugins": [
-      "expo-av",
-      {
-        "microphonePermission": "Permítenos usar el micrófono para grabar tus notas de voz."
-      }
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Permítenos usar el micrófono."
+        }
+      ]
     ]
   }
 }

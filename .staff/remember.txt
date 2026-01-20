@@ -10,3 +10,5 @@ npx expo start --localhost
 eas build --platform android --profile preview
 
 /kkp7#X$_eZ7PsH
+npx expo install babel-preset-expo
+npm install babel-plugin-inline-import --save-dev

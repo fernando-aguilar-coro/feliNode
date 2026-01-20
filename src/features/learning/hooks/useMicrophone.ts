@@ -1,19 +1,64 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Audio } from 'expo-av';
+import {
+    useAudioRecorder,
+    RecordingPresets,
+    requestRecordingPermissionsAsync,
+    setAudioModeAsync,
+    PermissionStatus,
+    RecordingOptions,
+    IOSOutputFormat,
+    AudioQuality
+} from 'expo-audio';
+
+// Constants for permissions
+const PERMISSION_GRANTED = 'granted';
+
+const WAV_RECORDING_PRESET: RecordingOptions = {
+    isMeteringEnabled: true,
+    extension: '.wav',
+    sampleRate: 16000,
+    numberOfChannels: 1,
+    bitRate: 256000,
+    android: {
+        extension: '.wav',
+        outputFormat: 'default' as any, // Cast to avoid strict type issues if 'default' isn't fully overlapping with enum in some versions
+        audioEncoder: 'default' as any,
+        sampleRate: 16000,
+    },
+    ios: {
+        extension: '.wav',
+        outputFormat: IOSOutputFormat.LINEARPCM,
+        audioQuality: AudioQuality.MAX,
+        sampleRate: 16000,
+        linearPCMBitDepth: 16,
+        linearPCMIsBigEndian: false,
+        linearPCMIsFloat: false,
+    },
+    web: {
+        mimeType: 'audio/wav',
+        bitsPerSecond: 128000,
+    },
+};
 
 /**
  * Hook to manage microphone functionality (recording, stopping, permissions).
- * Uses 'expo-av' for audio operations.
+ * Migrated to use 'expo-audio'.
  */
 export const useMicrophone = () => {
-    // State to store the recording object
-    const [recording, setRecording] = useState<Audio.Recording | null>(null);
-    // State to track if recording is in progress
-    const [isRecording, setIsRecording] = useState<boolean>(false);
-    // State for permission status
-    const [permissionResponse, setPermissionResponse] = useState<Audio.PermissionResponse | null>(null);
+    // Permission state
+    const [permissionStatus, setPermissionStatus] = useState<PermissionStatus | null>(null);
+
+    // State to track if we are logically recording (for UI)
+    const [isRecording, setIsRecording] = useState(false);
+
     // State for the recorded URI
     const [recordedUri, setRecordedUri] = useState<string | null>(null);
+
+    // Initialize recorder
+    const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY, (status) => {
+        // Optional: you can sync isRecording with status.isRecording here if desired
+        // but for now we manage it manually for simplicity or use the recorder state hook if needed.
+    });
 
     /**
      * Request microphone permissions on mount.
@@ -21,8 +66,9 @@ export const useMicrophone = () => {
     useEffect(() => {
         const getPermissions = async () => {
             try {
-                const response = await Audio.requestPermissionsAsync();
-                setPermissionResponse(response);
+                // Check or request permissions
+                const { status } = await requestRecordingPermissionsAsync();
+                setPermissionStatus(status);
             } catch (err) {
                 console.error("Error requesting permissions:", err);
             }
@@ -31,71 +77,57 @@ export const useMicrophone = () => {
     }, []);
 
     /**
-     * Cleanup: ensure recording is stopped and unloaded when host component unmounts.
-     */
-    useEffect(() => {
-        return () => {
-            if (recording) {
-                recording.stopAndUnloadAsync().catch((err) => {
-                    console.error("Error cleaning up recording:", err);
-                });
-            }
-        };
-    }, [recording]);
-
-    /**
-     * Starts audio recording after setting up Audio mode and checking permissions.
+     * Starts audio recording.
      */
     const startRecording = useCallback(async () => {
         try {
-            // Check permissions before starting
-            if (permissionResponse?.status !== 'granted') {
-                const response = await Audio.requestPermissionsAsync();
-                setPermissionResponse(response);
-                if (response.status !== 'granted') {
+            // Check permissions
+            if (permissionStatus !== PERMISSION_GRANTED) {
+                const { status } = await requestRecordingPermissionsAsync();
+                setPermissionStatus(status);
+                if (status !== PERMISSION_GRANTED) {
                     console.warn("Microphone permission not granted");
                     return;
                 }
             }
 
-            // Configure Audio session for recording
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: true,
-                playsInSilentModeIOS: true,
+            // Configure audio mode
+            await setAudioModeAsync({
+                allowsRecording: true,
+                playsInSilentMode: true,
             });
 
             console.log('Starting recording...');
-            // Create a new recording instance with high quality preset
-            const { recording: newRecording } = await Audio.Recording.createAsync(
-                Audio.RecordingOptionsPresets.HIGH_QUALITY
-            );
+            // Prepare and record
+            // Use same preset as hook init or explicit
+            await audioRecorder.prepareToRecordAsync(WAV_RECORDING_PRESET);
+            audioRecorder.record();
 
-            setRecording(newRecording);
             setIsRecording(true);
+            setRecordedUri(null); // Clear previous
             console.log('Recording started');
         } catch (err) {
             console.error('Failed to start recording', err);
         }
-    }, [permissionResponse]);
+    }, [permissionStatus, audioRecorder]);
 
     /**
-     * Stops current recording and returns the URI of the recorded file.
+     * Stops current recording and returns the URI.
      */
     const stopRecording = useCallback(async () => {
-        if (!recording) return null;
+        if (!isRecording) return null;
 
         console.log('Stopping recording...');
         setIsRecording(false);
         try {
-            await recording.stopAndUnloadAsync();
-            const uri = recording.getURI();
+            await audioRecorder.stop();
+            const uri = audioRecorder.uri;
 
-            // Set audio mode back to defaults (disable recording capability for UI stability)
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: false,
+            // Reset audio mode
+            await setAudioModeAsync({
+                allowsRecording: false,
             });
 
-            setRecording(null);
             setRecordedUri(uri);
             console.log('Recording stopped and saved at', uri);
             return uri;
@@ -103,12 +135,12 @@ export const useMicrophone = () => {
             console.error('Failed to stop recording', err);
             return null;
         }
-    }, [recording]);
+    }, [isRecording, audioRecorder]);
 
     return {
         isRecording,
         recordedUri,
-        permissionStatus: permissionResponse?.status,
+        permissionStatus,
         startRecording,
         stopRecording,
     };
