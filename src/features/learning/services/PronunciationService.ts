@@ -1,128 +1,52 @@
-// Types for the Azure Pronunciation Assessment Response
-export interface AzureSyllable {
-    Syllable: string;
-    Grapheme: string;
-    Offset: number;
-    Duration: number;
-    AccuracyScore: number;
+import * as FileSystem from 'expo-file-system';
+import { Platform } from 'react-native';
+
+// Simplified Types
+interface AzureWord {
+    Word: string; Offset: number; Duration: number; AccuracyScore: number; ErrorType?: string;
+    Syllables?: { Syllable: string; Grapheme: string; AccuracyScore: number }[];
 }
 
-export interface AzurePhoneme {
-    Phoneme: string;
-    Offset: number;
-    Duration: number;
-    AccuracyScore: number;
+interface AzureResponse {
+    RecognitionStatus: string; NBest: { AccuracyScore: number; Words: AzureWord[] }[];
 }
 
-export interface AzureWord {
-    Word: string;
-    Offset: number;
-    Duration: number;
-    Confidence: number;
-    AccuracyScore: number;
-    Syllables?: AzureSyllable[];
-    Phonemes?: AzurePhoneme[];
-    ErrorType?: string; // "Omission", "Insertion", "Mispronunciation", etc.
-}
-
-export interface AzureNBest {
-    Confidence: number;
-    Lexical: string;
-    ITN: string;
-    MaskedITN: string;
-    Display: string;
-    AccuracyScore: number;
-    Words: AzureWord[];
-}
-
-export interface AzureResponse {
-    RecognitionStatus: string;
-    Offset: number;
-    Duration: number;
-    DisplayText: string;
-    SNR: number;
-    NBest: AzureNBest[];
-}
-
-// Mapped Clean Result Type
 export interface PronunciationResult {
     overallScore: number;
-    words: {
-        word: string;
-        accuracyScore: number;
-        errorType?: string;
-        syllables: {
-            syllable: string;
-            grapheme: string;
-            accuracyScore: number;
-        }[];
-    }[];
+    words: { word: string; accuracyScore: number; errorType?: string; syllables: { syllable: string; accuracyScore: number }[] }[];
 }
 
 const BASE_URL = "https://feli-node-back.vercel.app/api/pronunciation_assessment";
 
 export const PronunciationService = {
-    /**
-     * Assess pronunciation by sending audio to the backend.
-     * @param audioUri Local URI of the audio file.
-     * @param referenceText Text that the user was supposed to read.
-     */
     assessPronunciation: async (audioUri: string, referenceText: string): Promise<PronunciationResult> => {
         try {
-            console.log(`Preparing to assess pronunciation for: "${referenceText}"`);
-
-            // 1. Fetch the file from the local URI to get a Blob
-            const fileResponse = await fetch(audioUri);
-            const audioBlob = await fileResponse.blob();
-            console.log('Audio blob created', audioBlob);
-            // 2. Construct the URL (reference text is now in header)
-
-
-            // 3. Send the POST request with the raw audio blob
-            console.log('Sending audio to backend...', BASE_URL);
-            console.log("text", referenceText)
+            const base64Audio = await new FileSystem.File(audioUri).base64();
             const response = await fetch(BASE_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'audio/wav',
-                    'text': referenceText,
-                },
-                body: audioBlob,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: referenceText,
+                    audio: base64Audio,
+                    mimeType: Platform.OS === 'android' ? 'audio/webm' : 'audio/wav',
+                }),
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Backend Error (${response.status}): ${errorText}`);
-            }
+            if (!response.ok) throw new Error(`Backend Error (${response.status}): ${await response.text()}`);
 
-            // 4. Parse the response
-            const azureResult: AzureResponse = await response.json();
-            const result_raw: any = await response.json()
-            console.log('Received response from backend', result_raw);
+            const data: AzureResponse = await response.json();
+            if (data.RecognitionStatus !== 'Success' || !data.NBest?.[0]) throw new Error(`Recognition failed: ${data.RecognitionStatus}`);
 
-            if (azureResult.RecognitionStatus !== 'Success' || !azureResult.NBest || azureResult.NBest.length === 0) {
-                throw new Error(`Recognition failed: ${azureResult.RecognitionStatus}`);
-            }
-
-            const bestMatch = azureResult.NBest[0];
-
-            // 5. Map to a cleaner structure
-            const result: PronunciationResult = {
-                overallScore: bestMatch.AccuracyScore,
-                words: bestMatch.Words.map((word) => ({
-                    word: word.Word,
-                    accuracyScore: word.AccuracyScore,
-                    errorType: word.ErrorType,
-                    syllables: word.Syllables?.map((syl) => ({
-                        syllable: syl.Syllable,
-                        grapheme: syl.Grapheme,
-                        accuracyScore: syl.AccuracyScore,
-                    })) || [],
-                })),
+            const best = data.NBest[0];
+            return {
+                overallScore: best.AccuracyScore,
+                words: best.Words.map(w => ({
+                    word: w.Word,
+                    accuracyScore: w.AccuracyScore,
+                    errorType: w.ErrorType,
+                    syllables: w.Syllables?.map(s => ({ syllable: s.Syllable, accuracyScore: s.AccuracyScore })) || []
+                }))
             };
-
-            return result;
-
         } catch (error) {
             console.error('Pronunciation Assessment Error:', error);
             throw error;
