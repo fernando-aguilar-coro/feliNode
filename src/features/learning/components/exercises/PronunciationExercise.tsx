@@ -59,6 +59,19 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
         setStatus('idle');
     };
 
+    const handleRecordingStart = React.useCallback(() => {
+        setStatus('recording');
+    }, []);
+
+    const handleRecordingComplete = React.useCallback((uri: string | null) => {
+        if (uri) {
+            setRecordedUri(uri);
+            setStatus('idle');
+        } else {
+            setStatus('idle');
+        }
+    }, []);
+
     return (
         <View style={styles.container}>
             <AppText variant="lg" style={styles.question}>Lee esta frase:</AppText>
@@ -86,21 +99,19 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
                     <Spacer height={theme.spacing.sm} />
                     <AppText variant="sm" color={theme.colors.textLight}>Analizando...</AppText>
                 </View>
-            ) : status === 'result' || recordedUri ? (
+            ) : recordedUri && !result ? (
                 <View style={styles.reviewContainer}>
                     <View style={styles.reviewButtons}>
                         <AppButton title="Reintentar" onPress={handleRetry} variant="outline" style={{ marginRight: 10 }} />
-                        {!result && <AppButton title="Enviar" onPress={handleSend} variant="primary" />}
+                        <AppButton title="Enviar" onPress={handleSend} variant="primary" />
                     </View>
                 </View>
-            ) : (
+            ) : status !== 'result' ? (
                 <Microphone
-                    maxTimeSeconds={15}
-                    onRecordingComplete={React.useCallback((uri: string | null) => {
-                        if (uri) setRecordedUri(uri);
-                    }, [])}
+                    onRecordingStart={handleRecordingStart}
+                    onRecordingComplete={handleRecordingComplete}
                 />
-            )}
+            ) : null}
 
             {recordedUri && <AudioPlayer uri={recordedUri} />}
         </View>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useAudioPlayer } from 'expo-audio';
+import { Audio } from 'expo-av';
 import { AppText } from '../../../components';
 import { theme } from '../../../theme';
 
@@ -10,35 +10,80 @@ interface AudioPlayerProps {
 }
 
 export const AudioPlayer: React.FC<AudioPlayerProps> = ({ uri }) => {
-    const player = useAudioPlayer(uri);
-
-    // expo-audio player object typically has a 'playing' property but it might not be reactive directly on the object property access in render.
-    // However, the hook usually triggers re-renders on status change, or we need to subscribe.
-    // Based on typical Expo Audio hook behavior (like useAudioRecorder in useMicrophone.ts),
-    // let's try to trust the hook or use a simple toggle.
-
+    const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
+    // Cleanup sound on unmount or when sound changes
     useEffect(() => {
-        if (player) {
-            const subscription = player.addListener('playbackStatusUpdate', (status) => {
-                setIsPlaying(status.playing);
-                // Auto rewind if finished (optional, but good UX)
-                if (status.didJustFinish) {
-                    player.seekTo(0);
-                    player.pause();
+        return () => {
+            if (sound) {
+                console.log('Unloading Sound');
+                sound.unloadAsync();
+            }
+        };
+    }, [sound]);
+
+    // Load sound when URI changes
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadSound = async () => {
+            if (!uri) return;
+
+            try {
+                // Previous sound cleanup handled by cleanup effect mostly, 
+                // but if we are replacing 'sound' state, the old one needs unloading.
+                // However, the cleanup effect runs on dependnecy change (sound change), 
+                // so it might be cleaner to just create new one and let setSound trigger cleanup of old one?
+                // Actually, cleanup effect runs on unmount OR before re-running effect due to dependency change.
+                // But setSound makes 'sound' change. 
+                // Let's rely on React cleanup for the previous state instance? 
+                // No, we need to be careful. The 'sound' variable in the effect cleanup is the OLD state.
+                // So yes, simple cleanup effect is correct.
+
+                console.log('Loading Sound form URI:', uri);
+                const { sound: newSound } = await Audio.Sound.createAsync(
+                    { uri },
+                    { shouldPlay: false },
+                    (status) => {
+                        if (status.isLoaded) {
+                            setIsPlaying(status.isPlaying);
+                            if (status.didJustFinish) {
+                                newSound.setPositionAsync(0);
+                                newSound.pauseAsync(); // Ensure state update reflects paused
+                            }
+                        }
+                    }
+                );
+
+                if (isMounted) {
+                    setSound(newSound);
+                } else {
+                    newSound.unloadAsync();
                 }
-            });
-            return () => subscription.remove();
-        }
-    }, [player]);
+
+            } catch (error) {
+                console.error("Error loading sound", error);
+            }
+        };
+
+        if (uri) loadSound();
+
+        return () => { isMounted = false; };
+    }, [uri]);
 
 
-    const togglePlayback = () => {
-        if (player.playing) {
-            player.pause();
-        } else {
-            player.play();
+    const togglePlayback = async () => {
+        if (!sound) return;
+
+        try {
+            if (isPlaying) {
+                await sound.pauseAsync();
+            } else {
+                await sound.playAsync();
+            }
+        } catch (error) {
+            console.error("Error toggling playback", error);
         }
     };
 
@@ -48,6 +93,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ uri }) => {
                 style={styles.button}
                 onPress={togglePlayback}
                 activeOpacity={0.7}
+                disabled={!sound}
             >
                 <MaterialCommunityIcons
                     name={isPlaying ? "pause" : "play"}

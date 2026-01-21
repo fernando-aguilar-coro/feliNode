@@ -4,12 +4,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMicrophone } from '../hooks/useMicrophone';
 
 interface MicrophoneProps {
-    maxTimeSeconds?: number;
     onRecordingComplete?: (uri: string | null) => void;
+    onRecordingStart?: () => void;
 }
 
-export const Microphone: React.FC<MicrophoneProps> = ({ maxTimeSeconds = 30, onRecordingComplete }) => {
-    const { isRecording, startRecording, stopRecording } = useMicrophone(maxTimeSeconds, onRecordingComplete);
+export const Microphone: React.FC<MicrophoneProps> = ({ onRecordingComplete, onRecordingStart }) => {
+    const { isRecording, startRecording, stopRecording } = useMicrophone(onRecordingComplete, onRecordingStart);
 
     const handlePress = () => isRecording ? stopRecording() : startRecording();
 

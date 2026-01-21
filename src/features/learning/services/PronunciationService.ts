@@ -20,6 +20,11 @@ const BASE_URL = "https://feli-node-back.vercel.app/api/pronunciation_assessment
 
 export const PronunciationService = {
     assessPronunciation: async (audioUri: string, referenceText: string): Promise<PronunciationResult> => {
+        // Validate URI
+        if (!audioUri) {
+            throw new Error('Audio URI is null or empty');
+        }
+
         try {
             const base64Audio = await new FileSystem.File(audioUri).base64();
             const response = await fetch(BASE_URL, {
@@ -28,7 +33,6 @@ export const PronunciationService = {
                 body: JSON.stringify({
                     text: referenceText,
                     audio: base64Audio,
-                    mimeType: Platform.OS === 'android' ? 'audio/webm' : 'audio/wav',
                 }),
             });
 

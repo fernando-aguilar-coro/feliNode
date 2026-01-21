@@ -39,13 +39,6 @@
         "projectId": "fe4e1cd6-70e5-4d20-8d2c-56aac93f74f9"
       }
     },
-    "plugins": [
-      [
-        "expo-audio",
-        {
-          "microphonePermission": "Permítenos usar el micrófono."
-        }
-      ]
-    ]
+    "plugins": []
   }
 }
