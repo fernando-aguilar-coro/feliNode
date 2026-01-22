@@ -1,10 +1,16 @@
 {
   "build": {
-    "preview": {
-      "android": {
-        "buildType": "apk"
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "RCT_NEW_ARCH_ENABLED": "1"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "RCT_NEW_ARCH_ENABLED": "1"
+      }
+    }
   }
 }
