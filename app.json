@@ -26,7 +26,8 @@
       "permissions": [
         "RECORD_AUDIO",
         "WRITE_EXTERNAL_STORAGE",
-        "READ_EXTERNAL_STORAGE"
+        "READ_EXTERNAL_STORAGE",
+        "MODIFY_AUDIO_SETTINGS"
       ],
       "edgeToEdgeEnabled": true,
       "package": "com.felinode.felinode"
@@ -39,6 +40,8 @@
         "projectId": "fe4e1cd6-70e5-4d20-8d2c-56aac93f74f9"
       }
     },
-    "plugins": []
+    "plugins": [
+      "expo-dev-client"
+    ]
   }
 }
