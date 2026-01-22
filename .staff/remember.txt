@@ -7,7 +7,7 @@ adb reverse tcp:8081 tcp:8081
 
 npx expo start --localhost
 
-eas build --platform android --profile preview
+eas build --platform android --profile development
 
 /kkp7#X$_eZ7PsH
 npx expo install babel-preset-expo
