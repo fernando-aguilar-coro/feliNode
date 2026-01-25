@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Audio } from 'expo-av';
+import AudioRecord from 'react-native-audio-record';
 
 // Constant for max recording time (30 seconds)
 const MAX_RECORDING_TIME_SECONDS = 30;
@@ -11,8 +12,8 @@ export const useMicrophone = (
     const [permissionStatus, setPermissionStatus] = useState<string | null>(null);
     const [isRecording, setIsRecording] = useState(false);
 
-    // Use ref for recording instance to allow access in closures (timers/cleanup)
-    const recordingRef = useRef<Audio.Recording | null>(null);
+    // Timer ref to clear timeout on stop
+    const autoStopTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Store callbacks in refs to avoid stale closures
     const onRecordingCompleteRef = useRef(onRecordingComplete);
@@ -23,15 +24,25 @@ export const useMicrophone = (
         onRecordingStartRef.current = onRecordingStart;
     }, [onRecordingComplete, onRecordingStart]);
 
-    // Initial permissions check
+    // Initial permissions check and AudioRecord initialization
     useEffect(() => {
         (async () => {
             try {
                 const { status } = await Audio.requestPermissionsAsync();
                 console.log("Microphone permission status:", status);
                 setPermissionStatus(status);
+
+                if (status === 'granted') {
+                    AudioRecord.init({
+                        sampleRate: 16000,
+                        channels: 1,
+                        bitsPerSample: 16,
+                        audioSource: 6, // 6 = VoiceRecognition
+                        wavFile: 'audio.wav'
+                    });
+                }
             } catch (err) {
-                console.error("Failed to request permissions:", err);
+                console.error("Failed to request permissions or init recorder:", err);
             }
         })();
     }, []);
@@ -39,19 +50,21 @@ export const useMicrophone = (
     const stopRecording = useCallback(async () => {
         console.log("Stopping recording...");
 
-        const recording = recordingRef.current;
-        if (!recording) {
-            console.warn("Attempted to stop but no recording instance found");
-            return null;
+        // Clear auto-stop timer if it exists
+        if (autoStopTimerRef.current) {
+            clearTimeout(autoStopTimerRef.current);
+            autoStopTimerRef.current = null;
         }
 
         try {
-            await recording.stopAndUnloadAsync();
-            const uri = recording.getURI();
-            console.log("Recording stopped, URI:", uri);
+            // Stop recording and get the file path
+            let uri = await AudioRecord.stop();
+            console.log("Recording stopped, path:", uri);
 
-            // Clean up ref
-            recordingRef.current = null;
+            if (!uri.startsWith('file://')) {
+                uri = 'file://' + uri;
+            }
+            console.log("Recording stopped, URI:", uri);
             setIsRecording(false);
 
             // Reset audio mode
@@ -67,7 +80,6 @@ export const useMicrophone = (
         } catch (err) {
             console.error("Failed to stop recording", err);
             setIsRecording(false);
-            recordingRef.current = null;
             if (onRecordingCompleteRef.current) {
                 onRecordingCompleteRef.current(null);
             }
@@ -82,9 +94,18 @@ export const useMicrophone = (
             const { status } = await Audio.requestPermissionsAsync();
             setPermissionStatus(status);
             if (status !== 'granted') return;
+
+            // Re-init if permission was just granted
+            AudioRecord.init({
+                sampleRate: 16000,
+                channels: 1,
+                bitsPerSample: 16,
+                audioSource: 6,
+                wavFile: 'audio.wav'
+            });
         }
 
-        if (isRecording || recordingRef.current) {
+        if (isRecording) {
             console.warn("Already recording");
             return;
         }
@@ -96,24 +117,16 @@ export const useMicrophone = (
                 playsInSilentModeIOS: true,
             });
 
-            // Create and start recording
-            // HIGH_QUALITY preset uses .m4a/AAC on both iOS and Android (usually)
-            const { recording } = await Audio.Recording.createAsync(
-                Audio.RecordingOptionsPresets.HIGH_QUALITY
-            );
-
-            recordingRef.current = recording;
+            AudioRecord.start();
             setIsRecording(true);
             console.log("Recording started");
 
             if (onRecordingStartRef.current) onRecordingStartRef.current();
 
             // Auto-stop timer
-            setTimeout(() => {
-                if (recordingRef.current) {
-                    console.log(`Max recording time (${MAX_RECORDING_TIME_SECONDS}s) reached.`);
-                    stopRecording();
-                }
+            autoStopTimerRef.current = setTimeout(() => {
+                console.log(`Max recording time (${MAX_RECORDING_TIME_SECONDS}s) reached.`);
+                stopRecording();
             }, MAX_RECORDING_TIME_SECONDS * 1000);
 
         } catch (err) {
@@ -125,9 +138,11 @@ export const useMicrophone = (
     // Cleanup on unmount
     useEffect(() => {
         return () => {
-            if (recordingRef.current) {
-                console.log("Cleanup: stopping recorder");
-                recordingRef.current.stopAndUnloadAsync().catch(e => console.error("Cleanup error", e));
+            // Cleanup logic if needed. 
+            // AudioRecord doesn't have a generic cleanup other than stop,
+            // but we can ensure the timer is cleared.
+            if (autoStopTimerRef.current) {
+                clearTimeout(autoStopTimerRef.current);
             }
         };
     }, []);

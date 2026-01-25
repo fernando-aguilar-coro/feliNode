@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserStore } from '../../../store/UserStore';
 import { TreeNodeScreen } from '../../nodes/screens/TreeNodeScreen';
@@ -7,33 +8,31 @@ import { AppButton } from '../../../components';
 import { theme } from '../../../theme';
 
 export const HomeScreen = () => {
-    // Obtenemos la función de logout y la información del usuario del store
+    // Obtenemos la función de logout store
     const logout = useUserStore((state) => state.logout);
-    const user = useUserStore((state) => state.user);
-
-    // Determinamos si el usuario es un invitado si su nombre es 'Guest User'
-    // o si el objeto usuario no existe (aunque Navigation.tsx garantiza que exista si estamos aquí)
-    const isGuest = user?.name === 'Guest User' || !user;
+    const netInfo = useNetInfo();
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                {/* 
-                  Si es invitado, mostramos 'Iniciar Sesión'. 
-                  En ambos casos llamamos a logout() para limpiar el estado y volver a la pantalla de bienvenida/login.
-                */}
                 <AppButton
-                    title={isGuest ? "Iniciar Sesión" : "Cerrar Sesión"}
+                    title="Cerrar Sesión"
                     onPress={logout}
-                    variant={isGuest ? "primary" : "outline"}
+                    variant="outline"
                     style={[
                         styles.authButton,
-                        !isGuest && { borderColor: theme.colors.error } // Color rojo suave para cerrar sesión
+                        { borderColor: theme.colors.error }
                     ]}
-                    // Para el texto de 'Cerrar Sesión' usamos el color de error si no es invitado
-                    {...(!isGuest && { color: theme.colors.error })}
+                    textColor={theme.colors.error}
                 />
             </View>
+            {netInfo.isConnected === false && (
+                <View style={styles.offlineContainer}>
+                    <Text style={styles.offlineText}>
+                        Conexión a internet no disponible, algunas funciones no estarán disponibles
+                    </Text>
+                </View>
+            )}
             <View style={styles.content}>
                 <TreeNodeScreen />
             </View>
@@ -58,6 +57,18 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
+    },
+    offlineContainer: {
+        backgroundColor: theme.colors.error,
+        padding: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    offlineText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
 });
 

@@ -150,7 +150,7 @@ export const getLessonNodes = async (): Promise<LessonNode[]> => {
     if (!db) await init();
 
     // Fetch lessons
-    const lessons: any[] = await db!.getAllAsync('SELECT id, title, description, status FROM lessons ORDER BY order_index ASC');
+    const lessons: any[] = await db!.getAllAsync("SELECT id, title, description, status FROM lessons WHERE id NOT LIKE 'placement_test%' ORDER BY order_index ASC");
 
     // Fetch dependencies
     const dependencies: any[] = await db!.getAllAsync('SELECT lesson_id, prerequisite_id FROM lesson_dependencies');

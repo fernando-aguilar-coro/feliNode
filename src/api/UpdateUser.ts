@@ -1,4 +1,4 @@
-import { supabase } from '../features/auth/services/supabaseClient'; // Asegúrate de importar tu instancia de cliente
+import { supabase } from './supabaseClient'; // Asegúrate de importar tu instancia de cliente
 // Ya no necesitas API_URL de Vercel
 
 export const updateUser = async (completedLessons: string[]) => {

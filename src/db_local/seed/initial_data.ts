@@ -1,13 +1,10 @@
 import { SeedData } from './types';
-import { UNIT_1_MODALS } from './content/units/unit_1_modals';
-import { PLACEMENT_TEST } from './content/placement_test';
+import { PLACEMENT_TEST_BASIC, PLACEMENT_TEST_INTERMEDIATE, PLACEMENT_TEST_ADVANCED } from './content';
 
 // Aggregate all units here
-const MODULES = [
-    UNIT_1_MODALS
-];
+const MODULES: any[] = [];
 
 export const INITIAL_DATA: SeedData = {
     modules: MODULES,
-    placement_test: PLACEMENT_TEST
+    placement_tests: [PLACEMENT_TEST_BASIC, PLACEMENT_TEST_INTERMEDIATE, PLACEMENT_TEST_ADVANCED]
 };

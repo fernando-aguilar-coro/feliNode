@@ -8,7 +8,6 @@ export interface SeedExerciseContent {
     segments?: string[];
     correct_answer?: string;
     options?: SeedOption[];
-    correctAnswer?: string; // For multiple_choice
     phrase?: string; // For translate
     // Add other fields as needed for different exercise types
 }
@@ -17,7 +16,7 @@ export interface SeedExercise {
     type: string;
     instruction: string;
     content: SeedExerciseContent;
-    order_index?: number;
+    order_index: number;
 }
 
 export interface SeedTheorySection {
@@ -34,9 +33,12 @@ export interface SeedLesson {
     title: string;
     desc: string;
     status: string;
-    order?: number;
+    order: number;
     theory?: string; // Markdown content
-    exercises?: SeedExercise[];
+    exercises: SeedExercise[];
+    moduleId?: number;
+    moduleTitle?: string;
+    moduleOrder?: number;
 }
 
 export interface SeedDependency {
@@ -46,12 +48,12 @@ export interface SeedDependency {
 
 export interface SeedModule {
     title: string;
-    order_index?: number;
+    order_index: number;
     lessons: SeedLesson[];
     dependencies: SeedDependency[];
 }
 
 export interface SeedData {
     modules: SeedModule[];
-    placement_test?: SeedLesson; // Special case for placement test which might not be in a module strictly or is standalone
+    placement_tests?: SeedLesson[]; // Array of placement tests
 }

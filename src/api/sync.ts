@@ -1,4 +1,4 @@
-import { supabase } from '../features/auth/services/supabaseClient';
+import { supabase } from './supabaseClient';
 import { getCompletedLessons, setCompletedLessons } from '../db_local/api_local';
 
 export const syncUserProgress = async () => {

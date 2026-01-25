@@ -10,7 +10,7 @@ export const NodeService = {
     async getLayout(width: number = 400, height: number = 600): Promise<{ nodes: TreeNode[], links: TreeLink[] }> {
         const allLessons = await getLessonNodes();
         // Filter out placement_test from the tree view
-        const lessons = allLessons.filter(l => l.id !== 'placement_test');
+        const lessons = allLessons;
 
         if (lessons.length === 0) {
             return { nodes: [], links: [] };

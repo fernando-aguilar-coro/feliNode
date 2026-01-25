@@ -13,12 +13,14 @@ interface AppButtonProps extends TouchableOpacityProps {
     title: string;
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
     loading?: boolean;
+    textColor?: string;
 }
 
 export const AppButton: React.FC<AppButtonProps> = ({
     title,
     variant = 'primary',
     loading = false,
+    textColor,
     style,
     disabled,
     ...props
@@ -42,12 +44,12 @@ export const AppButton: React.FC<AppButtonProps> = ({
             {...props}
         >
             {loading ? (
-                <ActivityIndicator color={variantStyles.textColor} />
+                <ActivityIndicator color={textColor || variantStyles.textColor} />
             ) : (
                 <AppText
                     variant="md"
                     weight="bold"
-                    color={variantStyles.textColor}
+                    color={textColor || variantStyles.textColor}
                     style={styles.text}
                 >
                     {title}

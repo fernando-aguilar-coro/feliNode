@@ -12,3 +12,5 @@ eas build --platform android --profile development
 /kkp7#X$_eZ7PsH
 npx expo install babel-preset-expo
 npm install babel-plugin-inline-import --save-dev
+npx eas build --profile development --platform android
+

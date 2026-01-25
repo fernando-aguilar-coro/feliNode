@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../../../api/supabaseClient';
 import { Session, User } from '@supabase/supabase-js';
 
 export const authService = {

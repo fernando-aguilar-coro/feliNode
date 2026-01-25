@@ -19,19 +19,7 @@ const getScoreColor = (score: number) => {
     return theme.colors.error;
 };
 
-const FeedbackView = ({ result, targetText }: { result: PronunciationResult | null, targetText: string }) => {
-    if (!result) return <AppText variant="xl" style={{ color: theme.colors.text }} align="center">{targetText}</AppText>;
-
-    return (
-        <View style={styles.wordsContainer}>
-            {result.words.map((w, i) => (
-                <AppText key={i} style={[styles.word, { color: getScoreColor(w.accuracyScore) }]} variant="xl" weight="bold">
-                    {w.word}{' '}
-                </AppText>
-            ))}
-        </View>
-    );
-};
+import { PronunciationFeedback } from './PronunciationFeedback';
 
 export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
     const [status, setStatus] = useState<'idle' | 'recording' | 'processing' | 'result'>('idle');
@@ -77,7 +65,7 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
             <AppText variant="lg" style={styles.question}>Lee esta frase:</AppText>
 
             <View style={styles.sentenceContainer}>
-                <FeedbackView result={result} targetText={exercise.phrase} />
+                <PronunciationFeedback result={result} targetText={exercise.phrase} />
             </View>
 
             <Spacer height={theme.spacing.lg} />
@@ -122,8 +110,6 @@ const styles = StyleSheet.create({
     container: { alignItems: 'center', width: '100%' },
     question: { marginBottom: theme.spacing.md, color: theme.colors.textSecondary },
     sentenceContainer: { minHeight: 80, justifyContent: 'center', alignItems: 'center', paddingHorizontal: theme.spacing.md },
-    wordsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: theme.spacing.sm },
-    word: { marginHorizontal: 3 },
     scoreContainer: { alignItems: 'center' },
     loadingContainer: { alignItems: 'center' },
     reviewContainer: { width: '100%', alignItems: 'center' },

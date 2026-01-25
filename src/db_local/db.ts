@@ -34,8 +34,6 @@ export const initDatabase = async () => {
       FOREIGN KEY (prerequisite_id) REFERENCES lessons(id) ON DELETE CASCADE,
       PRIMARY KEY (lesson_id, prerequisite_id)
     );
- 
-    -- lesson_theory table removed
 
     CREATE TABLE IF NOT EXISTS exercises (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

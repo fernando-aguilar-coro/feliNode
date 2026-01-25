@@ -1,18 +1,73 @@
 import * as FileSystem from 'expo-file-system';
 
 // Simplified Types
+interface AzureMetrics {
+    AccuracyScore: number;
+    FluencyScore?: number;
+    CompletenessScore?: number;
+    PronScore?: number;
+    ErrorType?: string;
+}
+
+interface AzurePhoneme {
+    Phoneme: string;
+    Offset: number;
+    Duration: number;
+    AccuracyScore?: number; // Direct property fallback
+    PronunciationAssessment?: AzureMetrics;
+}
+
+interface AzureSyllable {
+    Syllable: string;
+    Grapheme?: string;
+    Offset: number;
+    Duration: number;
+    AccuracyScore?: number; // Direct property fallback
+    PronunciationAssessment?: AzureMetrics;
+}
+
 interface AzureWord {
-    Word: string; Offset: number; Duration: number; AccuracyScore: number; ErrorType?: string;
-    Syllables?: { Syllable: string; Grapheme: string; AccuracyScore: number }[];
+    Word: string;
+    Offset: number;
+    Duration: number;
+    AccuracyScore?: number; // Direct property fallback
+    PronunciationAssessment?: AzureMetrics;
+    Syllables?: AzureSyllable[];
+    Phonemes?: AzurePhoneme[];
 }
 
 interface AzureResponse {
-    RecognitionStatus: string; NBest: { AccuracyScore: number; Words: AzureWord[] }[];
+    RecognitionStatus: number | string;
+    NBest: {
+        Confidence: number;
+        Lexical: string;
+        ITN: string;
+        MaskedITN: string;
+        Display: string;
+        AccuracyScore?: number; // Direct property fallback
+        PronunciationAssessment?: AzureMetrics; // Nested property
+        Words: AzureWord[]
+    }[];
 }
 
 export interface PronunciationResult {
     overallScore: number;
-    words: { word: string; accuracyScore: number; errorType?: string; syllables: { syllable: string; accuracyScore: number }[] }[];
+    fluencyScore?: number;
+    completenessScore?: number;
+    pronScore?: number;
+    words: {
+        word: string;
+        accuracyScore: number;
+        errorType?: string;
+        syllables: {
+            syllable: string;
+            accuracyScore: number;
+        }[];
+        phonemes: {
+            phoneme: string;
+            accuracyScore: number;
+        }[];
+    }[];
 }
 
 const BASE_URL = "https://feli-node-back.vercel.app/api/pronunciation_assessment";
@@ -38,16 +93,44 @@ export const PronunciationService = {
             if (!response.ok) throw new Error(`Backend Error (${response.status}): ${await response.text()}`);
 
             const data: AzureResponse = await response.json();
-            if (data.RecognitionStatus !== 'Success' || !data.NBest?.[0]) throw new Error(`Recognition failed: ${data.RecognitionStatus}`);
+            console.log("Response data:", JSON.stringify(data, null, 2));
+
+            // Check for success (API can return string "Success" or enum 0)
+            const isSuccess = data.RecognitionStatus === 'Success' || data.RecognitionStatus === 0;
+
+            if (!isSuccess || !data.NBest?.[0]) {
+                throw new Error(`Recognition failed: ${data.RecognitionStatus}`);
+            }
 
             const best = data.NBest[0];
+
+            // Helper to get score regardless of structure (nested or flat)
+            const getScore = (item: any) => {
+                if (item.PronunciationAssessment?.AccuracyScore !== undefined) {
+                    return item.PronunciationAssessment.AccuracyScore;
+                }
+                return item.AccuracyScore ?? 0;
+            };
+
+            const getMetrics = (item: any) => item.PronunciationAssessment || {};
+
             return {
-                overallScore: best.AccuracyScore,
+                overallScore: getScore(best),
+                fluencyScore: getMetrics(best).FluencyScore,
+                completenessScore: getMetrics(best).CompletenessScore,
+                pronScore: getMetrics(best).PronScore,
                 words: best.Words.map(w => ({
                     word: w.Word,
-                    accuracyScore: w.AccuracyScore,
-                    errorType: w.ErrorType,
-                    syllables: w.Syllables?.map(s => ({ syllable: s.Syllable, accuracyScore: s.AccuracyScore })) || []
+                    accuracyScore: getScore(w),
+                    errorType: getMetrics(w).ErrorType,
+                    syllables: w.Syllables?.map(s => ({
+                        syllable: s.Syllable,
+                        accuracyScore: getScore(s)
+                    })) || [],
+                    phonemes: w.Phonemes?.map(p => ({
+                        phoneme: p.Phoneme,
+                        accuracyScore: getScore(p)
+                    })) || []
                 }))
             };
         } catch (error) {

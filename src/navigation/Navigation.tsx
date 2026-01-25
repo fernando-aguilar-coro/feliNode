@@ -3,14 +3,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useUserStore } from '../store/UserStore';
 import LoginScreen from '../features/auth/screens/OTP Screen';
 
-import { WelcomeScreen } from '../features/auth/screens/WelcomeScreen';
-import { PlacementTestScreen } from '../features/learning/screens/PlacementTestScreen';
+import { PlacementTestScreen } from '../features/learning/components/PlacementTestScreen';
+import { ChoseInitialTest } from '../features/learning/screens/ChoseInitialTest';
 import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
 
 const Stack = createNativeStackNavigator();
-
+const minCount = 1;
 export const Navigation = () => {
-    const { isAuthenticated, checkSession } = useUserStore();
+    const { isAuthenticated, checkSession, completedLessonsCount } = useUserStore();
 
     React.useEffect(() => {
         checkSession();
@@ -20,22 +20,29 @@ export const Navigation = () => {
         <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
             {isAuthenticated ? (
                 // App Stack
-                <Stack.Screen name="Home" component={HomeNavigation} />
+                <Stack.Group>
+                    {completedLessonsCount <= minCount ? (
+                        <>
+                            <Stack.Screen
+                                name="PlacementSelection"
+                                component={ChoseInitialTest}
+                                options={{ title: 'Select Level' }}
+                            />
+                            <Stack.Screen
+                                name="PlacementEvaluation"
+                                component={PlacementTestScreen}
+                                options={{ title: 'Placement Test' }}
+                            />
+                        </>
+                    ) : null}
+                    <Stack.Screen name="Home" component={HomeNavigation} />
+                </Stack.Group>
             ) : (
                 <Stack.Group>
                     <Stack.Screen
-                        name="Welcome"
-                        component={WelcomeScreen}
-                    />
-                    <Stack.Screen
                         name="Login"
                         component={LoginScreen}
-                    />
-
-                    <Stack.Screen
-                        name="PlacementEvaluation"
-                        component={PlacementTestScreen}
-                        options={{ title: 'Placement Test' }}
+                        options={{ title: 'Login' }}
                     />
                 </Stack.Group>
             )}

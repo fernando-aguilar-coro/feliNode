@@ -11,7 +11,7 @@ import { theme } from '../../../../theme';
 
 interface Props {
     exercise: Exercise;
-    onCheck: (answer: string) => boolean;
+    onCheck: (answer: string) => boolean | undefined;
     onNext: () => void;
     lastResult: { correct: boolean; message?: string } | null;
 }

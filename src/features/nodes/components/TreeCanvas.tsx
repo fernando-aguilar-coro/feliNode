@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useMemo } from 'react';
+import { View } from 'react-native';
 import Svg from 'react-native-svg';
 import { TreeNode, TreeLink } from '../types/NodeTypes';
-import { LinkLine } from './LinkLine';
-import { NodeContent } from './NodeContent';
+import { BezierLink } from './BezierLink';
+import { ModernNode } from './ModernNode';
 
 interface TreeCanvasProps {
     width: number;
@@ -14,36 +14,26 @@ interface TreeCanvasProps {
 }
 
 export const TreeCanvas: React.FC<TreeCanvasProps> = ({ width, height, nodes, links, onNodePress }) => {
+    // Memoize nodes and links rendering to prevent unnecessary re-calculations if props don't change
+    // profound change: removed Filters, Gradients, and Patterns for raw performance.
+
+    const renderedLinks = useMemo(() => links.map((link, index) => (
+        <BezierLink key={`link-${index}`} link={link} />
+    )), [links]);
+
+    const renderedNodes = useMemo(() => nodes.map((node) => (
+        <ModernNode key={node.id} node={node} onPress={onNodePress} />
+    )), [nodes, onNodePress]);
+
     return (
-        <View style={{ width, height, backgroundColor: '#f0f0f0' }}>
+        <View style={{ width, height, backgroundColor: '#fafafa' }}>
             <Svg width={width} height={height}>
                 {/* 1. Render Links First (Background) */}
-                {links.map((link, index) => (
-                    <LinkLine key={`link-${index}`} link={link} />
-                ))}
+                {renderedLinks}
 
                 {/* 2. Render Nodes (Foreground) */}
-                {nodes.map((node) => (
-                    <NodeContent key={node.id} node={node} onPress={onNodePress} />
-                ))}
+                {renderedNodes}
             </Svg>
-
-            {/* 3. Text Labels Overlay (Absolute Positioning for better text handling) */}
-            {nodes.map((node) => (
-                <View
-                    key={`label-${node.id}`}
-                    style={{
-                        position: 'absolute',
-                        left: node.x - 50,
-                        top: node.y + 35,
-                        width: 100,
-                        alignItems: 'center',
-                        pointerEvents: 'none' // Let clicks pass through to SVG if overlapping
-                    }}
-                >
-                    <Text style={{ textAlign: 'center', fontSize: 12 }}>{node.title}</Text>
-                </View>
-            ))}
         </View>
     );
 };

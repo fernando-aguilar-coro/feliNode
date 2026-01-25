@@ -1,21 +1,23 @@
-import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useUserStore } from '../../../store/UserStore';
-import { LearningSection } from '../components/LearningSection';
+
+import { LearningSection } from './LearningSection';
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { theme } from '../../../theme';
 
+import { useRoute } from '@react-navigation/native';
+
 export const PlacementTestScreen = () => {
     const navigation = useNavigation<any>();
-    const completeOnboarding = useUserStore((state) => state.completeOnboarding);
+    const route = useRoute<any>();
+    const { lessonId } = route.params || {};
 
     return (
         <LearningSection
-            lessonId="placement_test"
+            lessonId={lessonId || "placement_test_basic"}
             headerTitle="Prueba de Nivel"
             loadingText="Cargando prueba de nivel..."
-            onExit={() => navigation.navigate('Welcome')}
+            onExit={() => navigation.navigate('Home')}
             renderCompleted={() => (
                 <Screen style={styles.centerContainer}>
                     <AppText variant="xxl" weight="bold" color={theme.colors.success} align="center">
@@ -29,16 +31,9 @@ export const PlacementTestScreen = () => {
                     <Spacer height={theme.spacing.xl} />
                     <View style={styles.completionButtonContainer}>
                         <AppButton
-                            title="Identifícate para guardar tu progreso"
-                            onPress={() => navigation.navigate('Login')}
+                            title="Ir al Inicio"
+                            onPress={() => navigation.navigate('Home')}
                             variant="primary"
-                        />
-                        <Spacer height={theme.spacing.md} />
-                        {/* Opción para continuar sin cuenta */}
-                        <AppButton
-                            title="Continuar sin registrarse"
-                            onPress={() => completeOnboarding()}
-                            variant="secondary"
                         />
                     </View>
                 </Screen>
