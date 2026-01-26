@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LessonScreen } from '../../learning/screens/LessonScreen';
 
+
 export type HomeStackParamList = {
     Main: undefined;
     Lesson: { lessonId: string };

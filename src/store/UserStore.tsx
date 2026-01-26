@@ -2,10 +2,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../features/auth/services/authService';
-import { syncUserProgress } from '../api/sync';
-import { getUserCompletedLessons } from '../api/GetProgressUser';
+import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
 
-// ... imports
 interface UserState {
     isAuthenticated: boolean;
     user: { name: string } | null;
@@ -40,9 +38,6 @@ export const useUserStore = create<UserState>()(
                             user: { name: session.user.email || 'User' },
                             completedLessonsCount: count
                         });
-
-                        // Trigger sync on session load
-                        syncUserProgress().catch(err => console.error('Sync failed on session check:', err));
                     } else if (wasAuthenticated) {
                         //TODO: Handle token refresh
                         // Session is invalid but we had persistence, log out to be safe or handle token refresh
@@ -88,8 +83,6 @@ export const useUserStore = create<UserState>()(
                             user: { name: session.user.email || 'User' },
                             completedLessonsCount: count
                         });
-                        // Trigger sync on successful login
-                        syncUserProgress().catch(err => console.error('Sync failed on login:', err));
                     }
                 } catch (error) {
                     console.error('Verify OTP error:', error);

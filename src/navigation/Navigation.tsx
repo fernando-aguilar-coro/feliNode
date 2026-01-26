@@ -6,15 +6,41 @@ import LoginScreen from '../features/auth/screens/OTP Screen';
 import { PlacementTestScreen } from '../features/learning/components/PlacementTestScreen';
 import { ChoseInitialTest } from '../features/learning/screens/ChoseInitialTest';
 import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
+import { syncUserProgress } from '../api/syncUserProgress';
+import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
+import { LoadingScreen } from '../components';
 
 const Stack = createNativeStackNavigator();
 const minCount = 1;
 export const Navigation = () => {
     const { isAuthenticated, checkSession, completedLessonsCount } = useUserStore();
+    const [isSyncing, setIsSyncing] = React.useState(false);
 
     React.useEffect(() => {
         checkSession();
     }, [checkSession]);
+
+    React.useEffect(() => {
+        const sync = async () => {
+            if (isAuthenticated) {
+                setIsSyncing(true);
+                try {
+                    await syncUserProgress();
+                    const count = await getUserCompletedLessons();
+                    useUserStore.setState({ completedLessonsCount: count });
+                } catch (error) {
+                    console.error('Sync failed:', error);
+                } finally {
+                    setIsSyncing(false);
+                }
+            }
+        };
+        sync();
+    }, [isAuthenticated]);
+
+    if (isAuthenticated && isSyncing) {
+        return <LoadingScreen message="Syncing progress..." />;
+    }
 
     return (
         <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>

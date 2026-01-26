@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { LoadingScreen } from './src/screens/LoadingScreen';
+import { LoadingScreen } from './src/components/LoadingScreen';
 import { Navigation } from './src/navigation/Navigation';
 import { seedDatabase } from './src/db_local/seed/seed_db';
 

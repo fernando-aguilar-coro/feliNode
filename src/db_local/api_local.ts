@@ -168,15 +168,28 @@ export const getLessonNodes = async (): Promise<LessonNode[]> => {
     const completedLessons = await getCompletedLessons();
 
     return lessons.map(row => {
+        const parents = dependencyMap.get(row.id) || [];
         let status = row.status;
+
         if (completedLessons.includes(row.id)) {
             status = 'completed';
+        } else {
+            // Not completed check dependencies logic
+            if (parents.length > 0) {
+                const allParentsCompleted = parents.every(p => completedLessons.includes(p));
+                if (allParentsCompleted) {
+                    status = 'available';
+                } else {
+                    status = 'locked';
+                }
+            }
+            // If no parents, we trust the DB status (usually 'available' for root nodes)
         }
 
         return {
             ...row,
             status,
-            parents: dependencyMap.get(row.id) || []
+            parents
         };
     });
 };
