@@ -4,6 +4,7 @@ import Svg from 'react-native-svg';
 import { TreeNode, TreeLink } from '../types/NodeTypes';
 import { BezierLink } from './BezierLink';
 import { ModernNode } from './ModernNode';
+import { PannableCanvas, PannableCanvasRef } from './PannableCanvas';
 
 interface TreeCanvasProps {
     width: number;
@@ -13,7 +14,7 @@ interface TreeCanvasProps {
     onNodePress: (node: TreeNode) => void;
 }
 
-export const TreeCanvas: React.FC<TreeCanvasProps> = ({ width, height, nodes, links, onNodePress }) => {
+export const TreeCanvas = React.forwardRef<PannableCanvasRef, TreeCanvasProps>(({ width, height, nodes, links, onNodePress }, ref) => {
     // Memoize nodes and links rendering to prevent unnecessary re-calculations if props don't change
     // profound change: removed Filters, Gradients, and Patterns for raw performance.
 
@@ -26,14 +27,16 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({ width, height, nodes, li
     )), [nodes, onNodePress]);
 
     return (
-        <View style={{ width, height, backgroundColor: '#fafafa' }}>
-            <Svg width={width} height={height}>
-                {/* 1. Render Links First (Background) */}
-                {renderedLinks}
+        <PannableCanvas ref={ref} width={width} height={height}>
+            <View style={{ width, height }}>
+                <Svg width={width} height={height}>
+                    {/* 1. Render Links First (Background) */}
+                    {renderedLinks}
 
-                {/* 2. Render Nodes (Foreground) */}
-                {renderedNodes}
-            </Svg>
-        </View>
+                    {/* 2. Render Nodes (Foreground) */}
+                    {renderedNodes}
+                </Svg>
+            </View>
+        </PannableCanvas>
     );
-};
+});

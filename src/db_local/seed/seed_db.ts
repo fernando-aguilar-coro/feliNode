@@ -3,7 +3,7 @@ import { initDatabase } from '../db';
 import { INITIAL_DATA } from './initial_data';
 import { ensureModule, ensureLessons } from './seed_config';
 import { SeedModule, SeedLesson } from './types';
-
+import { getAllLessons, getAllDependencies } from '../../api/getAllLessons';
 let db: SQLite.SQLiteDatabase | null = null;
 
 const init = async () => {
@@ -35,7 +35,7 @@ export const seedDatabase = async () => {
 
         // Seed from Supabase
         console.log('[DB_SEED] Fetching lessons from Supabase...');
-        const { getAllLessons, getAllDependencies } = await import('../../api/GetAllLessons');
+
         const supabaseLessons = await getAllLessons();
 
         if (supabaseLessons.length > 0) {

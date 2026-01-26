@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LoadingScreen } from './src/screens/LoadingScreen';
 import { Navigation } from './src/navigation/Navigation';
 import { seedDatabase } from './src/db_local/seed/seed_db';
@@ -21,12 +22,14 @@ export const App = () => {
     }, []);
 
     return (
-        appIsReady ? (
-            <NavigationContainer>
-                <Navigation />
-            </NavigationContainer>
-        ) : (
-            <LoadingScreen />
-        )
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            {appIsReady ? (
+                <NavigationContainer>
+                    <Navigation />
+                </NavigationContainer>
+            ) : (
+                <LoadingScreen />
+            )}
+        </GestureHandlerRootView>
     );
 }

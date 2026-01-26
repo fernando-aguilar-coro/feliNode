@@ -9,6 +9,7 @@ module.exports = function (api) {
                     extensions: ['.md'],
                 },
             ],
+            'react-native-reanimated/plugin',
         ],
     };
 };
