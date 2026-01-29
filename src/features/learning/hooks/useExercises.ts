@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Exercise } from '../types/exercise';
+import { Exercise, ExerciseType } from '../types/exercise';
 
 /**
  * Hook to manage the state and logic of a set of exercises.
@@ -32,8 +32,15 @@ export const useExercises = (initialExercises: Exercise[]) => {
     const checkAnswer = (userAnswer: string) => {
         if (!currentExercise) return;
 
-        // Simple case-insensitive check for now
-        const isCorrect = userAnswer.trim().toLowerCase() === currentExercise.correctAnswer.trim().toLowerCase();
+        let isCorrect = false;
+
+        // Pronunciation exercises are always considered correct to avoid blocking
+        if (currentExercise.type === ExerciseType.PRONUNCIATION) {
+            isCorrect = true;
+        } else {
+            // Simple case-insensitive check for now
+            isCorrect = userAnswer.trim().toLowerCase() === currentExercise.correctAnswer.trim().toLowerCase();
+        }
 
         if (isCorrect) {
             setCompletedCount(prev => prev + 1);

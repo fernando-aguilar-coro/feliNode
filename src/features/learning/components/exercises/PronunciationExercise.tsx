@@ -19,7 +19,8 @@ interface Props {
 
 const getScoreColor = (score: number) => {
     if (score >= 80) return theme.colors.success;
-    if (score >= 40) return '#F39C12';
+    if (score >= 60) return '#F39C12';
+    if (score >= 40) return '#f31212ff';
     return theme.colors.error;
 };
 
@@ -28,6 +29,13 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
     const [status, setStatus] = useState<'idle' | 'recording' | 'processing' | 'result'>('idle');
     const [result, setResult] = useState<PronunciationResult | null>(null);
     const [recordedUri, setRecordedUri] = useState<string | null>(null);
+
+    // Initial effect to enable the "Check" button in the container immediately
+    // or whenever we want to allow skipping.
+    React.useEffect(() => {
+        // We set a non-empty string to satisfy !userAnswer check in ExerciseContainer
+        onAnswer("READY");
+    }, []);
 
     const handleSend = async () => {
         if (!recordedUri) return;

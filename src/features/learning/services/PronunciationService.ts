@@ -4,7 +4,7 @@ import { supabase } from '../../../api/supabaseClient';
 // Simplified Types
 interface AzureMetrics {
     AccuracyScore: number;
-    FluencyScore?: number;
+    FluencyScore: number;
     CompletenessScore?: number;
     PronScore?: number;
     ErrorType?: string;
@@ -55,7 +55,7 @@ export interface BackendResponse {
     azure_analysis: AzureResponse;
     gemini_feedback: string;
 }
-
+// result parsed from backend
 
 export interface PronunciationSyllableResult {
     syllable: string;
@@ -81,7 +81,7 @@ export interface PronunciationResult {
     completenessScore?: number;
     pronScore?: number;
     words: PronunciationWordResult[];
-    geminiFeedback?: string;
+    geminiFeedback: string;
 }
 
 const BASE_URL = "https://feli-node-back.vercel.app/api/pronunciation_assessment";

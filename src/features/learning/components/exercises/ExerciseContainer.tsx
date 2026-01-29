@@ -112,7 +112,7 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
             {!hasChecked ? (
                 /* Botón para comprobar la respuesta */
                 <AppButton
-                    title="Comprobar Respuesta"
+                    title={exercise.type === ExerciseType.PRONUNCIATION ? "Siguiente" : "Comprobar Respuesta"}
                     onPress={handleCheck}
                     disabled={!userAnswer}
                     variant="primary"
