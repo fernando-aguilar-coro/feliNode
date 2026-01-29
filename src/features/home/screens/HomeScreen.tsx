@@ -1,29 +1,36 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useUserStore } from '../../../store/UserStore';
+import { Ionicons } from '@expo/vector-icons';
 import { TreeNodeScreen } from '../../nodes/screens/TreeNodeScreen';
 import { AppButton } from '../../../components';
 import { theme } from '../../../theme';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { HomeStackParamList } from '../navigation/HomeNavigation';
+
+type HomeScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Main'>;
 
 export const HomeScreen = () => {
     // Obtenemos la función de logout store
-    const logout = useUserStore((state) => state.logout);
+    // Obtenemos la función de logout store
     const netInfo = useNetInfo();
+    const navigation = useNavigation<HomeScreenNavigationProp>();
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+                    <Ionicons name="settings-outline" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+            </View>
+            <View style={{ padding: 10, alignItems: 'center' }}>
                 <AppButton
-                    title="Cerrar Sesión"
-                    onPress={logout}
-                    variant="outline"
-                    style={[
-                        styles.authButton,
-                        { borderColor: theme.colors.error }
-                    ]}
-                    textColor={theme.colors.error}
+                    title="Práctica de Pronunciación"
+                    onPress={() => navigation.navigate('PronunciationAssessment')}
+                    variant="secondary"
+                    style={{ width: '100%' }}
                 />
             </View>
             {netInfo.isConnected === false && (
@@ -51,10 +58,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
-    authButton: {
-        height: 40, // Un poco más compacto para el header
-        paddingHorizontal: 15,
-    },
+
     content: {
         flex: 1,
     },

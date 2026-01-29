@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Exercise, ExerciseType } from '../../types/exercise';
 import { MultipleChoiceExercise } from './MultipleChoiceExercise';
 import { FillInTheBlankExercise } from './FillInTheBlankExercise';
@@ -80,7 +80,7 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent} style={styles.container}>
             <Card style={styles.card}>
                 {renderContent()}
             </Card>
@@ -125,13 +125,18 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
                     variant="secondary"
                 />
             )}
-        </View>
+            <Spacer height={theme.spacing.xl} />
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+    },
+    scrollContent: {
         padding: theme.spacing.md,
+        flexGrow: 1,
     },
     card: {
         minHeight: 200,

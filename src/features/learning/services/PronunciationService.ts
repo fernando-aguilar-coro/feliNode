@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system';
+import { supabase } from '../../../api/supabaseClient';
 
 // Simplified Types
 interface AzureMetrics {
@@ -50,24 +51,37 @@ interface AzureResponse {
     }[];
 }
 
+export interface BackendResponse {
+    azure_analysis: AzureResponse;
+    gemini_feedback: string;
+}
+
+
+export interface PronunciationSyllableResult {
+    syllable: string;
+    accuracyScore: number;
+}
+
+export interface PronunciationPhonemeResult {
+    phoneme: string;
+    accuracyScore: number;
+}
+
+export interface PronunciationWordResult {
+    word: string;
+    accuracyScore: number;
+    errorType?: string;
+    syllables: PronunciationSyllableResult[];
+    phonemes: PronunciationPhonemeResult[];
+}
+
 export interface PronunciationResult {
     overallScore: number;
     fluencyScore?: number;
     completenessScore?: number;
     pronScore?: number;
-    words: {
-        word: string;
-        accuracyScore: number;
-        errorType?: string;
-        syllables: {
-            syllable: string;
-            accuracyScore: number;
-        }[];
-        phonemes: {
-            phoneme: string;
-            accuracyScore: number;
-        }[];
-    }[];
+    words: PronunciationWordResult[];
+    geminiFeedback?: string;
 }
 
 const BASE_URL = "https://feli-node-back.vercel.app/api/pronunciation_assessment";
@@ -80,10 +94,22 @@ export const PronunciationService = {
         }
 
         try {
+            // Get the current session token
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+            if (sessionError || !session?.access_token) {
+                throw new Error('User not authenticated');
+            }
+
+            const token = session.access_token;
+
             const base64Audio = await new FileSystem.File(audioUri).base64();
             const response = await fetch(BASE_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     text: referenceText,
                     audio: base64Audio,
@@ -92,8 +118,13 @@ export const PronunciationService = {
 
             if (!response.ok) throw new Error(`Backend Error (${response.status}): ${await response.text()}`);
 
-            const data: AzureResponse = await response.json();
-            console.log("Response data:", JSON.stringify(data, null, 2));
+            const text = await response.text();
+            console.log("Raw Server Response:", text);
+            const parsed: BackendResponse = JSON.parse(text);
+            console.log("Parsed data:", JSON.stringify(parsed, null, 2));
+
+            const data = parsed.azure_analysis;
+            const geminiFeedback = parsed.gemini_feedback;
 
             // Check for success (API can return string "Success" or enum 0)
             const isSuccess = data.RecognitionStatus === 'Success' || data.RecognitionStatus === 0;
@@ -131,7 +162,8 @@ export const PronunciationService = {
                         phoneme: p.Phoneme,
                         accuracyScore: getScore(p)
                     })) || []
-                }))
+                })),
+                geminiFeedback: geminiFeedback
             };
         } catch (error) {
             console.error('Pronunciation Assessment Error:', error);

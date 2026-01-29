@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initDatabase } from '../db';
 import { INITIAL_DATA } from './initial_data';
 import { ensureModule, ensureLessons } from './seed_config';
@@ -16,6 +17,12 @@ const init = async () => {
 export const seedDatabase = async () => {
     try {
         const dbInstance = await init();
+
+        const hasSeeded = await AsyncStorage.getItem('HAS_SEEDED_DB');
+        if (hasSeeded === 'true') {
+            console.log('[DB_SEED] Already seeded. Skipping.');
+            return;
+        }
 
         console.log('[DB_SEED] Starting seed process...');
 
@@ -90,6 +97,7 @@ export const seedDatabase = async () => {
         }
 
         console.log('[DB_SEED] Seeding complete successfully.');
+        await AsyncStorage.setItem('HAS_SEEDED_DB', 'true');
     } catch (error) {
         console.error('[DB_SEED] Error during database seeding:', error);
     }
