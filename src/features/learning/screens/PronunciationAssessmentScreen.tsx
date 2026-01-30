@@ -5,6 +5,7 @@ import { AppText, AppButton, Spacer, Screen } from '../../../components';
 import { theme } from '../../../theme';
 import { PronunciationExercise } from '../components/exercises/PronunciationExercise';
 import { ExerciseType, PronunciationExercise as PronunciationExerciseType } from '../types/exercise';
+import { RecommendationButton } from '../components/RecommendationButton';
 
 export const PronunciationAssessmentScreen = () => {
     const navigation = useNavigation();
@@ -73,6 +74,10 @@ export const PronunciationAssessmentScreen = () => {
                             />
 
                             <Spacer height={theme.spacing.xl} />
+
+                            <RecommendationButton onRecommendationReceived={setPhrase} />
+
+                            <Spacer height={theme.spacing.md} />
 
                             <AppButton
                                 title="Comenzar Práctica"

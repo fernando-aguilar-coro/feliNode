@@ -84,7 +84,9 @@ export interface PronunciationResult {
     geminiFeedback: string;
 }
 
-const BASE_URL = "https://feli-node-back.vercel.app/api/pronunciation_assessment";
+import { API_BASE_URL } from '../../../config';
+
+const BASE_URL = `${API_BASE_URL}/pronunciation_assessment`;
 
 export const PronunciationService = {
     assessPronunciation: async (audioUri: string, referenceText: string): Promise<PronunciationResult> => {
@@ -135,31 +137,36 @@ export const PronunciationService = {
 
             const best = data.NBest[0];
 
-            // Helper to get score regardless of structure (nested or flat)
-            const getScore = (item: any) => {
-                if (item.PronunciationAssessment?.AccuracyScore !== undefined) {
-                    return item.PronunciationAssessment.AccuracyScore;
-                }
-                return item.AccuracyScore ?? 0;
+            // Helper to get score regardless of structure (nested or flat) and case
+            const getAssessment = (item: any) => {
+                return item.PronunciationAssessment || item.pronunciationAssessment || {};
             };
 
-            const getMetrics = (item: any) => item.PronunciationAssessment || {};
+            const getScore = (item: any) => {
+                const assessment = getAssessment(item);
+                if (assessment.AccuracyScore !== undefined) return assessment.AccuracyScore;
+                if (assessment.accuracyScore !== undefined) return assessment.accuracyScore;
+                return item.AccuracyScore ?? item.accuracyScore ?? 0;
+            };
+
+            const bestAssessment = getAssessment(best);
+            console.log("Best Assessment Object:", JSON.stringify(bestAssessment, null, 2));
 
             return {
                 overallScore: getScore(best),
-                fluencyScore: getMetrics(best).FluencyScore,
-                completenessScore: getMetrics(best).CompletenessScore,
-                pronScore: getMetrics(best).PronScore,
-                words: best.Words.map(w => ({
-                    word: w.Word,
+                fluencyScore: bestAssessment.FluencyScore ?? bestAssessment.fluencyScore,
+                completenessScore: bestAssessment.CompletenessScore ?? bestAssessment.completenessScore,
+                pronScore: bestAssessment.PronScore ?? bestAssessment.pronScore,
+                words: best.Words.map((w: any) => ({
+                    word: w.Word || w.word,
                     accuracyScore: getScore(w),
-                    errorType: getMetrics(w).ErrorType,
-                    syllables: w.Syllables?.map(s => ({
-                        syllable: s.Syllable,
+                    errorType: getAssessment(w).ErrorType || getAssessment(w).errorType,
+                    syllables: w.Syllables?.map((s: any) => ({
+                        syllable: s.Syllable || s.syllable,
                         accuracyScore: getScore(s)
                     })) || [],
-                    phonemes: w.Phonemes?.map(p => ({
-                        phoneme: p.Phoneme,
+                    phonemes: w.Phonemes?.map((p: any) => ({
+                        phoneme: p.Phoneme || p.phoneme,
                         accuracyScore: getScore(p)
                     })) || []
                 })),

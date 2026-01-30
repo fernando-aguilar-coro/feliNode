@@ -52,10 +52,10 @@ export const PronunciationFeedbackAzure = ({ result, targetText }: Props) => {
 
                 {/* Global Metrics */}
                 <View style={styles.metricsRow}>
-                    <MetricBadge label="Accuracy" score={result.overallScore} />
-                    {result.fluencyScore !== undefined && <MetricBadge label="Fluency" score={result.fluencyScore} />}
-                    {result.completenessScore !== undefined && <MetricBadge label="Completeness" score={result.completenessScore} />}
-                    {result.pronScore !== undefined && <MetricBadge label="Pronunciation" score={result.pronScore} />}
+                    <MetricBadge label="Precisión" score={result.overallScore} />
+                    {result.fluencyScore !== undefined && <MetricBadge label="Fluidez" score={result.fluencyScore} />}
+                    {result.completenessScore !== undefined && <MetricBadge label="Completitud" score={result.completenessScore} />}
+                    {result.pronScore !== undefined && <MetricBadge label="Pronunciación" score={result.pronScore} />}
                 </View>
 
                 <Spacer height={theme.spacing.md} />

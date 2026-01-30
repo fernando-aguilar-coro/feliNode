@@ -30,13 +30,6 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
     const [result, setResult] = useState<PronunciationResult | null>(null);
     const [recordedUri, setRecordedUri] = useState<string | null>(null);
 
-    // Initial effect to enable the "Check" button in the container immediately
-    // or whenever we want to allow skipping.
-    React.useEffect(() => {
-        // We set a non-empty string to satisfy !userAnswer check in ExerciseContainer
-        onAnswer("READY");
-    }, []);
-
     const handleSend = async () => {
         if (!recordedUri) return;
         setStatus('processing');
@@ -77,14 +70,6 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
         <ScrollView contentContainerStyle={styles.container}>
             <AppText variant="lg" style={styles.question}>Lee esta frase:</AppText>
 
-            <View style={styles.sentenceContainer}>
-                {/* Show feedback if we have any, even during processing */}
-                <PronunciationFeedbackGemini feedback={result?.geminiFeedback} />
-                <PronunciationFeedbackAzure result={result} targetText={exercise.phrase} />
-            </View>
-
-            <Spacer height={theme.spacing.lg} />
-
             {result && (
                 <View style={styles.scoreContainer}>
                     <AppText variant="sm" color={theme.colors.textSecondary}>Precisión General:</AppText>
@@ -93,8 +78,10 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
                     </AppText>
                 </View>
             )}
-
             <Spacer height={theme.spacing.md} />
+            <PronunciationFeedbackAzure result={result} targetText={exercise.phrase} />
+            <PronunciationFeedbackGemini feedback={result?.geminiFeedback} />
+            <Spacer height={theme.spacing.lg} />
 
             {status === 'processing' && !result ? (
                 <View style={styles.loadingContainer}>
@@ -131,11 +118,32 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
 };
 
 const styles = StyleSheet.create({
-    container: { alignItems: 'center', width: '100%' },
-    question: { marginBottom: theme.spacing.md, color: theme.colors.textSecondary },
-    sentenceContainer: { minHeight: 80, justifyContent: 'center', alignItems: 'center', paddingHorizontal: theme.spacing.md, width: '100%' },
-    scoreContainer: { alignItems: 'center' },
-    loadingContainer: { alignItems: 'center' },
-    reviewContainer: { width: '100%', alignItems: 'center' },
-    reviewButtons: { flexDirection: 'row', justifyContent: 'center' }
+    container: {
+        flexGrow: 1,
+        alignItems: 'center',
+        padding: theme.spacing.md,
+    },
+    question: {
+        marginBottom: theme.spacing.md,
+        color: theme.colors.textSecondary,
+        textAlign: 'center',
+    },
+    scoreContainer: {
+        alignItems: 'center',
+        marginVertical: theme.spacing.md,
+    },
+    loadingContainer: {
+        alignItems: 'center',
+        marginVertical: theme.spacing.md,
+    },
+    reviewContainer: {
+        width: '100%',
+        alignItems: 'center',
+        marginTop: theme.spacing.md,
+    },
+    reviewButtons: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: theme.spacing.md, // Use gap for better spacing
+    }
 });

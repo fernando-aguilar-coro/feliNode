@@ -8,6 +8,8 @@ import { ScrambledSentenceExercise } from './ScrambledSentenceExercise';
 import { PronunciationExercise } from './PronunciationExercise';
 import { Card, AppButton, AppText, Spacer } from '../../../../components';
 import { theme } from '../../../../theme';
+import { ExplainCorrectButton } from '../ExplainCorrectButton';
+import { ExplainErrorButton } from '../ExplainErrorButton';
 
 interface Props {
     exercise: Exercise;
@@ -22,7 +24,11 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
 
     // Reset state when exercise changes
     useEffect(() => {
-        setUserAnswer('');
+        if (exercise.type === ExerciseType.PRONUNCIATION) {
+            setUserAnswer('READY');
+        } else {
+            setUserAnswer('');
+        }
         setHasChecked(false);
     }, [exercise]);
 
@@ -104,6 +110,25 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
                     >
                         {lastResult.message}
                     </AppText>
+
+                    <Spacer height={theme.spacing.sm} />
+
+                    {(exercise.type === ExerciseType.FILL_IN_THE_BLANK || exercise.type === ExerciseType.TRANSLATE) && (
+                        <>
+                            {lastResult.correct ? (
+                                <ExplainCorrectButton
+                                    userAnswer={userAnswer}
+                                    question={exercise.question}
+                                />
+                            ) : (
+                                <ExplainErrorButton
+                                    userAnswer={userAnswer}
+                                    correctAnswer={exercise.correctAnswer}
+                                    question={exercise.question}
+                                />
+                            )}
+                        </>
+                    )}
                 </View>
             )}
 
@@ -112,7 +137,7 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
             {!hasChecked ? (
                 /* Botón para comprobar la respuesta */
                 <AppButton
-                    title={exercise.type === ExerciseType.PRONUNCIATION ? "Siguiente" : "Comprobar Respuesta"}
+                    title={exercise.type === ExerciseType.PRONUNCIATION ? "Saltar ejercicio ?" : "Comprobar Respuesta"}
                     onPress={handleCheck}
                     disabled={!userAnswer}
                     variant="primary"

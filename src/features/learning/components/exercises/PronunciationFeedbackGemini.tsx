@@ -15,27 +15,37 @@ export const PronunciationFeedbackGemini: React.FC<Props> = ({ feedback }) => {
     return (
         <Card style={styles.card}>
             <Card.Content>
-                <Text variant="titleMedium" style={{ color: theme.colors.primary, marginBottom: 8 }}>
-                    Gemini Feedback
+                <Text variant="titleMedium" style={{ color: theme.colors.primary, marginBottom: 8, fontWeight: 'bold' }}>
+                    Sugerencias de Mejora
                 </Text>
                 <Markdown
                     style={{
                         body: {
                             color: theme.colors.onSurface,
                             fontSize: 16,
+                            lineHeight: 24,
                         },
                         heading1: {
                             color: theme.colors.primary,
                             marginVertical: 10,
+                            fontWeight: 'bold',
                         },
                         heading2: {
                             color: theme.colors.secondary,
                             marginTop: 10,
                             marginBottom: 5,
+                            fontWeight: 'bold',
                         },
                         strong: {
                             color: theme.colors.primary,
                             fontWeight: 'bold',
+                        },
+                        // Ensure lists are properly styled if Gemini returns bullets
+                        bullet_list: {
+                            marginVertical: 5,
+                        },
+                        list_item: {
+                            marginVertical: 3,
                         }
                     }}
                 >
