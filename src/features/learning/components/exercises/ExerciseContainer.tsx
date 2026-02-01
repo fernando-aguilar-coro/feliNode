@@ -16,9 +16,10 @@ interface Props {
     onCheck: (answer: string) => boolean | undefined;
     onNext: () => void;
     lastResult: { correct: boolean; message?: string } | null;
+    lessonContext?: string;
 }
 
-export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Props) => {
+export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lessonContext }: Props) => {
     const [userAnswer, setUserAnswer] = useState('');
     const [hasChecked, setHasChecked] = useState(false);
 
@@ -113,18 +114,20 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult }: Pro
 
                     <Spacer height={theme.spacing.sm} />
 
-                    {(exercise.type === ExerciseType.FILL_IN_THE_BLANK || exercise.type === ExerciseType.TRANSLATE) && (
+                    {(exercise.type === ExerciseType.FILL_IN_THE_BLANK || exercise.type === ExerciseType.TRANSLATE || exercise.type === ExerciseType.SCRAMBLED_SENTENCE) && (
                         <>
                             {lastResult.correct ? (
                                 <ExplainCorrectButton
                                     userAnswer={userAnswer}
                                     question={exercise.question}
+                                    lessonContext={lessonContext}
                                 />
                             ) : (
                                 <ExplainErrorButton
                                     userAnswer={userAnswer}
                                     correctAnswer={exercise.correctAnswer}
                                     question={exercise.question}
+                                    lessonContext={lessonContext}
                                 />
                             )}
                         </>

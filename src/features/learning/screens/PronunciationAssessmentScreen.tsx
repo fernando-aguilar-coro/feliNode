@@ -6,28 +6,57 @@ import { theme } from '../../../theme';
 import { PronunciationExercise } from '../components/exercises/PronunciationExercise';
 import { ExerciseType, PronunciationExercise as PronunciationExerciseType } from '../types/exercise';
 import { RecommendationButton } from '../components/RecommendationButton';
+import { useEffect } from 'react';
+import { getCompletedLessons, getLessonById, getLessonNodes } from '../../../db_local/api_local';
 
 export const PronunciationAssessmentScreen = () => {
     const navigation = useNavigation();
     const [phrase, setPhrase] = useState('');
     const [isExercising, setIsExercising] = useState(false);
-    const [lastScore, setLastScore] = useState<string | null>(null);
+    const [currentLessonTitle, setCurrentLessonTitle] = useState<string>("Práctica General");
+
+    useEffect(() => {
+        const fetchContext = async () => {
+            try {
+                const nodes = await getLessonNodes();
+                const available = nodes.filter(n => n.status === 'available');
+
+                if (available.length > 0) {
+                    const titles = available.map(n => n.title).join(", ");
+                    setCurrentLessonTitle(titles);
+                } else {
+                    // Fallback if nothing available (weird state, or all completed)
+                    // If all completed, maybe show last completed? 
+                    // For now, if no available, we stick to default or try completed.
+                    // Let's stick to default "Práctica General" initialized in state, 
+                    // or maybe check completed if available is empty.
+                    const completed = await getCompletedLessons();
+                    if (completed.length > 0) {
+                        // Fallback to last completed
+                        const lastId = completed[completed.length - 1];
+                        const lesson: any = await getLessonById(lastId);
+                        if (lesson?.title) setCurrentLessonTitle(lesson.title);
+                    }
+                }
+            } catch (e) {
+                console.log("Error fetching context for recommendation", e);
+            }
+        };
+        fetchContext();
+    }, []);
 
     const handleStart = () => {
         if (phrase.trim()) {
             Keyboard.dismiss();
             setIsExercising(true);
-            setLastScore(null);
         }
     };
 
     const handleAnswer = (score: string) => {
-        setLastScore(score);
     };
 
     const handleReset = () => {
         setIsExercising(false);
-        setLastScore(null);
         setPhrase('');
     };
 
@@ -75,7 +104,14 @@ export const PronunciationAssessmentScreen = () => {
 
                             <Spacer height={theme.spacing.xl} />
 
-                            <RecommendationButton onRecommendationReceived={setPhrase} />
+                            <Spacer height={theme.spacing.xl} />
+
+                            <RecommendationButton
+                                onRecommendationReceived={setPhrase}
+                                currentLesson={currentLessonTitle}
+                            />
+
+                            <Spacer height={theme.spacing.md} />
 
                             <Spacer height={theme.spacing.md} />
 

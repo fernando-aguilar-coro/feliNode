@@ -22,5 +22,12 @@ export const LessonService = {
      */
     completeLesson: async (lessonId: string, score: number) => {
         await saveUserProgress(lessonId, score);
+    },
+
+    /**
+     * Fetches the full lesson object.
+     */
+    getLesson: async (lessonId: string) => {
+        return await getLessonById(lessonId);
     }
 };

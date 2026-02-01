@@ -8,18 +8,21 @@ export const useLessonSession = (lessonId: string) => {
     const [status, setStatus] = useState<LessonStatus>('loading');
     const [theoryContent, setTheoryContent] = useState<string>('');
     const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [lesson, setLesson] = useState<any>(null);
 
     useEffect(() => {
         const loadLessonData = async () => {
             try {
                 setStatus('loading');
-                const [theory, exList] = await Promise.all([
+                const [theory, exList, lessonData] = await Promise.all([
                     LessonService.getTheory(lessonId),
-                    LessonService.getExercises(lessonId)
+                    LessonService.getExercises(lessonId),
+                    LessonService.getLesson(lessonId)
                 ]);
 
                 setTheoryContent(theory);
                 setExercises(exList);
+                setLesson(lessonData);
 
                 if (theory && theory.length > 0) {
                     setStatus('theory');
@@ -59,6 +62,7 @@ export const useLessonSession = (lessonId: string) => {
         theoryContent,
         exercises,
         startExercises,
-        completeLesson
+        completeLesson,
+        lesson
     };
 };

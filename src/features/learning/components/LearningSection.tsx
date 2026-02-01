@@ -37,7 +37,8 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
         theoryContent,
         exercises,
         startExercises,
-        completeLesson
+        completeLesson,
+        lesson
     } = useLessonSession(lessonId);
 
     // Inner hook for exercises (only active when we have exercises)
@@ -96,6 +97,7 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
                             onCheck={checkAnswer}
                             onNext={nextExercise}
                             lastResult={lastResult}
+                            lessonContext={lesson?.title}
                         />
                     ) : (
                         <View style={styles.centerContainer}>

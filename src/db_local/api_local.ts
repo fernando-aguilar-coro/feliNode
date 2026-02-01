@@ -194,30 +194,4 @@ export const getLessonNodes = async (): Promise<LessonNode[]> => {
     });
 };
 
-export const getProgressUser = async (): Promise<string> => {
-    try {
-        if (!db) await init();
 
-        // Get completed lessons
-        const completedIds = await getCompletedLessons();
-
-        if (completedIds.length === 0) {
-            return "El usuario es nuevo y no ha completado ninguna lección.";
-        }
-
-        // Get details of completed lessons to provide context
-        // We'll limit to the last 5 to avoid sending too much data
-        const recentIds = completedIds.slice(-5);
-
-        const placeholders = recentIds.map(() => '?').join(',');
-        const query = `SELECT title, description FROM lessons WHERE id IN (${placeholders})`;
-        const recentLessons: any[] = await db!.getAllAsync(query, recentIds);
-
-        const topics = recentLessons.map(l => l.title).join(", ");
-
-        return `El usuario ha completado ${completedIds.length} lecciones. Temas recientes dominados: ${topics}.`;
-    } catch (error) {
-        console.error("Error getting user progress:", error);
-        return "No se pudo recuperar el progreso del usuario.";
-    }
-};

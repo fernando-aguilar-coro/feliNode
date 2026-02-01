@@ -3,21 +3,21 @@ import { TouchableOpacity, ActivityIndicator, StyleSheet, Alert, View } from 're
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppText } from '../../../components';
 import { theme } from '../../../theme';
-import { getProgressUser } from '../../../db_local/api_local';
 import { GeminiService } from '../services/GeminiService';
 
 interface RecommendationButtonProps {
     onRecommendationReceived: (phrase: string) => void;
+    currentLesson: string;
 }
 
-export const RecommendationButton: React.FC<RecommendationButtonProps> = ({ onRecommendationReceived }) => {
+export const RecommendationButton: React.FC<RecommendationButtonProps> = ({ onRecommendationReceived, currentLesson }) => {
     const [loading, setLoading] = useState(false);
 
     const handlePress = async () => {
         setLoading(true);
         try {
-            const userProgress = await getProgressUser();
-            const prompt = `El usuario tiene el siguiente progreso: "${userProgress}". Recomiéndame una frase corta (máximo 25 palabras) en inglés para practicar pronunciación, basada en su nivel. Solo dame la frase, sin explicaciones.`;
+            // const userProgress = await getProgressUser(); // Removed as requested
+            const prompt = `El usuario tiene disponibles las siguientes lecciones: "${currentLesson}". Recomiéndame una frase (de 5 a 40 palabras en funcion del progreso del usuario) en inglés para practicar pronunciación, relacionada con estos temas. Solo dame la frase, sin ninguna explicación.`;
             const phrase = await GeminiService.generateResponse(prompt);
             onRecommendationReceived(phrase);
         } catch (error) {

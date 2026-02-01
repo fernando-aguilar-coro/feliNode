@@ -1,25 +1,29 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { AppText } from '../../../components';
 import { theme } from '../../../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { GeminiService } from '../services/GeminiService';
+import { ExplanationCard } from './ExplanationCard';
 
 interface Props {
     userAnswer: string;
     correctAnswer: string;
     question: string;
+    lessonContext?: string;
 }
 
-export const ExplainErrorButton = ({ userAnswer, correctAnswer, question }: Props) => {
+export const ExplainErrorButton = ({ userAnswer, correctAnswer, question, lessonContext }: Props) => {
     const [isLoading, setIsLoading] = React.useState(false);
+    const [explanation, setExplanation] = React.useState<string | null>(null);
 
     const handlePress = async () => {
         setIsLoading(true);
         try {
-            const prompt = `Explica por qué esta respuesta es incorrecta. Pregunta: "${question}". Respuesta del usuario: "${userAnswer}". Respuesta correcta: "${correctAnswer}". Explica el error y por qué la correcta es la adecuada. Sé amable y constructivo. Responde en español.`;
+            ;
+            const prompt = `Explica por qué esta respuesta es incorrecta en ${lessonContext}. Pregunta: "${question}". Respuesta del usuario: "${userAnswer}". Respuesta correcta: "${correctAnswer}". Si la respuesta del usuario esta muy mal, responde de manera muy corta, si no explicalo de manera clara.`;
             const response = await GeminiService.generateResponse(prompt);
-            Alert.alert("Explicación del error", response);
+            setExplanation(response);
         } catch (error) {
             console.error("Error fetching explanation:", error);
             Alert.alert("Error", "No se pudo obtener la explicación en este momento.");
@@ -28,23 +32,37 @@ export const ExplainErrorButton = ({ userAnswer, correctAnswer, question }: Prop
         }
     };
 
+    const handleClose = () => {
+        setExplanation(null);
+    };
+
     return (
-        <TouchableOpacity style={styles.container} onPress={handlePress} disabled={isLoading}>
-            {isLoading ? (
-                <ActivityIndicator size="small" color={theme.colors.error} />
-            ) : (
-                <>
-                    <MaterialCommunityIcons
-                        name="help-circle-outline"
-                        size={20}
-                        color={theme.colors.error}
-                    />
-                    <AppText variant="sm" color={theme.colors.error} weight="bold" style={styles.text}>
-                        ¿Por qué está mal?
-                    </AppText>
-                </>
-            )}
-        </TouchableOpacity>
+        <>
+            <TouchableOpacity style={styles.container} onPress={handlePress} disabled={isLoading}>
+                {isLoading ? (
+                    <ActivityIndicator size="small" color={theme.colors.error} />
+                ) : (
+                    <>
+                        <MaterialCommunityIcons
+                            name="help-circle-outline"
+                            size={20}
+                            color={theme.colors.error}
+                        />
+                        <AppText variant="sm" color={theme.colors.error} weight="bold" style={styles.text}>
+                            ¿Por qué está mal?
+                        </AppText>
+                    </>
+                )}
+            </TouchableOpacity>
+
+            <ExplanationCard
+                visible={!!explanation}
+                onClose={handleClose}
+                content={explanation || ''}
+                title="Explicación del error"
+                type="error"
+            />
+        </>
     );
 };
 

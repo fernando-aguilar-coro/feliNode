@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Exercise, ExerciseType } from '../types/exercise';
+import { TextValidationService } from '../services/TextValidationService';
 
 /**
  * Hook to manage the state and logic of a set of exercises.
@@ -38,8 +39,9 @@ export const useExercises = (initialExercises: Exercise[]) => {
         if (currentExercise.type === ExerciseType.PRONUNCIATION) {
             isCorrect = true;
         } else {
-            // Simple case-insensitive check for now
-            isCorrect = userAnswer.trim().toLowerCase() === currentExercise.correctAnswer.trim().toLowerCase();
+            // Improved validation: ignore extra spaces and trailing punctuation
+            // Now also handles contractions via TextValidationService
+            isCorrect = TextValidationService.normalizeAnswer(userAnswer) === TextValidationService.normalizeAnswer(currentExercise.correctAnswer);
         }
 
         if (isCorrect) {
