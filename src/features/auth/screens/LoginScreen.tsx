@@ -87,6 +87,23 @@ export default function LoginScreen() {
                     disabled={loading}
                 />
 
+                <Spacer height={theme.spacing.md} />
+
+                {step === 'email' && (
+                    <AppButton
+                        title="Iniciar con Google"
+                        onPress={async () => {
+                            try {
+                                await useUserStore.getState().signInWithGoogle();
+                            } catch (e: any) {
+                                setError(e.message || 'Error con Google Sign In');
+                            }
+                        }}
+                        disabled={loading}
+                        variant="outline"
+                    />
+                )}
+
                 {step === 'code' && (
                     <>
                         <Spacer height={theme.spacing.md} />

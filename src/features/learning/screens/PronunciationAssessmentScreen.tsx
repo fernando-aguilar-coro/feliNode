@@ -66,7 +66,7 @@ export const PronunciationAssessmentScreen = () => {
         type: ExerciseType.PRONUNCIATION,
         question: 'Pronuncia la siguiente frase:',
         phrase: phrase,
-        correctAnswer: phrase,
+
     };
 
     return (

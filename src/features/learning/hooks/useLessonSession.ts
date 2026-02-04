@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { LessonService } from '../services/LessonService';
+import { LessonService } from '../services/Lesson.service';
 import { Exercise } from '../types/exercise';
 
 export type LessonStatus = 'loading' | 'theory' | 'exercises' | 'completed';

@@ -35,7 +35,6 @@ export const getAllLessons = async (): Promise<SeedLesson[]> => {
             moduleTitle: l.modules?.title,
             moduleOrder: l.modules?.order_index,
             exercises: (l.exercises || [])
-                .sort((a: any, b: any) => a.order_index - b.order_index)
                 .map((e: any) => ({
                     type: e.type,
                     instruction: e.instruction,

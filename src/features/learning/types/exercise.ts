@@ -39,7 +39,6 @@ export interface ScrambledSentenceExercise extends BaseExercise {
 export interface PronunciationExercise extends BaseExercise {
     type: ExerciseType.PRONUNCIATION;
     phrase: string;
-    correctAnswer: string;
 }
 
 export type Exercise = MultipleChoiceExercise | FillInTheBlankExercise | TranslateExercise | ScrambledSentenceExercise | PronunciationExercise;

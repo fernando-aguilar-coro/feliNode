@@ -6,6 +6,7 @@ import { LoadingScreen } from './src/components/LoadingScreen';
 import { Navigation } from './src/navigation/Navigation';
 import { seedDatabase } from './src/db_local/seed/seed_db';
 import { theme as appTheme } from './src/theme';
+import { authService } from './src/features/auth/services/authService';
 
 const paperTheme = {
     ...MD3LightTheme,
@@ -25,6 +26,7 @@ export const App = () => {
     useEffect(() => {
         async function prepare() {
             try {
+                authService.configureGoogleSignin(); // Configure Google Sign-In
                 await seedDatabase();
             } catch (e) {
                 console.error("Error crítico:", e);

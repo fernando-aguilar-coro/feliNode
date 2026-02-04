@@ -5,7 +5,7 @@ import { AppText, Spacer, AppButton } from '../../../../components';
 import { theme } from '../../../../theme';
 import { Microphone } from '../Microphone';
 import { AudioPlayer } from '../AudioPlayer';
-import { PronunciationService, PronunciationResult } from '../../services/PronunciationService';
+import { PronunciationService, PronunciationResult } from '../../services/Pronunciation.service';
 import { PronunciationExercise as PronunciationExerciseType } from '../../types/exercise';
 import { PronunciationFeedbackAzure } from './PronunciationFeedbackAzure';
 import { PronunciationFeedbackGemini } from './PronunciationFeedbackGemini';

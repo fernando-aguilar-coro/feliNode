@@ -1,8 +1,10 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppText, Spacer } from '../../../../components';
 import { theme } from '../../../../theme';
-import { PronunciationResult, PronunciationWordResult, PronunciationSyllableResult } from '../../services/PronunciationService';
+import { PronunciationResult, PronunciationWordResult, PronunciationSyllableResult } from '../../services/Pronunciation.service';
+import { TtsService } from '../../services/Tts.service';
 
 interface Props {
     result: PronunciationResult | null;
@@ -16,12 +18,21 @@ const getScoreColor = (score: number) => {
 };
 
 export const PronunciationFeedbackAzure = ({ result, targetText }: Props) => {
+    useEffect(() => {
+        if (!result) {
+            TtsService.speak(targetText);
+        }
+    }, [targetText, result]);
+
     if (!result) {
         return (
             <View style={styles.emptyContainer}>
-                <AppText variant="xl" style={{ color: theme.colors.text }} align="center">
-                    {targetText}
-                </AppText>
+                <TouchableOpacity onPress={() => TtsService.speak(targetText)} style={styles.ttsContainer}>
+                    <MaterialCommunityIcons name="volume-high" size={28} color={theme.colors.primary} style={{ marginRight: 8 }} />
+                    <AppText variant="xl" style={{ color: theme.colors.text }} align="center">
+                        {targetText}
+                    </AppText>
+                </TouchableOpacity>
             </View>
         );
     }
@@ -108,6 +119,10 @@ const styles = StyleSheet.create({
         padding: theme.spacing.lg,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    ttsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     wordsContainer: {
         flexDirection: 'row',

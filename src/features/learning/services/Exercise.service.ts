@@ -87,7 +87,7 @@ const mapDbExerciseToAppExercise = (dbExercise: any): Exercise | null => {
                 type: ExerciseType.PRONUNCIATION,
                 question: dbExercise.instruction,
                 phrase: content.phrase || '',
-                correctAnswer: content.correct_answer || content.phrase || '',
+
             } as PronunciationExercise;
 
         default:
@@ -126,7 +126,8 @@ export const ExerciseService = {
      * Performs a case-insensitive trim comparison.
      */
     validateAnswer: (exercise: Exercise, answer: string): boolean => {
-        if (!exercise || !exercise.correctAnswer) return false;
+        if (!exercise) return false;
+        if (exercise.type === ExerciseType.PRONUNCIATION) return true;
         return answer.trim().toLowerCase() === exercise.correctAnswer.trim().toLowerCase();
     }
 };

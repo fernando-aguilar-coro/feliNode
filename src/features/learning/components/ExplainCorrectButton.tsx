@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-na
 import { AppText } from '../../../components';
 import { theme } from '../../../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { GeminiService } from '../services/GeminiService';
+import { GeminiService } from '../services/Gemini.service';
 import { ExplanationCard } from './ExplanationCard';
 
 interface Props {

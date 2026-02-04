@@ -4,6 +4,7 @@ import { AppText, Card } from '../../../components';
 import { theme } from '../../../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
+import { markdownStyles } from '../styles/md.style';
 
 interface Props {
     visible: boolean;
@@ -32,7 +33,7 @@ export const ExplanationCard = ({ visible, onClose, content, title, type }: Prop
                         </TouchableOpacity>
                     </View>
                     <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-                        <Markdown>
+                        <Markdown style={markdownStyles}>
                             {content}
                         </Markdown>
                     </ScrollView>

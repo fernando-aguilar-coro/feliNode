@@ -1,5 +1,5 @@
 import { getLessonById, saveUserProgress } from '../../../db_local/api_local';
-import { ExerciseService } from './ExerciseService';
+import { ExerciseService } from './Exercise.service';
 
 export const LessonService = {
     /**

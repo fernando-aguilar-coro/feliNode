@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Exercise, ExerciseType } from '../types/exercise';
-import { TextValidationService } from '../services/TextValidationService';
+import { TextValidationService } from '../services/TextValidation.service';
 
 /**
  * Hook to manage the state and logic of a set of exercises.
@@ -51,9 +51,11 @@ export const useExercises = (initialExercises: Exercise[]) => {
             setExercises(prev => [...prev, currentExercise]);
         }
 
+        const correctAnswerText = currentExercise.type !== ExerciseType.PRONUNCIATION ? currentExercise.correctAnswer : '';
+
         setLastResult({
             correct: isCorrect,
-            message: isCorrect ? 'Correct!' : `Incorrect. The answer was: ${currentExercise.correctAnswer}`,
+            message: isCorrect ? 'Correct!' : `Incorrect. The answer was: ${correctAnswerText}`,
         });
 
         return isCorrect;

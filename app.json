@@ -3,7 +3,7 @@
     "name": "felinode",
     "slug": "felinode",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -40,6 +40,8 @@
         "projectId": "fe4e1cd6-70e5-4d20-8d2c-56aac93f74f9"
       }
     },
-    "plugins": []
+    "plugins": [
+      "@react-native-google-signin/google-signin"
+    ]
   }
 }

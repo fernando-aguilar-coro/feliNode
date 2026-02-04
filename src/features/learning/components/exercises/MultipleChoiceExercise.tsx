@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { MultipleChoiceExercise as MultipleChoiceExerciseType } from '../../types/exercise';
 import { AppText } from '../../../../components';
 import { theme } from '../../../../theme';
+import { TtsService } from '../../services/Tts.service';
 
 interface Props {
     exercise: MultipleChoiceExerciseType;
@@ -23,7 +24,10 @@ export const MultipleChoiceExercise = ({ exercise, onAnswer, userAnswer }: Props
                 return (
                     <TouchableOpacity
                         key={option.text}
-                        onPress={() => onAnswer(option.text)}
+                        onPress={() => {
+                            onAnswer(option.text);
+                            TtsService.speak(option.text);
+                        }}
                         style={[
                             styles.option,
                             isSelected && styles.optionSelected,

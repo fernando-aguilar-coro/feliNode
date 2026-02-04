@@ -1,7 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useUserStore } from '../store/UserStore';
-import LoginScreen from '../features/auth/screens/OTP Screen';
+import LoginScreen from '../features/auth/screens/LoginScreen';
 
 import { PlacementTestScreen } from '../features/learning/components/PlacementTestScreen';
 import { ChoseInitialTest } from '../features/learning/screens/ChoseInitialTest';

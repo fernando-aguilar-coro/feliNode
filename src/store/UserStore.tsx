@@ -11,6 +11,7 @@ interface UserState {
     checkSession: () => Promise<void>;
     sendOtp: (email: string) => Promise<void>;
     verifyOtp: (email: string, token: string) => Promise<void>;
+    signInWithGoogle: () => Promise<void>;
     logout: () => Promise<void>;
     completedLessonsCount: number;
 }
@@ -86,6 +87,28 @@ export const useUserStore = create<UserState>()(
                     }
                 } catch (error) {
                     console.error('Verify OTP error:', error);
+                    throw error;
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            signInWithGoogle: async () => {
+                set({ loading: true });
+                try {
+                    const response = await authService.signInWithGoogle();
+                    if (response?.session) {
+                        const { session } = response;
+                        const count = await getUserCompletedLessons();
+
+                        set({
+                            isAuthenticated: true,
+                            user: { name: session.user.email || 'User' },
+                            completedLessonsCount: count
+                        });
+                    }
+                } catch (error) {
+                    console.error('Google Sign In error:', error);
                     throw error;
                 } finally {
                     set({ loading: false });

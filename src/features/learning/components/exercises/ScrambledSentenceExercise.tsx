@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { ScrambledSentenceExercise as ScrambledSentenceExerciseType } from '../../types/exercise';
 import { AppText } from '../../../../components';
 import { theme } from '../../../../theme';
+import { TtsService } from '../../services/Tts.service';
 
 interface Props {
     exercise: ScrambledSentenceExerciseType;
@@ -29,12 +30,16 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
 
     const handleSelect = (index: number) => {
         setSelectedIndices([...selectedIndices, index]);
+        TtsService.speak(exercise.segments[index]);
     };
 
     const handleRemove = (listIndex: number) => {
+        const itemIndex = selectedIndices[listIndex];
+        const word = exercise.segments[itemIndex];
         const newIndices = [...selectedIndices];
         newIndices.splice(listIndex, 1);
         setSelectedIndices(newIndices);
+        TtsService.speak(word);
     };
 
     return (
