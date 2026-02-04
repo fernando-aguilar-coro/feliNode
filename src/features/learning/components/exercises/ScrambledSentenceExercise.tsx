@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { ScrambledSentenceExercise as ScrambledSentenceExerciseType } from '../../types/exercise';
 import { AppText } from '../../../../components';
-import { theme } from '../../../../theme';
+import { useAppTheme } from '../../../../theme/ThemeContext';
 import { TtsService } from '../../services/Tts.service';
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
 }
 
 export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
+    const theme = useAppTheme();
     const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
     useEffect(() => {
@@ -42,13 +43,82 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
         TtsService.speak(word);
     };
 
+    const styles = useMemo(() => StyleSheet.create({
+        container: {},
+        question: {
+            marginBottom: theme.spacing.sm,
+            color: theme.colors.text,
+        },
+        instruction: {
+            marginBottom: theme.spacing.lg,
+            color: theme.colors.textSecondary,
+        },
+        answerArea: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            minHeight: 80,
+            backgroundColor: theme.colors.background,
+            borderRadius: 12,
+            padding: theme.spacing.md,
+            marginBottom: theme.spacing.xl,
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: theme.colors.border,
+            borderStyle: 'dashed'
+        },
+        placeholder: {
+            color: theme.colors.textLight,
+            fontStyle: 'italic',
+            width: '100%',
+            textAlign: 'center',
+        },
+        divider: { height: 10 },
+        wordBank: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+        wordBubble: {
+            backgroundColor: theme.colors.surface,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 16,
+            margin: 6,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            // Shadow
+            shadowColor: theme.colors.text, // Fallback to text color for shadow (often blackish) or use a specific color if defined
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+            elevation: 2
+        },
+        wordBubbleSelected: {
+            backgroundColor: theme.colors.primary + '40', // transparent primary
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 16,
+            margin: 6,
+            borderWidth: 1,
+            borderColor: theme.colors.primary,
+        },
+        wordBubbleGhost: {
+            backgroundColor: theme.colors.background,
+            borderColor: theme.colors.background,
+            shadowColor: 'transparent',
+            elevation: 0,
+        },
+        wordText: {
+            fontSize: theme.typography.fontSizes.md,
+            fontWeight: '500',
+            color: theme.colors.text,
+        },
+        wordTextGhost: { color: 'transparent' }
+    }), [theme]);
+
     return (
         <View style={styles.container}>
             <AppText variant="lg" weight="medium" style={styles.question}>
                 {exercise.question}
             </AppText>
             {/* Instrucción para el usuario */}
-            <AppText variant="sm" color={theme.colors.textSecondary} style={styles.instruction}>
+            <AppText variant="sm" style={styles.instruction}>
                 Toca las palabras para formar la oración correcta:
             </AppText>
 
@@ -101,69 +171,3 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {},
-    question: {
-        marginBottom: theme.spacing.sm,
-    },
-    instruction: {
-        marginBottom: theme.spacing.lg,
-    },
-    answerArea: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        minHeight: 80,
-        backgroundColor: theme.colors.background,
-        borderRadius: 12,
-        padding: theme.spacing.md,
-        marginBottom: theme.spacing.xl,
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: theme.colors.border,
-        borderStyle: 'dashed'
-    },
-    placeholder: {
-        color: theme.colors.textLight,
-        fontStyle: 'italic',
-        width: '100%',
-        textAlign: 'center',
-    },
-    divider: { height: 10 },
-    wordBank: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
-    wordBubble: {
-        backgroundColor: theme.colors.surface,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        margin: 6,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        // Shadow
-        shadowColor: theme.colors.black,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2
-    },
-    wordBubbleSelected: {
-        backgroundColor: theme.colors.primary + '40', // transparent primary
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        margin: 6,
-        borderWidth: 1,
-        borderColor: theme.colors.primary,
-    },
-    wordBubbleGhost: {
-        backgroundColor: theme.colors.background,
-        borderColor: theme.colors.background,
-        shadowColor: 'transparent',
-        elevation: 0,
-    },
-    wordText: {
-        fontSize: theme.typography.fontSizes.md,
-        fontWeight: '500',
-    },
-    wordTextGhost: { color: 'transparent' }
-});

@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Screen } from './Screen';
 import { AppText } from './AppText';
-import { theme } from '../theme';
+import { useAppTheme } from '../theme/ThemeContext';
 
 interface LoadingScreenProps {
     message?: string;
@@ -12,13 +12,31 @@ interface LoadingScreenProps {
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     message = 'Loading...',
-    spinnerColor = theme.colors.primary,
-    backgroundColor = theme.colors.background,
+    spinnerColor,
+    backgroundColor,
 }) => {
+    const theme = useAppTheme();
+    const activeSpinnerColor = spinnerColor || theme.colors.primary;
+    const activeBackgroundColor = backgroundColor || theme.colors.background;
+
+    const styles = useMemo(() => StyleSheet.create({
+        container: {
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        content: {
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        textContainer: {
+            marginTop: theme.spacing.md,
+        },
+    }), [theme]);
+
     return (
-        <Screen style={styles.container} backgroundColor={backgroundColor}>
+        <Screen style={styles.container} backgroundColor={activeBackgroundColor}>
             <View style={styles.content}>
-                <ActivityIndicator size="large" color={spinnerColor} />
+                <ActivityIndicator size="large" color={activeSpinnerColor} />
                 {message && (
                     <View style={styles.textContainer}>
                         <AppText variant="md" color={theme.colors.textSecondary} align="center">
@@ -30,17 +48,3 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         </Screen>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    content: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    textContainer: {
-        marginTop: theme.spacing.md,
-    },
-});

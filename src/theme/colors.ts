@@ -1,16 +1,7 @@
-export const colors = {
+const common = {
     // Brand
     primary: '#7db0b0ff',
     secondary: '#5d554f74',
-
-    // Neutral
-    background: '#FFFFFF', // White
-    surface: '#F5F6FA', // Very light grey for slight contrast
-
-    // Text
-    text: '#2D3436', // Black-ish
-    textSecondary: '#636E72', // Dark Grey
-    textLight: '#B2BEC3', // Light Grey
 
     // Base
     white: '#FFFFFF',
@@ -22,7 +13,27 @@ export const colors = {
     error: '#FF7675',
     warning: '#FFEAA7',
     info: '#74B9FF',
+};
 
-    // Border
+export const lightColors = {
+    ...common,
+    background: '#FFFFFF',
+    surface: '#F5F6FA',
+    text: '#2D3436',
+    textSecondary: '#636E72',
+    textLight: '#B2BEC3',
     border: '#DFE6E9',
 };
+
+export const darkColors = {
+    ...common,
+    background: '#121212',
+    surface: '#1E1E1E',
+    text: '#E1E1E1',
+    textSecondary: '#A0A0A0',
+    textLight: '#606060',
+    border: '#2C2C2C',
+};
+
+// Default to light for backwards compatibility during refactor
+export const colors = lightColors;

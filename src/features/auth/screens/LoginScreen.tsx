@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useUserStore } from '../../../store/UserStore';
-import { Screen, AppText, AppTextInput, AppButton, Spacer } from '../../../components';
-import { theme } from '../../../theme';
+import { Screen, Spacer, AppText } from '../../../components';
+import { useAppTheme } from '../../../theme/ThemeContext';
+import { LoginHeader, LoginForm, SocialLogin } from '../components';
 
 export default function LoginScreen() {
+    const theme = useAppTheme();
     const { sendOtp, verifyOtp, loading } = useUserStore();
     const [email, setEmail] = useState('');
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
     const [step, setStep] = useState<'email' | 'code'>('email');
+
+    useEffect(() => {
+        const checkGoogleSignIn = async () => {
+            try {
+                await useUserStore.getState().signInWithGoogle()
+            } catch (error) {
+                console.log('Error checking Google Sign In:', error);
+            }
+        };
+        checkGoogleSignIn();
+    }, []);
 
     const handleSendOtp = async () => {
         if (!email) {
@@ -33,98 +46,71 @@ export default function LoginScreen() {
         setError('');
         try {
             await verifyOtp(email, code);
-            // On success, the store's isAuthenticated changes and Navigation handles the rest
         } catch (err: any) {
             setError(err.message || 'El código es incorrecto o ha expirado');
         }
     };
 
     return (
-        <Screen>
-            <Spacer height={theme.spacing.xl} />
-            <AppText variant="xxl" weight="bold" align="center">
-                {step === 'email' ? 'Iniciar Sesión' : 'Verificar Código'}
-            </AppText>
-            <AppText align="center" color={theme.colors.textSecondary}>
-                {step === 'email'
-                    ? 'Ingresa tu correo para recibir un código de acceso'
-                    : `Ingresa el código que enviamos a ${email}`}
-            </AppText>
-            <Spacer height={theme.spacing.xl} />
+        <Screen style={{ backgroundColor: theme.colors.background }}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <ScrollView
+                    contentContainerStyle={[styles.scrollContent, { paddingHorizontal: theme.spacing.lg }]}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <Spacer height={theme.spacing.xl * 2} />
 
-            <View style={styles.form}>
-                {step === 'email' ? (
-                    <AppTextInput
-                        label="Correo electrónico"
-                        placeholder="tucorreo@ejemplo.com"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-                ) : (
-                    <AppTextInput
-                        label="Código de verificación"
-                        placeholder="123456"
-                        value={code}
-                        onChangeText={setCode}
-                        keyboardType="number-pad"
-                        maxLength={6}
-                    />
-                )}
+                    <LoginHeader step={step} email={email} />
 
-                {error ? (
-                    <AppText variant="sm" color={theme.colors.error} style={{ marginTop: 10 }}>
-                        {error}
-                    </AppText>
-                ) : null}
-
-                <Spacer height={theme.spacing.lg} />
-
-                <AppButton
-                    title={loading ? "Procesando..." : (step === 'email' ? "Enviar código" : "Verificar código")}
-                    onPress={step === 'email' ? handleSendOtp : handleVerifyOtp}
-                    disabled={loading}
-                />
-
-                <Spacer height={theme.spacing.md} />
-
-                {step === 'email' && (
-                    <AppButton
-                        title="Iniciar con Google"
-                        onPress={async () => {
-                            try {
-                                await useUserStore.getState().signInWithGoogle();
-                            } catch (e: any) {
-                                setError(e.message || 'Error con Google Sign In');
-                            }
-                        }}
-                        disabled={loading}
-                        variant="outline"
-                    />
-                )}
-
-                {step === 'code' && (
-                    <>
-                        <Spacer height={theme.spacing.md} />
-                        <AppButton
-                            title="Volver a ingresar correo"
-                            onPress={() => {
+                    <View style={[styles.card, { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text }]}>
+                        <LoginForm
+                            email={email}
+                            code={code}
+                            step={step}
+                            loading={loading}
+                            onEmailChange={setEmail}
+                            onCodeChange={setCode}
+                            onSubmit={step === 'email' ? handleSendOtp : handleVerifyOtp}
+                            onBack={() => {
                                 setStep('email');
                                 setCode('');
+                                setError('');
                             }}
-                            variant="outline"
-                            disabled={loading}
                         />
-                    </>
-                )}
-            </View>
+
+                        {error ? (
+                            <AppText variant="sm" color={theme.colors.error} align="center" style={{ marginTop: 15 }}>
+                                {error}
+                            </AppText>
+                        ) : null}
+
+                        {step === 'email' && (
+                            <SocialLogin loading={loading} onError={setError} />
+                        )}
+                    </View>
+
+                    <Spacer height={theme.spacing.xl} />
+                </ScrollView>
+            </KeyboardAvoidingView>
         </Screen>
     );
 }
 
 const styles = StyleSheet.create({
-    form: {
-        width: '100%',
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
     },
+    card: {
+        borderRadius: 20,
+        padding: 24,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 5,
+        width: '100%',
+    }
 });

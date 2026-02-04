@@ -1,15 +1,17 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
 import Markdown, { MarkdownIt } from 'react-native-markdown-display';
-import { Card, useTheme, Text } from 'react-native-paper';
-import { markdownStyles } from '../../styles/md.style';
+import { Card, Text } from 'react-native-paper';
+import { getMarkdownStyles } from '../../styles/md.style';
+import { useAppTheme } from '../../../../theme/ThemeContext';
 
 interface Props {
     feedback?: string;
 }
 
 export const PronunciationFeedbackGemini: React.FC<Props> = ({ feedback }) => {
-    const theme = useTheme();
+    const theme = useAppTheme();
+    const mdStyles = useMemo(() => getMarkdownStyles(theme), [theme]);
 
     if (!feedback) return null;
 
@@ -20,7 +22,7 @@ export const PronunciationFeedbackGemini: React.FC<Props> = ({ feedback }) => {
                     Sugerencias de Mejora
                 </Text>
                 <Markdown
-                    style={markdownStyles}
+                    style={mdStyles}
                 >
                     {feedback}
                 </Markdown>

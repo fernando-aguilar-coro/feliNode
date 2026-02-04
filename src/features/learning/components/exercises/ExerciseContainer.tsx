@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Exercise, ExerciseType } from '../../types/exercise';
 import { MultipleChoiceExercise } from './MultipleChoiceExercise';
@@ -7,7 +7,7 @@ import { TranslateExercise } from './TranslateExercise';
 import { ScrambledSentenceExercise } from './ScrambledSentenceExercise';
 import { PronunciationExercise } from './PronunciationExercise';
 import { Card, AppButton, AppText, Spacer } from '../../../../components';
-import { theme } from '../../../../theme';
+import { useAppTheme } from '../../../../theme/ThemeContext';
 import { ExplainCorrectButton } from '../ExplainCorrectButton';
 import { ExplainErrorButton } from '../ExplainErrorButton';
 
@@ -20,6 +20,7 @@ interface Props {
 }
 
 export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lessonContext }: Props) => {
+    const theme = useAppTheme();
     const [userAnswer, setUserAnswer] = useState('');
     const [hasChecked, setHasChecked] = useState(false);
 
@@ -85,6 +86,26 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
                 return <AppText>Tipo de ejercicio desconocido</AppText>;
         }
     };
+
+    const styles = useMemo(() => StyleSheet.create({
+        container: {
+            flex: 1,
+        },
+        scrollContent: {
+            padding: theme.spacing.md,
+            flexGrow: 1,
+        },
+        card: {
+            minHeight: 200,
+            justifyContent: 'center',
+            backgroundColor: theme.colors.surface,
+        },
+        feedback: {
+            padding: theme.spacing.md,
+            borderRadius: 12,
+            marginBottom: theme.spacing.md,
+        },
+    }), [theme]);
 
     return (
         <ScrollView contentContainerStyle={styles.scrollContent} style={styles.container}>
@@ -157,22 +178,3 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
         </ScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    scrollContent: {
-        padding: theme.spacing.md,
-        flexGrow: 1,
-    },
-    card: {
-        minHeight: 200,
-        justifyContent: 'center',
-    },
-    feedback: {
-        padding: theme.spacing.md,
-        borderRadius: 12,
-        marginBottom: theme.spacing.md,
-    },
-});

@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { MultipleChoiceExercise as MultipleChoiceExerciseType } from '../../types/exercise';
 import { AppText } from '../../../../components';
-import { theme } from '../../../../theme';
+import { useAppTheme } from '../../../../theme/ThemeContext';
 import { TtsService } from '../../services/Tts.service';
 
 interface Props {
@@ -13,6 +13,34 @@ interface Props {
 }
 
 export const MultipleChoiceExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
+    const theme = useAppTheme();
+
+    const styles = useMemo(() => StyleSheet.create({
+        question: {
+            marginBottom: theme.spacing.lg,
+            color: theme.colors.text,
+        },
+        option: {
+            padding: theme.spacing.md,
+            marginVertical: theme.spacing.xs,
+            backgroundColor: theme.colors.surface,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            borderRadius: 12,
+        },
+        optionSelected: {
+            borderColor: theme.colors.primary,
+            backgroundColor: theme.colors.primary + '10', // 10% opacity
+        },
+        optionContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        icon: {
+            marginRight: theme.spacing.md,
+        },
+    }), [theme]);
+
     return (
         <View>
             <AppText variant="lg" weight="medium" style={styles.question}>
@@ -55,28 +83,3 @@ export const MultipleChoiceExercise = ({ exercise, onAnswer, userAnswer }: Props
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    question: {
-        marginBottom: theme.spacing.lg,
-    },
-    option: {
-        padding: theme.spacing.md,
-        marginVertical: theme.spacing.xs,
-        backgroundColor: theme.colors.surface,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        borderRadius: 12,
-    },
-    optionSelected: {
-        borderColor: theme.colors.primary,
-        backgroundColor: theme.colors.primary + '10', // 10% opacity
-    },
-    optionContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    icon: {
-        marginRight: theme.spacing.md,
-    },
-});

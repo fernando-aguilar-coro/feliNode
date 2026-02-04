@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppText, Spacer } from '../../../../components';
-import { theme } from '../../../../theme';
+import { useAppTheme } from '../../../../theme/ThemeContext';
 import { PronunciationResult, PronunciationWordResult, PronunciationSyllableResult } from '../../services/Pronunciation.service';
 import { TtsService } from '../../services/Tts.service';
 
@@ -11,18 +11,117 @@ interface Props {
     targetText: string;
 }
 
-const getScoreColor = (score: number) => {
-    if (score >= 80) return theme.colors.success;
-    if (score >= 40) return '#F39C12'; // Orange
-    return theme.colors.error;
-};
-
 export const PronunciationFeedbackAzure = ({ result, targetText }: Props) => {
+    const theme = useAppTheme();
+
+    const getScoreColor = (score: number) => {
+        if (score >= 80) return theme.colors.success;
+        if (score >= 40) return '#F39C12'; // Orange
+        return theme.colors.error;
+    };
+
     useEffect(() => {
         if (!result) {
             TtsService.speak(targetText);
         }
     }, [targetText, result]);
+
+    const styles = useMemo(() => StyleSheet.create({
+        container: {
+            width: '100%',
+            alignItems: 'center',
+        },
+        emptyContainer: {
+            padding: theme.spacing.lg,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        ttsContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        wordsContainer: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            paddingHorizontal: theme.spacing.md,
+        },
+        word: {
+            marginHorizontal: 3,
+            marginBottom: 4,
+        },
+        detailsContainer: {
+            width: '100%',
+            backgroundColor: theme.colors.surface,
+            borderRadius: 12,
+            padding: theme.spacing.md,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            shadowColor: theme.colors.text, // "black" equivalent
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 2,
+        },
+        metricsRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            marginBottom: theme.spacing.sm,
+            paddingHorizontal: theme.spacing.xs,
+        },
+        metricBadge: {
+            alignItems: 'center',
+            padding: 8,
+            minWidth: 70,
+            backgroundColor: theme.colors.background, // Was #f8f9fa, close to surface. Using background provided it's light/dark compatible. 
+            // Or stick to a surface variant if available. Let's use surface or background. 
+            // If background is dark in darkmode, this is good.
+            borderRadius: 8,
+            margin: 4,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
+        breakdownContainer: {
+            width: '100%',
+        },
+        wordBreakdown: {
+            marginBottom: theme.spacing.md,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.colors.border,
+            paddingBottom: theme.spacing.sm,
+        },
+        wordHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 4,
+        },
+        ipaContainer: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginTop: 4,
+        },
+        syllableBadge: {
+            marginRight: 8,
+            marginBottom: 4,
+            backgroundColor: theme.colors.surface, // Was #fff
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: theme.colors.border, // Was #e0e0e0
+        }
+    }), [theme]);
+
+    const MetricBadge = ({ label, score }: { label: string, score: number }) => (
+        <View style={styles.metricBadge}>
+            <AppText variant="xs" color={theme.colors.textSecondary}>{label}</AppText>
+            <AppText variant="lg" weight="bold" style={{ color: getScoreColor(score) }}>
+                {score.toFixed(0)}
+            </AppText>
+        </View>
+    );
 
     if (!result) {
         return (
@@ -100,96 +199,3 @@ export const PronunciationFeedbackAzure = ({ result, targetText }: Props) => {
         </View>
     );
 };
-
-const MetricBadge = ({ label, score }: { label: string, score: number }) => (
-    <View style={styles.metricBadge}>
-        <AppText variant="xs" color={theme.colors.textSecondary}>{label}</AppText>
-        <AppText variant="lg" weight="bold" style={{ color: getScoreColor(score) }}>
-            {score.toFixed(0)}
-        </AppText>
-    </View>
-);
-
-const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-        alignItems: 'center',
-    },
-    emptyContainer: {
-        padding: theme.spacing.lg,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    ttsContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    wordsContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        paddingHorizontal: theme.spacing.md,
-    },
-    word: {
-        marginHorizontal: 3,
-        marginBottom: 4,
-    },
-    detailsContainer: {
-        width: '100%',
-        backgroundColor: theme.colors.surface,
-        borderRadius: 12,
-        padding: theme.spacing.md,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    metricsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap', // Allow wrapping on small screens
-        marginBottom: theme.spacing.sm,
-        paddingHorizontal: theme.spacing.xs,
-    },
-    metricBadge: {
-        alignItems: 'center',
-        padding: 8,
-        minWidth: 70,
-        backgroundColor: '#f8f9fa',
-        borderRadius: 8,
-        margin: 4,
-    },
-    breakdownContainer: {
-        width: '100%',
-    },
-    wordBreakdown: {
-        marginBottom: theme.spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-        paddingBottom: theme.spacing.sm,
-    },
-    wordHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 4,
-    },
-    ipaContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginTop: 4,
-    },
-    syllableBadge: {
-        marginRight: 8,
-        marginBottom: 4,
-        backgroundColor: '#fff',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-    }
-});

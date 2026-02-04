@@ -1,14 +1,14 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { AppText, Spacer, AppButton } from '../../../../components';
-import { theme } from '../../../../theme';
+import { useAppTheme } from '../../../../theme/ThemeContext';
 import { Microphone } from '../Microphone';
 import { AudioPlayer } from '../AudioPlayer';
 import { PronunciationService, PronunciationResult } from '../../services/Pronunciation.service';
 import { PronunciationExercise as PronunciationExerciseType } from '../../types/exercise';
 import { PronunciationFeedbackAzure } from './PronunciationFeedbackAzure';
 import { PronunciationFeedbackGemini } from './PronunciationFeedbackGemini';
+import { LiveSpeechFeedback } from '../LiveSpeechFeedback';
 
 
 interface Props {
@@ -17,18 +17,18 @@ interface Props {
     userAnswer: string;
 }
 
-const getScoreColor = (score: number) => {
-    if (score >= 80) return theme.colors.success;
-    if (score >= 60) return '#F39C12';
-    if (score >= 40) return '#f31212ff';
-    return theme.colors.error;
-};
-
-
 export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
+    const theme = useAppTheme();
     const [status, setStatus] = useState<'idle' | 'recording' | 'processing' | 'result'>('idle');
     const [result, setResult] = useState<PronunciationResult | null>(null);
     const [recordedUri, setRecordedUri] = useState<string | null>(null);
+
+    const getScoreColor = (score: number) => {
+        if (score >= 80) return theme.colors.success;
+        if (score >= 60) return '#F39C12';
+        if (score >= 40) return '#f31212ff';
+        return theme.colors.error;
+    };
 
     const handleSend = async () => {
         if (!recordedUri) return;
@@ -65,6 +65,37 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
             setStatus('idle');
         }
     }, []);
+
+    const styles = useMemo(() => StyleSheet.create({
+        container: {
+            flexGrow: 1,
+            alignItems: 'center',
+            padding: theme.spacing.md,
+        },
+        question: {
+            marginBottom: theme.spacing.md,
+            color: theme.colors.textSecondary,
+            textAlign: 'center',
+        },
+        scoreContainer: {
+            alignItems: 'center',
+            marginVertical: theme.spacing.md,
+        },
+        loadingContainer: {
+            alignItems: 'center',
+            marginVertical: theme.spacing.md,
+        },
+        reviewContainer: {
+            width: '100%',
+            alignItems: 'center',
+            marginTop: theme.spacing.md,
+        },
+        reviewButtons: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: theme.spacing.md,
+        }
+    }), [theme]);
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -105,7 +136,8 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
                 />
             ) : null}
 
-            {/* Allow re-recording even if result is shown? Or maybe just status !== 'processing' */}
+            <LiveSpeechFeedback isRecording={status === 'recording'} />
+
             {status === 'result' && (
                 <View style={styles.reviewContainer}>
                     <AppButton title="Intentar de nuevo" onPress={handleRetry} variant="outline" />
@@ -116,34 +148,3 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
         </ScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        alignItems: 'center',
-        padding: theme.spacing.md,
-    },
-    question: {
-        marginBottom: theme.spacing.md,
-        color: theme.colors.textSecondary,
-        textAlign: 'center',
-    },
-    scoreContainer: {
-        alignItems: 'center',
-        marginVertical: theme.spacing.md,
-    },
-    loadingContainer: {
-        alignItems: 'center',
-        marginVertical: theme.spacing.md,
-    },
-    reviewContainer: {
-        width: '100%',
-        alignItems: 'center',
-        marginTop: theme.spacing.md,
-    },
-    reviewButtons: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: theme.spacing.md, // Use gap for better spacing
-    }
-});

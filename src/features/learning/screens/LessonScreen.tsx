@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { LearningSection } from '../components/LearningSection';
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
-import { theme } from '../../../theme';
+import { useAppTheme } from '../../../theme/ThemeContext';
 
 type RootStackParamList = {
     Lesson: { lessonId: string };
@@ -12,9 +12,20 @@ type RootStackParamList = {
 type LessonScreenRouteProp = RouteProp<RootStackParamList, 'Lesson'>;
 
 export const LessonScreen = () => {
+    const theme = useAppTheme();
     const navigation = useNavigation<any>();
     const route = useRoute<LessonScreenRouteProp>();
-    const { lessonId } = route.params || { lessonId: 'lesson_verbs_intro' }; // Fallback for dev/testing without nav params
+    const { lessonId } = route.params || { lessonId: 'lesson_verbs_intro' };
+
+    const styles = useMemo(() => StyleSheet.create({
+        centerContainer: {
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        button: {
+            width: '100%',
+        },
+    }), []);
 
     return (
         <LearningSection
@@ -31,7 +42,6 @@ export const LessonScreen = () => {
                         ¡Buen trabajo! Has dominado esta lección.
                     </AppText>
                     <Spacer height={theme.spacing.xl} />
-                    {/* Botón para continuar tras completar la lección */}
                     <AppButton
                         title="Continuar"
                         onPress={() => navigation.goBack()}
@@ -42,13 +52,3 @@ export const LessonScreen = () => {
         />
     );
 };
-
-const styles = StyleSheet.create({
-    centerContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    button: {
-        width: '100%',
-    },
-});

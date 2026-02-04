@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FillInTheBlankExercise as FillInTheBlankExerciseType } from '../../types/exercise';
 import { AppText, AppTextInput } from '../../../../components';
-import { theme } from '../../../../theme';
+import { useAppTheme } from '../../../../theme/ThemeContext';
 import { TtsService } from '../../services/Tts.service';
 
 interface Props {
@@ -13,9 +13,28 @@ interface Props {
 }
 
 export const FillInTheBlankExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
+    const theme = useAppTheme();
+
     useEffect(() => {
         TtsService.speak(exercise.sentence);
     }, []);
+
+    const styles = useMemo(() => StyleSheet.create({
+        question: {
+            marginBottom: theme.spacing.lg,
+            color: theme.colors.text,
+        },
+        sentenceContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: theme.spacing.md,
+        },
+        sentence: {
+            fontStyle: 'italic',
+            color: theme.colors.textSecondary,
+            flex: 1,
+        },
+    }), [theme]);
 
     return (
         <View>
@@ -38,19 +57,3 @@ export const FillInTheBlankExercise = ({ exercise, onAnswer, userAnswer }: Props
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    question: {
-        marginBottom: theme.spacing.lg,
-    },
-    sentenceContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: theme.spacing.md,
-    },
-    sentence: {
-        fontStyle: 'italic',
-        color: theme.colors.textSecondary,
-        flex: 1,
-    },
-});

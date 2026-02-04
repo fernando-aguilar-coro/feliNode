@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity, DeviceEventEmitter } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import Tts from 'react-native-tts';
 import { AppText, AppButton, Spacer } from '../../../components';
-import { theme } from '../../../theme';
+import { useAppTheme } from '../../../theme/ThemeContext';
 import { TtsService } from '../services/Tts.service';
-import { tableMarkdownStyles } from '../styles/md.style';
+import { getTableMarkdownStyles } from '../styles/md.style';
 
 interface TheoryViewerProps {
     content: string;
@@ -14,8 +14,11 @@ interface TheoryViewerProps {
 }
 
 export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue }) => {
+    const theme = useAppTheme();
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
+
+    const mdStyles = useMemo(() => getTableMarkdownStyles(theme), [theme]);
 
     useEffect(() => {
         // Listeners for TTS state
@@ -37,6 +40,7 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
         };
     }, []);
 
+    // ... (handlers skipped for brevity if identical, but I must rewrite entire block or use chunks. Let's rewrite handlers to be safe or just the full component)
     const handlePlay = () => {
         setIsPlaying(true);
         setIsPaused(false);
@@ -58,6 +62,38 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
             setIsPaused(true);
         }
     };
+
+    const styles = useMemo(() => StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.colors.background,
+        },
+        contentContainer: {
+            padding: theme.spacing.lg,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: theme.spacing.sm,
+        },
+        controls: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        controlButton: {
+            marginLeft: theme.spacing.sm,
+        },
+        title: {
+            color: theme.colors.text,
+            flex: 1,
+        },
+        skipButton: {
+            height: 40,
+            paddingHorizontal: theme.spacing.sm,
+            marginLeft: theme.spacing.sm,
+        },
+    }), [theme]);
 
     return (
         <ScrollView
@@ -99,7 +135,7 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
             </View>
             <Spacer height={theme.spacing.lg} />
 
-            <Markdown style={tableMarkdownStyles}>
+            <Markdown style={mdStyles}>
                 {content}
             </Markdown>
 
@@ -113,35 +149,3 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
         </ScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: theme.colors.background,
-    },
-    contentContainer: {
-        padding: theme.spacing.lg,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: theme.spacing.sm,
-    },
-    controls: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    controlButton: {
-        marginLeft: theme.spacing.sm,
-    },
-    title: {
-        color: theme.colors.text,
-        flex: 1, // Allow title to take flexible width to prevent overlap
-    },
-    skipButton: {
-        height: 40,
-        paddingHorizontal: theme.spacing.sm,
-        marginLeft: theme.spacing.sm,
-    },
-});

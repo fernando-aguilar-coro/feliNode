@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TextInput, Keyboard, TouchableWithoutFeedback, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AppText, AppButton, Spacer, Screen } from '../../../components';
-import { theme } from '../../../theme';
+import { useAppTheme } from '../../../theme/ThemeContext';
 import { PronunciationExercise } from '../components/exercises/PronunciationExercise';
 import { ExerciseType, PronunciationExercise as PronunciationExerciseType } from '../types/exercise';
 import { RecommendationButton } from '../components/RecommendationButton';
@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import { getCompletedLessons, getLessonById, getLessonNodes } from '../../../db_local/api_local';
 
 export const PronunciationAssessmentScreen = () => {
+    const theme = useAppTheme();
     const navigation = useNavigation();
     const [phrase, setPhrase] = useState('');
     const [isExercising, setIsExercising] = useState(false);
@@ -25,14 +26,8 @@ export const PronunciationAssessmentScreen = () => {
                     const titles = available.map(n => n.title).join(", ");
                     setCurrentLessonTitle(titles);
                 } else {
-                    // Fallback if nothing available (weird state, or all completed)
-                    // If all completed, maybe show last completed? 
-                    // For now, if no available, we stick to default or try completed.
-                    // Let's stick to default "Práctica General" initialized in state, 
-                    // or maybe check completed if available is empty.
                     const completed = await getCompletedLessons();
                     if (completed.length > 0) {
-                        // Fallback to last completed
                         const lastId = completed[completed.length - 1];
                         const lesson: any = await getLessonById(lastId);
                         if (lesson?.title) setCurrentLessonTitle(lesson.title);
@@ -60,14 +55,88 @@ export const PronunciationAssessmentScreen = () => {
         setPhrase('');
     };
 
-    // Construct a mock exercise object
     const mockExercise: PronunciationExerciseType = {
         id: 'custom-assessment',
         type: ExerciseType.PRONUNCIATION,
         question: 'Pronuncia la siguiente frase:',
         phrase: phrase,
-
     };
+
+    const styles = useMemo(() => StyleSheet.create({
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: theme.spacing.md,
+            paddingVertical: theme.spacing.sm,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.colors.border,
+            backgroundColor: theme.colors.background,
+        },
+        backButton: {
+            padding: theme.spacing.xs,
+        },
+        title: {
+            flex: 1,
+            textAlign: 'center',
+        },
+        placeholder: {
+            width: 60,
+        },
+        container: {
+            flex: 1,
+        },
+        scrollContainer: {
+            padding: theme.spacing.lg,
+            flexGrow: 1,
+        },
+        inputContainer: {
+            flex: 1,
+            justifyContent: 'center',
+        },
+        label: {
+            marginBottom: theme.spacing.xs,
+            color: theme.colors.text,
+            textAlign: 'center',
+        },
+        subtitle: {
+            textAlign: 'center',
+            marginBottom: theme.spacing.lg,
+        },
+        input: {
+            backgroundColor: theme.colors.surface,
+            borderRadius: 16,
+            padding: theme.spacing.lg,
+            fontSize: 18,
+            color: theme.colors.text,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            minHeight: 120,
+            textAlignVertical: 'top',
+            textAlign: 'center',
+        },
+        exerciseContainer: {
+            flex: 1,
+            paddingTop: theme.spacing.md,
+        },
+        card: {
+            backgroundColor: theme.colors.surface,
+            borderRadius: 16,
+            padding: theme.spacing.md,
+            // Shadow for elevation
+            shadowColor: theme.colors.black,
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 3.84,
+            elevation: 5,
+        },
+        fullWidth: {
+            width: '100%',
+        },
+    }), [theme]);
 
     return (
         <Screen>
@@ -149,79 +218,3 @@ export const PronunciationAssessmentScreen = () => {
         </Screen>
     );
 };
-
-const styles = StyleSheet.create({
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: theme.spacing.md,
-        paddingVertical: theme.spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.border,
-        backgroundColor: theme.colors.background,
-    },
-    backButton: {
-        padding: theme.spacing.xs,
-    },
-    title: {
-        flex: 1,
-        textAlign: 'center',
-    },
-    placeholder: {
-        width: 60,
-    },
-    container: {
-        flex: 1,
-    },
-    scrollContainer: {
-        padding: theme.spacing.lg,
-        flexGrow: 1,
-    },
-    inputContainer: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    label: {
-        marginBottom: theme.spacing.xs,
-        color: theme.colors.text,
-        textAlign: 'center',
-    },
-    subtitle: {
-        textAlign: 'center',
-        marginBottom: theme.spacing.lg,
-    },
-    input: {
-        backgroundColor: theme.colors.surface,
-        borderRadius: 16,
-        padding: theme.spacing.lg,
-        fontSize: 18,
-        color: theme.colors.text,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        minHeight: 120,
-        textAlignVertical: 'top',
-        textAlign: 'center',
-    },
-    exerciseContainer: {
-        flex: 1,
-        paddingTop: theme.spacing.md,
-    },
-    card: {
-        backgroundColor: theme.colors.surface,
-        borderRadius: 16,
-        padding: theme.spacing.md,
-        // Shadow for elevation
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    fullWidth: {
-        width: '100%',
-    },
-});

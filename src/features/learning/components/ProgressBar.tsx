@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { theme } from '../../../theme';
+import { useAppTheme } from '../../../theme/ThemeContext';
 
 interface Props {
     current: number;
@@ -8,6 +8,7 @@ interface Props {
 }
 
 export const ProgressBar = ({ current, total }: Props) => {
+    const theme = useAppTheme();
     // Ensure we don't divide by zero and clamp percentage between 0 and 100
     const percentage = Math.min(Math.max((current / total) * 100, 0), 100);
     const widthAnim = useRef(new Animated.Value(0)).current;
@@ -25,6 +26,25 @@ export const ProgressBar = ({ current, total }: Props) => {
         outputRange: ['0%', '100%'],
     });
 
+    const styles = useMemo(() => StyleSheet.create({
+        container: {
+            height: 8,
+            width: '100%',
+            marginVertical: theme.spacing.sm,
+        },
+        track: {
+            flex: 1,
+            backgroundColor: theme.colors.border,
+            borderRadius: 4,
+            overflow: 'hidden',
+        },
+        fill: {
+            height: '100%',
+            backgroundColor: theme.colors.primary,
+            borderRadius: 4,
+        },
+    }), [theme]);
+
     return (
         <View style={styles.container}>
             <View style={styles.track}>
@@ -40,22 +60,3 @@ export const ProgressBar = ({ current, total }: Props) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        height: 8,
-        width: '100%',
-        marginVertical: theme.spacing.sm,
-    },
-    track: {
-        flex: 1,
-        backgroundColor: theme.colors.border,
-        borderRadius: 4,
-        overflow: 'hidden',
-    },
-    fill: {
-        height: '100%',
-        backgroundColor: theme.colors.primary,
-        borderRadius: 4,
-    },
-});

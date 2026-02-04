@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useLessonSession } from '../hooks/useLessonSession';
 import { useExercises } from '../hooks/useExercises';
@@ -6,7 +6,7 @@ import { TheoryViewer } from './TheoryViewer';
 import { ExerciseContainer } from './exercises/ExerciseContainer';
 import { ProgressBar } from './ProgressBar';
 import { Screen, AppText, Spacer, AppButton } from '../../../components';
-import { theme } from '../../../theme';
+import { useAppTheme } from '../../../theme/ThemeContext';
 
 interface LearningSectionProps {
     lessonId: string;
@@ -32,6 +32,7 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
     onExit,
     renderCompleted,
 }) => {
+    const theme = useAppTheme();
     const {
         status,
         theoryContent,
@@ -58,6 +59,20 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
             completeLesson();
         }
     }, [isFinished, status, completeLesson]);
+
+    const styles = useMemo(() => StyleSheet.create({
+        centerContainer: {
+            flex: 1, // Ensure it takes full height to center properly
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        exercisesContainer: {
+            flex: 1,
+        },
+        header: {
+            paddingVertical: theme.spacing.md,
+        },
+    }), [theme]);
 
     if (status === 'loading') {
         return (
@@ -120,16 +135,3 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    centerContainer: {
-        flex: 1, // Ensure it takes full height to center properly
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    exercisesContainer: {
-        flex: 1,
-    },
-    header: {
-        paddingVertical: theme.spacing.md,
-    },
-});
