@@ -30,7 +30,8 @@
         "MODIFY_AUDIO_SETTINGS"
       ],
       "edgeToEdgeEnabled": true,
-      "package": "com.felinode.felinode"
+      "package": "com.felinode.felinode",
+      "allowBackup": false
     },
     "web": {
       "favicon": "./assets/favicon.png"

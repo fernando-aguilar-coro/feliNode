@@ -8,17 +8,17 @@ import { TreeCanvas } from '../components/TreeCanvas';
 import { PannableCanvasRef } from '../components/PannableCanvas';
 import { useAppTheme } from '../../../theme/ThemeContext';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-// Canvas size
-const CANVAS_WIDTH = SCREEN_WIDTH * 2;
-const CANVAS_HEIGHT = SCREEN_HEIGHT * 1.5;
 
 export const TreeNodeScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
-    const { nodes, links, isLoading, error } = useNodes(CANVAS_WIDTH, CANVAS_HEIGHT);
+    // We pass 0, 0 initially, or dimensions doesn't matter much for the *request* 
+    // if the service calculates total size independent of view size.
+    // However, NodeService might use width/height for spacing. 
+    // Let's keep passing defaults or screen size as "minimums" if needed, 
+    // but the hook now returns the *graph* size.
+    const { nodes, links, canvasWidth, canvasHeight, isLoading, error } = useNodes(400, 600); // 400/600 are just params for the layout algo spacing if used
     const canvasRef = useRef<PannableCanvasRef>(null);
 
     const handleNodePress = (node: TreeNode) => {
@@ -89,8 +89,8 @@ export const TreeNodeScreen = () => {
         <View style={styles.container}>
             <TreeCanvas
                 ref={canvasRef}
-                width={CANVAS_WIDTH}
-                height={CANVAS_HEIGHT}
+                width={canvasWidth}
+                height={canvasHeight}
                 nodes={nodes}
                 links={links}
                 onNodePress={handleNodePress}

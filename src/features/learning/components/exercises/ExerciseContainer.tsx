@@ -8,8 +8,7 @@ import { ScrambledSentenceExercise } from './ScrambledSentenceExercise';
 import { PronunciationExercise } from './PronunciationExercise';
 import { Card, AppButton, AppText, Spacer } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
-import { ExplainCorrectButton } from '../ExplainCorrectButton';
-import { ExplainErrorButton } from '../ExplainErrorButton';
+import { AiExplainButton } from '../AiExplainButton';
 
 interface Props {
     exercise: Exercise;
@@ -23,6 +22,9 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
     const theme = useAppTheme();
     const [userAnswer, setUserAnswer] = useState('');
     const [hasChecked, setHasChecked] = useState(false);
+    const [aiResult, setAiResult] = useState<{ correct: boolean; message: string } | null>(null);
+
+    const displayResult = aiResult || lastResult;
 
     // Reset state when exercise changes
     useEffect(() => {
@@ -32,6 +34,7 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
             setUserAnswer('');
         }
         setHasChecked(false);
+        setAiResult(null);
     }, [exercise]);
 
     const handleCheck = () => {
@@ -115,12 +118,12 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
 
             <Spacer height={theme.spacing.lg} />
 
-            {lastResult && hasChecked && (
+            {displayResult && hasChecked && (
                 <View
                     style={[
                         styles.feedback,
                         {
-                            backgroundColor: lastResult.correct
+                            backgroundColor: displayResult.correct
                                 ? theme.colors.success + '20' // 20% opacity
                                 : theme.colors.error + '20',
                         },
@@ -128,30 +131,21 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
                 >
                     <AppText
                         weight="bold"
-                        color={lastResult.correct ? theme.colors.success : theme.colors.error}
+                        color={displayResult.correct ? theme.colors.success : theme.colors.error}
                     >
-                        {lastResult.message}
+                        {displayResult.message}
                     </AppText>
 
                     <Spacer height={theme.spacing.sm} />
 
                     {(exercise.type === ExerciseType.FILL_IN_THE_BLANK || exercise.type === ExerciseType.TRANSLATE || exercise.type === ExerciseType.SCRAMBLED_SENTENCE) && (
-                        <>
-                            {lastResult.correct ? (
-                                <ExplainCorrectButton
-                                    userAnswer={userAnswer}
-                                    question={exercise.question}
-                                    lessonContext={lessonContext}
-                                />
-                            ) : (
-                                <ExplainErrorButton
-                                    userAnswer={userAnswer}
-                                    correctAnswer={exercise.correctAnswer}
-                                    question={exercise.question}
-                                    lessonContext={lessonContext}
-                                />
-                            )}
-                        </>
+                        <AiExplainButton
+                            userAnswer={userAnswer}
+                            question={exercise.question}
+                            correctAnswer={exercise.correctAnswer}
+                            lessonContext={lessonContext}
+                            onAiResult={setAiResult}
+                        />
                     )}
                 </View>
             )}

@@ -4,7 +4,7 @@ import { initDatabase } from '../db';
 import { INITIAL_DATA } from './initial_data';
 import { ensureModule, ensureLessons } from './seed_config';
 import { SeedModule, SeedLesson } from './types';
-import { getAllLessons, getAllDependencies } from '../../api/getAllLessons';
+import { getAllLessons, getAllDependencies } from '../../api/GetAllLessons';
 let db: SQLite.SQLiteDatabase | null = null;
 
 const init = async () => {

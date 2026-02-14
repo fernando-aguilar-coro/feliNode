@@ -1,30 +1,16 @@
-import { supabase } from './supabaseClient';
 
+import { getCompletedLessons } from '../db_local/api_local';
+
+/**
+ * Fetches the count of completed lessons from the local database.
+ * This is used by the UserStore and Navigation to determine user progress.
+ */
 export const getUserCompletedLessons = async (): Promise<number> => {
     try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-        if (userError || !user) {
-            console.log('[GetProgress] No active session.');
-            return 0;
-        }
-
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('lesson_ids')
-            .eq('id', user.id)
-            .maybeSingle();
-
-        if (error) {
-            console.error('[GetProgress] Error fetching profile:', error);
-            return 0;
-        }
-
-        const completedLessons = data?.lesson_ids || [];
-        return Array.isArray(completedLessons) ? completedLessons.length : 0;
-
+        const completedLessons = await getCompletedLessons();
+        return completedLessons.length;
     } catch (error) {
-        console.error('[GetProgress] Unexpected error:', error);
+        console.error('Error fetching user completed lessons:', error);
         return 0;
     }
 };

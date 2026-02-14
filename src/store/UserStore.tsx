@@ -4,6 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../features/auth/services/authService';
 import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
 
+import { clearUserProgress } from '../db_local/api_local';
+import NetInfo from '@react-native-community/netinfo';
+
 interface UserState {
     isAuthenticated: boolean;
     user: { name: string } | null;
@@ -22,41 +25,53 @@ export const useUserStore = create<UserState>()(
             isAuthenticated: false,
             user: null,
             loading: false,
+            isSyncing: false,
             completedLessonsCount: 0,
 
             checkSession: async () => {
-                // If already authenticated from persistence, verify in background instead of blocking
                 const wasAuthenticated = get().isAuthenticated;
+                const state = await NetInfo.fetch();
+
+                if (!state.isConnected) {
+                    // Offline: Trust persisted state if authenticated
+                    if (wasAuthenticated) {
+                        console.log('User is offline, using persisted session');
+                        return; // Keep existing state
+                    }
+                }
 
                 try {
                     const session = await authService.getSession();
                     if (session) {
-                        // Fetch progress first
-                        const count = await getUserCompletedLessons();
+                        try {
+                            // Sync progress first
+                            const count = await getUserCompletedLessons();
 
-                        set({
-                            isAuthenticated: true,
-                            user: { name: session.user.email || 'User' },
-                            completedLessonsCount: count
-                        });
+                            set({
+                                isAuthenticated: true,
+                                user: { name: session.user.email || 'User' },
+                                completedLessonsCount: count
+                            });
+                        } catch (syncError) {
+                            console.error('Sync failed during session check:', syncError);
+                            // Still set authenticated even if sync fails? 
+                            // Yes, allow usage, maybe retry sync later
+                            set({
+                                isAuthenticated: true,
+                                user: { name: session.user.email || 'User' },
+                            });
+                        }
                     } else if (wasAuthenticated) {
-                        //TODO: Handle token refresh
-                        // Session is invalid but we had persistence, log out to be safe or handle token refresh
-                        // For now, if no session from supabase, we should arguably clear state
-                        // But for offline support, we might want to keep it if error is network related?
-                        // verifySession returns null if no session. 
-                        // If offline, supabase cleanup might not be reliable.
-                        // authService.getSession() usually tries to recover session.
-
-                        // If we are strictly offline, getSession might fail or return null?
-                        // Usually getSession is local. 
-
-                        // For safety, let's update if session is actively null (logged out remotely or expired)
-                        // But user specifically wants OFFLINE support.
+                        // Online but session invalid - clear state
+                        set({
+                            isAuthenticated: false,
+                            user: null,
+                            completedLessonsCount: 0
+                        });
                     }
                 } catch (error) {
                     console.error('Check session error:', error);
-                    // If error (e.g. network), keep persisted state if we are authenticated
+                    // If error (e.g. network glitch despite isConnected=true), keep persisted state
                 }
             },
 
@@ -119,6 +134,8 @@ export const useUserStore = create<UserState>()(
                 set({ loading: true });
                 try {
                     await authService.signOut();
+                    // Clear local DB to prevent data leak to next user
+                    await clearUserProgress();
                     // State clear will happen below
                 } catch (error) {
                     console.error('Logout error:', error);

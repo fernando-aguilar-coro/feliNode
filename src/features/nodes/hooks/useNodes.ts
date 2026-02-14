@@ -6,6 +6,8 @@ import { TreeNode, TreeLink } from '../types/NodeTypes';
 export const useNodes = (width: number, height: number) => {
     const [nodes, setNodes] = useState<TreeNode[]>([]);
     const [links, setLinks] = useState<TreeLink[]>([]);
+    const [canvasWidth, setCanvasWidth] = useState(width);
+    const [canvasHeight, setCanvasHeight] = useState(height);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -15,6 +17,8 @@ export const useNodes = (width: number, height: number) => {
             const data = await NodeService.getLayout(width, height);
             setNodes(data.nodes);
             setLinks(data.links);
+            setCanvasWidth(data.width);
+            setCanvasHeight(data.height);
             setError(null);
         } catch (err) {
             console.error('Error loading nodes:', err);
@@ -33,6 +37,8 @@ export const useNodes = (width: number, height: number) => {
     return {
         nodes,
         links,
+        canvasWidth,
+        canvasHeight,
         isLoading,
         error,
         refreshNodes

@@ -18,10 +18,9 @@ export interface PannableCanvasRef {
 }
 
 const clamp = (val: number, min: number, max: number) => {
-    'worklet';
     return Math.min(Math.max(val, min), max);
 };
-const sensitivity = 0.5;
+
 /**
  * PannableCanvas
  * 
@@ -72,42 +71,42 @@ export const PannableCanvas = React.forwardRef<PannableCanvasRef, PannableCanvas
         }
     }));
 
+    // 4. Infinite Canvas Logic
+    // We do NOT clamp translation. This allows "infinite" panning.
+    // We only clamp scale to avoid too small/large views.
+
     /**
      * Pan Gesture
      */
     const panGesture = Gesture.Pan()
-        .minDistance(1)
+        .averageTouches(true)
         .onStart(() => {
             prevTranslationX.value = translationX.value;
             prevTranslationY.value = translationY.value;
         })
         .onUpdate((event) => {
-            translationX.value = prevTranslationX.value + event.translationX * sensitivity;
-            translationY.value = prevTranslationY.value + event.translationY * sensitivity;
+            translationX.value = prevTranslationX.value + event.translationX;
+            translationY.value = prevTranslationY.value + event.translationY;
         })
         .onEnd((event) => {
             // Momentum for natural feel
-            translationX.value = withDecay({ velocity: event.velocityX * sensitivity, deceleration: 0.998 });
-            translationY.value = withDecay({ velocity: event.velocityY * sensitivity, deceleration: 0.998 });
+            translationX.value = withDecay({ velocity: event.velocityX, deceleration: 0.998 });
+            translationY.value = withDecay({ velocity: event.velocityY, deceleration: 0.998 });
         });
 
     /**
      * Pinch Gesture
+     * Optimized to zoom towards the center of the gesture
      */
     const pinchGesture = Gesture.Pinch()
         .onStart(() => {
             startScale.value = scale.value;
         })
         .onUpdate((event) => {
-            // Apply sensitivity to the delta scale (deviation from 1)
-            const scaleDelta = event.scale - 1;
-            const dampenedScale = 1 + scaleDelta * sensitivity;
-
-            scale.value = clamp(
-                startScale.value * dampenedScale,
-                MIN_SCALE,
-                MAX_SCALE
-            );
+            // Simple scale logic for now to ensure stability
+            // (Advanced focal point zooming requires complex offset calculations)
+            const nextScale = startScale.value * event.scale;
+            scale.value = clamp(nextScale, MIN_SCALE, MAX_SCALE);
         });
 
     const composedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
@@ -126,10 +125,18 @@ export const PannableCanvas = React.forwardRef<PannableCanvasRef, PannableCanvas
         <GestureDetector gesture={composedGesture}>
             <Animated.View style={[
                 styles.canvasContainer,
-                { width: canvasWidth, height: canvasHeight, overflow: 'hidden' }
+                { width: '100%', height: '100%', overflow: 'hidden' }
+                // We use 100% to fill the parent (Screen)
             ]}>
-                {/* The Content moves inside the static viewport */}
-                <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+                {/* The Content moves inside. We ensure it's large enough or centered. 
+                    Actually for infinite canvas, the inner view size matters less 
+                    if we translate it freely, but setting it to the content size 
+                    helps with initial centering if we want.
+                */}
+                <Animated.View style={[
+                    { width: canvasWidth, height: canvasHeight }, // Set strictly to content size
+                    animatedStyle
+                ]}>
                     {children}
                 </Animated.View>
             </Animated.View>

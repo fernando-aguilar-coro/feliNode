@@ -7,7 +7,7 @@ export const GeminiService = {
      * @param prompt The text prompt to send.
      * @returns The generated response from Gemini.
      */
-    generateResponse: async (prompt: string): Promise<string> => {
+    generateResponse: async (prompt: string, options?: { raw?: boolean }): Promise<string> => {
         try {
             const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
@@ -30,6 +30,11 @@ export const GeminiService = {
             }
 
             const data = await response.json();
+
+            if (options?.raw) {
+                return data.response || "";
+            }
+
             // Clean up quotes if present (standard cleanup for this app)
             return data.response ? data.response.replace(/["']/g, "").trim() : "";
 

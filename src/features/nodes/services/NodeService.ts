@@ -1,91 +1,85 @@
-import * as d3 from 'd3-hierarchy';
+import dagre from 'dagre';
 import { getLessonNodes } from '../../../db_local/api_local';
 import { TreeNode, TreeLink } from '../types/NodeTypes';
 
 export const NodeService = {
     /**
-     * Fetches lessons from the database and calculates their positions in a tree layout.
-     * Uses d3.stratify() since the DB now provides a strict parent_id relationship.
+     * Fetches lessons from the database and calculates their positions using dagre for DAG layout.
      */
-    async getLayout(width: number = 400, height: number = 600): Promise<{ nodes: TreeNode[], links: TreeLink[] }> {
-        const allLessons = await getLessonNodes();
-        // Filter out placement_test from the tree view
-        const lessons = allLessons;
+    async getLayout(width: number = 400, height: number = 600): Promise<{ nodes: TreeNode[], links: TreeLink[], width: number, height: number }> {
+        const lessons = await getLessonNodes();
 
         if (lessons.length === 0) {
-            return { nodes: [], links: [] };
+            return { nodes: [], links: [], width, height };
         }
 
         try {
-            // 1. Build Adjacency List (Parent -> Children)
-            // The API returns lessons with 'parents' array. We need to invert this for d3.hierarchy.
-            const childrenMap = new Map<string, string[]>();
-            const lessonMap = new Map<string, any>();
+            // Create a new directed graph
+            const g = new dagre.graphlib.Graph();
 
-            lessons.forEach(l => {
-                lessonMap.set(l.id, l);
-                l.parents.forEach(pId => {
-                    if (!childrenMap.has(pId)) childrenMap.set(pId, []);
-                    childrenMap.get(pId)?.push(l.id);
+            // Set an object for the graph label
+            g.setGraph({
+                rankdir: 'TB', // Top-to-Bottom
+                marginx: 20,
+                marginy: 20,
+                nodesep: 50, // Horizontal separation between nodes
+                ranksep: 100 // Vertical separation between ranks
+            });
+
+            // Default to assigning a new object as a label for each new edge.
+            g.setDefaultEdgeLabel(function () { return {}; });
+
+            // Add nodes to the graph. The first argument is the node id. The second is
+            // metadata about the node. In this case we're going to add labels to each of our nodes.
+            lessons.forEach(lesson => {
+                g.setNode(lesson.id, {
+                    label: lesson.id,
+                    width: 100, // Assumed width
+                    height: 50,  // Assumed height
+                    ...lesson
                 });
             });
 
-            // 2. Find Roots (Lessons with no parents)
-            const roots = lessons.filter(l => l.parents.length === 0);
-
-            // 3. Create Hierarchical Data
-            // We use a virtual root to handle multiple real roots
-            const virtualRoot = { id: 'virtual-root', isVirtual: true };
-
-            // Custom hierarchy traverser
-            const hierarchy = d3.hierarchy(virtualRoot, (d: any) => {
-                if (d.isVirtual) return roots; // Virtual root returns actual roots
-                // For a lesson, return its children from the map
-                const childIds = childrenMap.get(d.id);
-                return childIds ? childIds.map(id => lessonMap.get(id)) : null;
-            });
-
-            // 4. Calculate Layout
-            const LEVEL_HEIGHT = 160; // Distance between levels
-            const TOP_PADDING = 100;  // Padding from the top of the canvas
-
-            const treeLayout = d3.tree<any>()
-                .size([width, height]); // We still use size for horizontal distribution, but we'll override Y
-
-            const rootWithPositions = treeLayout(hierarchy);
-
-            // 5. Deduplicate Nodes (DAG Handling) and Adjust Vertical Position
-            const uniqueNodesMap = new Map<string, TreeNode>();
-
-            rootWithPositions.descendants().forEach(d => {
-                if (d.data.isVirtual) return;
-
-                if (!uniqueNodesMap.has(d.data.id)) {
-                    // We override d.y with a fixed vertical step based on depth
-                    // Depth 1 (actual roots) will be at TOP_PADDING
-                    // Depth 2 at TOP_PADDING + LEVEL_HEIGHT, etc.
-                    const nodeY = (d.depth - 1) * LEVEL_HEIGHT + TOP_PADDING;
-
-                    uniqueNodesMap.set(d.data.id, {
-                        ...d.data,
-                        x: d.x,
-                        y: nodeY,
+            // Add edges to the graph.
+            lessons.forEach(lesson => {
+                if (lesson.parents && lesson.parents.length > 0) {
+                    lesson.parents.forEach(parentId => {
+                        // dagre expects (v, w) where v is the source and w is the target
+                        // validation: ensure parent exists in lessons to avoid graph errors
+                        if (lessons.find(l => l.id === parentId)) {
+                            g.setEdge(parentId, lesson.id);
+                        }
                     });
                 }
             });
 
-            const positionedNodes = Array.from(uniqueNodesMap.values());
+            // Calculate the layout
+            dagre.layout(g);
 
-            // 6. Reconstruct Links
-            // We want links from ALL parents to the unique child node.
-            // d3 links connect the duplicated nodes. We remap them to the unique nodes.
+            // Construct the result
+            const positionedNodes: TreeNode[] = [];
+            g.nodes().forEach(v => {
+                const node = g.node(v) as any;
+                // dagre returns center x, y. We might need top-left depending on rendering, 
+                // but usually center is fine or we adjust. Let's return what dagre gives 
+                // and assume the renderer handles it or we expect center.
+                // d3 layout usually gave x,y.
+
+                // We map back to our TreeNode type.
+                // 'node' contains the properties we spread earlier (...lesson) + x, y from dagre.
+                positionedNodes.push({
+                    id: v,
+                    ...node, // contains original lesson data + x, y
+                    x: node.x,
+                    y: node.y
+                } as TreeNode);
+            });
+
             const links: TreeLink[] = [];
-
-            rootWithPositions.links().forEach(link => {
-                if (link.source.data.isVirtual || link.target.data.isVirtual) return;
-
-                const sourceNode = uniqueNodesMap.get(link.source.data.id);
-                const targetNode = uniqueNodesMap.get(link.target.data.id);
+            g.edges().forEach(e => {
+                // e.v is source, e.w is target
+                const sourceNode = positionedNodes.find(n => n.id === e.v);
+                const targetNode = positionedNodes.find(n => n.id === e.w);
 
                 if (sourceNode && targetNode) {
                     links.push({
@@ -95,11 +89,16 @@ export const NodeService = {
                 }
             });
 
-            return { nodes: positionedNodes, links };
+            return {
+                nodes: positionedNodes,
+                links,
+                width: g.graph().width || width,
+                height: g.graph().height || height
+            };
 
         } catch (e) {
-            console.error('Failed to calculate DAG layout:', e);
-            return { nodes: [], links: [] };
+            console.error('Failed to calculate DAG layout with dagre:', e);
+            return { nodes: [], links: [], width, height };
         }
     }
 };

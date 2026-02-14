@@ -1,50 +1,60 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useUserStore } from '../store/UserStore';
+import React, { useState, useEffect } from 'react';
 import LoginScreen from '../features/auth/screens/LoginScreen';
-
 import { PlacementTestScreen } from '../features/learning/components/PlacementTestScreen';
 import { ChoseInitialTest } from '../features/learning/screens/ChoseInitialTest';
-import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
-import { syncUserProgress } from '../api/syncUserProgress';
-import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
+
 import { LoadingScreen } from '../components';
+import { syncUserProgress } from '../api/syncUserProgress';
+import { useNetInfo } from '@react-native-community/netinfo';
+
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
+
+import { useUserStore } from '../store/UserStore';
+
 
 const Stack = createNativeStackNavigator();
 const minCount = 1;
 export const Navigation = () => {
     const { isAuthenticated, checkSession, completedLessonsCount } = useUserStore();
-    const [isSyncing, setIsSyncing] = React.useState(false);
+    const netInfo = useNetInfo();
 
-    React.useEffect(() => {
+    useEffect(() => {
         checkSession();
     }, [checkSession]);
 
-    React.useEffect(() => {
-        const sync = async () => {
-            if (isAuthenticated) {
-                setIsSyncing(true);
-                try {
-                    await syncUserProgress();
-                    const count = await getUserCompletedLessons();
-                    useUserStore.setState({ completedLessonsCount: count });
-                } catch (error) {
-                    console.error('Sync failed:', error);
-                } finally {
-                    setIsSyncing(false);
-                }
-            }
-        };
-        sync();
-    }, [isAuthenticated]);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [hasSync, setHasSync] = useState(false);
 
-    if (isAuthenticated && isSyncing) {
-        return <LoadingScreen message="Syncing progress..." />;
+    const syncData = async () => {
+        if (netInfo.isConnected && !isSyncing && isAuthenticated && !hasSync) {
+            try {
+                setIsSyncing(true);
+                setHasSync(true);
+                await syncUserProgress();
+            } catch (error) {
+                console.error('Error syncing progress in HomeScreen:', error);
+            } finally {
+                setIsSyncing(false);
+            }
+        }
+    };
+    useEffect(() => {
+        syncData();
+    }, [netInfo.isConnected]);
+
+    if (isAuthenticated && !hasSync) {
+        syncData();
+        setHasSync(true);
     }
 
+    if (isSyncing) {
+        return <LoadingScreen message="Sincronizando progreso..." />;
+    }
     return (
         <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
             {isAuthenticated ? (
+
                 // App Stack
                 <Stack.Group>
                     {completedLessonsCount <= minCount ? (

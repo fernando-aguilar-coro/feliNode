@@ -46,12 +46,7 @@ export const saveUserProgress = async (lessonId: string, score: number) => {
         let completed: string[] = [];
         if (profile) {
             completed = JSON.parse(profile.lessons_completed);
-        } else {
-            // Create profile if not exists
-            await db!.runAsync('INSERT INTO user_progress (lessons_completed) VALUES ("[]")');
-            profile = { id: 1 };
         }
-
         // 2. Add if not exists
         if (!completed.includes(lessonId)) {
             completed.push(lessonId);
@@ -119,6 +114,16 @@ export const setCompletedLessons = async (completedLessons: string[]) => {
         await db!.runAsync('UPDATE user_progress SET lessons_completed = ?, updated_at = ? WHERE id = ?', [json, now, profile.id]);
     } else {
         await db!.runAsync('INSERT INTO user_progress (lessons_completed, updated_at) VALUES (?, ?)', [json, now]);
+    }
+};
+
+export const clearUserProgress = async () => {
+    if (!db) await init();
+    try {
+        await db!.runAsync('DELETE FROM user_progress');
+        console.log('[DB] User progress cleared.');
+    } catch (error) {
+        console.error('[DB] Error clearing user progress:', error);
     }
 };
 

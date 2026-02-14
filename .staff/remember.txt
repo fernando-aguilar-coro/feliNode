@@ -13,6 +13,12 @@ eas build --platform android --profile development
 npx expo install babel-preset-expo
 npm install babel-plugin-inline-import --save-dev
 npx eas build --profile development --platform android
-
-
+npx eas build --profile preview --platform android
+#build local
 npx expo run:android
+#get key android
+cd android
+gradlew signingReport --debug 
+
+#run typescript
+npx tsc
