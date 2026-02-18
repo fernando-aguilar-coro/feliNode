@@ -10,11 +10,8 @@ export const syncUserProgress = async () => {
             return;
         }
 
-        console.log('[Sync] Starting synchronization for user:', user.email);
-
         // 1. Fetch Local Data
-        const localCompleted = await getCompletedLessons();
-        console.log('[Sync] Local progress:', localCompleted);
+        const localCompleted = await getCompletedLessons();;
 
         // 2. Fetch Remote Data
         const { data: remoteProfile, error: remoteError } = await supabase
@@ -29,7 +26,6 @@ export const syncUserProgress = async () => {
         }
 
         const remoteCompleted: string[] = remoteProfile?.lesson_ids || [];
-        console.log('[Sync] Remote progress:', remoteCompleted);
 
         // 3. Merge Logic (Union)
         // We simply take the set of all unique completed lessons from both sources.
@@ -41,7 +37,6 @@ export const syncUserProgress = async () => {
         // Sort to ensure consistency (optional but good for comparisons)
         mergedCompleted.sort();
 
-        console.log('[Sync] Merged progress:', mergedCompleted);
 
         // 4. Update Local if different
         const localSet = new Set(localCompleted);
@@ -57,7 +52,6 @@ export const syncUserProgress = async () => {
         const hasNewForRemote = mergedCompleted.some(id => !remoteSet.has(id));
 
         if (hasNewForRemote) {
-            console.log('[Sync] Updating remote database...');
             const { error: updateError } = await supabase
                 .from('profiles')
                 .update({
@@ -70,12 +64,6 @@ export const syncUserProgress = async () => {
             if (updateError) {
                 console.error('[Sync] Failed to update remote:', updateError);
             }
-        }
-
-        if (!hasNewForLocal && !hasNewForRemote) {
-            console.log('[Sync] databases are already in sync.');
-        } else {
-            console.log('[Sync] Synchronization complete.');
         }
 
     } catch (error) {

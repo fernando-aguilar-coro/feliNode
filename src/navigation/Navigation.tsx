@@ -11,51 +11,58 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
 
 import { useUserStore } from '../store/UserStore';
-
+import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
 
 const Stack = createNativeStackNavigator();
 const minCount = 1;
+
+
 export const Navigation = () => {
-    const { isAuthenticated, checkSession, completedLessonsCount } = useUserStore();
+    const { isAuthenticated, checkSession } = useUserStore();
     const netInfo = useNetInfo();
+    const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
+    const [isLoadingLessons, setIsLoadingLessons] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [hasSync, setHasSync] = useState(false);
 
     useEffect(() => {
         checkSession();
     }, [checkSession]);
 
-    const [isSyncing, setIsSyncing] = useState(false);
-    const [hasSync, setHasSync] = useState(false);
-
-    const syncData = async () => {
-        if (netInfo.isConnected && !isSyncing && isAuthenticated && !hasSync) {
-            try {
-                setIsSyncing(true);
-                setHasSync(true);
-                await syncUserProgress();
-            } catch (error) {
-                console.error('Error syncing progress in HomeScreen:', error);
-            } finally {
-                setIsSyncing(false);
-            }
-        }
-    };
+    // Sync progress
     useEffect(() => {
+        const syncData = async () => {
+            if (netInfo.isConnected && !isSyncing && isAuthenticated && !hasSync) {
+                try {
+                    setIsSyncing(true);
+                    setHasSync(true);
+                    await syncUserProgress();
+                    const count = await getUserCompletedLessons();
+                    setCompletedLessonsCount(count);
+                } catch (error) {
+                    console.error('Error syncing progress in HomeScreen:', error);
+                } finally {
+                    setIsSyncing(false);
+                    setIsLoadingLessons(false);
+                }
+            }
+        };
         syncData();
-    }, [netInfo.isConnected]);
+    }, [netInfo.isConnected, isAuthenticated, isSyncing, hasSync]);
 
-    if (isAuthenticated && !hasSync) {
-        syncData();
-        setHasSync(true);
+    if (isSyncing || (isAuthenticated && isLoadingLessons)) {
+        return <LoadingScreen message={isSyncing ? "Sincronizando progreso..." : "Cargando progreso..."} />;
     }
-
-    if (isSyncing) {
-        return <LoadingScreen message="Sincronizando progreso..." />;
+    if (!netInfo.isConnected) {
+        return (
+            <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Home" component={HomeNavigation} />
+            </Stack.Navigator>
+        );
     }
     return (
         <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
             {isAuthenticated ? (
-
-                // App Stack
                 <Stack.Group>
                     {completedLessonsCount <= minCount ? (
                         <>

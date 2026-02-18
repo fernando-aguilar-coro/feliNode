@@ -50,7 +50,8 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
         nextExercise,
         lastResult,
         completedCount,
-        initialTotal
+        initialTotal,
+        overrideResult
     } = useExercises(exercises);
 
     // Effect to bridge the "finished exercises" state to "completeLesson"
@@ -113,6 +114,7 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
                             onNext={nextExercise}
                             lastResult={lastResult}
                             lessonContext={lesson?.title}
+                            onOverrideResult={overrideResult}
                         />
                     ) : (
                         <View style={styles.centerContainer}>

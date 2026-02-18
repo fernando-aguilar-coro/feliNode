@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import RNFS from 'react-native-fs';
 import { supabase } from '../../../api/supabaseClient';
 
 // Simplified Types
@@ -105,7 +105,8 @@ export const PronunciationService = {
 
             const token = session.access_token;
 
-            const base64Audio = await new FileSystem.File(audioUri).base64();
+            const filePath = audioUri.startsWith('file://') ? audioUri.replace('file://', '') : audioUri;
+            const base64Audio = await RNFS.readFile(filePath, 'base64');
             const response = await fetch(BASE_URL, {
                 method: 'POST',
                 headers: {

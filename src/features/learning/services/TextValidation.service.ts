@@ -46,7 +46,10 @@ export const TextValidationService = {
         // 1. Normalize quotes (smart quotes to straight quotes)
         normalized = normalized.replace(/[‘’´`]/g, "'");
 
-        // 2. Expand contractions
+        // 2. Remove only acute accents (´) / \u0301
+        normalized = normalized.normalize('NFD').replace(/[\u0301]/g, "");
+
+        // 3. Expand contractions
         // We split by space to handle whole words, but need to be careful with punctuation attached
         // A simple regex replace for each key might be safer for now, or tokenizing.
         // Let's use word boundaries for the keys.

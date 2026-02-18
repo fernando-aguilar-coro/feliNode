@@ -6,6 +6,7 @@ import { FillInTheBlankExercise } from './FillInTheBlankExercise';
 import { TranslateExercise } from './TranslateExercise';
 import { ScrambledSentenceExercise } from './ScrambledSentenceExercise';
 import { PronunciationExercise } from './PronunciationExercise';
+import { ListeningExercise } from './ListeningExercise';
 import { Card, AppButton, AppText, Spacer } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { AiExplainButton } from '../AiExplainButton';
@@ -16,9 +17,10 @@ interface Props {
     onNext: () => void;
     lastResult: { correct: boolean; message?: string } | null;
     lessonContext?: string;
+    onOverrideResult?: (isCorrect: boolean) => void;
 }
 
-export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lessonContext }: Props) => {
+export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lessonContext, onOverrideResult }: Props) => {
     const theme = useAppTheme();
     const [userAnswer, setUserAnswer] = useState('');
     const [hasChecked, setHasChecked] = useState(false);
@@ -84,6 +86,14 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
                         userAnswer={userAnswer}
                     />
                 );
+            case ExerciseType.LISTENING:
+                return (
+                    <ListeningExercise
+                        exercise={exercise}
+                        onAnswer={setUserAnswer}
+                        userAnswer={userAnswer}
+                    />
+                );
             default:
                 /* Tipo de ejercicio desconocido o no implementado */
                 return <AppText>Tipo de ejercicio desconocido</AppText>;
@@ -138,13 +148,18 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
 
                     <Spacer height={theme.spacing.sm} />
 
-                    {(exercise.type === ExerciseType.FILL_IN_THE_BLANK || exercise.type === ExerciseType.TRANSLATE || exercise.type === ExerciseType.SCRAMBLED_SENTENCE) && (
+                    {(exercise.type !== ExerciseType.PRONUNCIATION && exercise.type !== ExerciseType.LISTENING) && (
                         <AiExplainButton
                             userAnswer={userAnswer}
                             question={exercise.question}
                             correctAnswer={exercise.correctAnswer}
                             lessonContext={lessonContext}
-                            onAiResult={setAiResult}
+                            onAiResult={(result) => {
+                                setAiResult(result);
+                                if (result.correct && onOverrideResult) {
+                                    onOverrideResult(true);
+                                }
+                            }}
                         />
                     )}
                 </View>
@@ -155,10 +170,23 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
             {!hasChecked ? (
                 /* Botón para comprobar la respuesta */
                 <AppButton
-                    title={exercise.type === ExerciseType.PRONUNCIATION ? "Saltar ejercicio ?" : "Comprobar Respuesta"}
+                    title={
+                        exercise.type === ExerciseType.PRONUNCIATION ? "Saltar" :
+                            (exercise.type === ExerciseType.LISTENING && !userAnswer) ? "Saltar" :
+                                "Comprobar Respuesta"
+                    }
                     onPress={handleCheck}
-                    disabled={!userAnswer}
-                    variant="primary"
+                    disabled={
+                        // Disable if no answer, EXCEPT for Pronunciation (always enabled) OR Listening (enabled for skip)
+                        !userAnswer &&
+                        exercise.type !== ExerciseType.PRONUNCIATION &&
+                        exercise.type !== ExerciseType.LISTENING
+                    }
+                    variant={
+                        exercise.type === ExerciseType.PRONUNCIATION ? "outline" :
+                            (exercise.type === ExerciseType.LISTENING && !userAnswer) ? "outline" :
+                                "primary"
+                    }
                 />
             ) : (
                 /* Botón para pasar al siguiente ejercicio */

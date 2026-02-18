@@ -2,8 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../features/auth/services/authService';
-import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
-
 import { clearUserProgress } from '../db_local/api_local';
 import NetInfo from '@react-native-community/netinfo';
 
@@ -16,7 +14,6 @@ interface UserState {
     verifyOtp: (email: string, token: string) => Promise<void>;
     signInWithGoogle: () => Promise<void>;
     logout: () => Promise<void>;
-    completedLessonsCount: number;
 }
 
 export const useUserStore = create<UserState>()(
@@ -26,8 +23,6 @@ export const useUserStore = create<UserState>()(
             user: null,
             loading: false,
             isSyncing: false,
-            completedLessonsCount: 0,
-
             checkSession: async () => {
                 const wasAuthenticated = get().isAuthenticated;
                 const state = await NetInfo.fetch();
@@ -45,12 +40,9 @@ export const useUserStore = create<UserState>()(
                     if (session) {
                         try {
                             // Sync progress first
-                            const count = await getUserCompletedLessons();
-
                             set({
                                 isAuthenticated: true,
                                 user: { name: session.user.email || 'User' },
-                                completedLessonsCount: count
                             });
                         } catch (syncError) {
                             console.error('Sync failed during session check:', syncError);
@@ -66,7 +58,6 @@ export const useUserStore = create<UserState>()(
                         set({
                             isAuthenticated: false,
                             user: null,
-                            completedLessonsCount: 0
                         });
                     }
                 } catch (error) {
@@ -92,12 +83,9 @@ export const useUserStore = create<UserState>()(
                 try {
                     const { session } = await authService.verifyOtp(email, token);
                     if (session) {
-                        const count = await getUserCompletedLessons();
-
                         set({
                             isAuthenticated: true,
                             user: { name: session.user.email || 'User' },
-                            completedLessonsCount: count
                         });
                     }
                 } catch (error) {
@@ -114,12 +102,9 @@ export const useUserStore = create<UserState>()(
                     const response = await authService.signInWithGoogle();
                     if (response?.session) {
                         const { session } = response;
-                        const count = await getUserCompletedLessons();
-
                         set({
                             isAuthenticated: true,
                             user: { name: session.user.email || 'User' },
-                            completedLessonsCount: count
                         });
                     }
                 } catch (error) {
@@ -144,7 +129,6 @@ export const useUserStore = create<UserState>()(
                         loading: false,
                         isAuthenticated: false,
                         user: null,
-                        completedLessonsCount: 0
                     });
                 }
             },
@@ -155,7 +139,6 @@ export const useUserStore = create<UserState>()(
             partialize: (state) => ({
                 isAuthenticated: state.isAuthenticated,
                 user: state.user,
-                completedLessonsCount: state.completedLessonsCount
             }),
         }
     )

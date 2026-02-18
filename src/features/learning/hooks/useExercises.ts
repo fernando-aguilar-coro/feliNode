@@ -34,9 +34,10 @@ export const useExercises = (initialExercises: Exercise[]) => {
         if (!currentExercise) return;
 
         let isCorrect = false;
-
+        const isPronunciation = currentExercise.type === ExerciseType.PRONUNCIATION;
+        const isListening = (currentExercise.type === ExerciseType.LISTENING) && userAnswer === "";
         // Pronunciation exercises are always considered correct to avoid blocking
-        if (currentExercise.type === ExerciseType.PRONUNCIATION) {
+        if (isPronunciation || isListening) {
             isCorrect = true;
         } else {
             // Improved validation: ignore extra spaces and trailing punctuation
@@ -73,6 +74,34 @@ export const useExercises = (initialExercises: Exercise[]) => {
         }
     };
 
+    /**
+     * Allows an external validator (like AI) to override the result of the current exercise.
+     * If the override is 'correct', we undo the penalty (remove duplication) and update stats.
+     */
+    const overrideResult = (isCorrect: boolean) => {
+        if (!currentExercise) return;
+
+        if (isCorrect) {
+            // Check if we previously marked it as incorrect/failed
+            // If so, we likely added it to the end of the list. We should remove that duplicate.
+            setExercises(prev => {
+                const newExercises = [...prev];
+                // Check if the last element is the same as the current one (simple heuristic for "just added")
+                if (newExercises.length > initialExercises.length && newExercises[newExercises.length - 1].id === currentExercise.id) {
+                    newExercises.pop();
+                }
+                return newExercises;
+            });
+
+            setCompletedCount(prev => prev + 1);
+
+            setLastResult({
+                correct: true,
+                message: '¡Corregido por la IA!',
+            });
+        }
+    };
+
     return {
         currentExercise,
         currentIndex,
@@ -83,5 +112,6 @@ export const useExercises = (initialExercises: Exercise[]) => {
         checkAnswer,
         nextExercise,
         lastResult,
+        overrideResult,
     };
 };

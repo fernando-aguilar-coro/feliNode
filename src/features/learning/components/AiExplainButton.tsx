@@ -21,45 +21,52 @@ interface Props {
 
 export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonContext, onAiResult }: Props) => {
     const [isLoading, setIsLoading] = React.useState(false);
-    const [explanation, setExplanation] = React.useState<string | null>(null);
+    const [explanation, setExplanation] = React.useState<{ specific: string; general: string } | null>(null);
     const [modalType, setModalType] = React.useState<'success' | 'error'>('success');
 
     const handlePress = async () => {
         setIsLoading(true);
         try {
-            const contextPart = lessonContext ? ` En el contexto de la lección sobre "${lessonContext}".` : '';
+            const contextPart = lessonContext ? ` In context of the lesson "${lessonContext}".` : '';
             const prompt = `
-        Act as an expert English teacher. Evaluate the student's response.
-        Question: "${question}"
+        Question: "${question}", correct answer: "${correctAnswer}"
         Student's Response: "${userAnswer}"
         ${contextPart}
         Your task is:
-        1. Determine if the response is conceptually and grammatically correct.
-        2. Provide a specific explanation (about what the user did wrong or correctly) and a general explanation (a translation of the response indicating the meaning and purpose of each word) in spanish.
-        Answer STRICTLY in this format: first word (true or false) depending on whether the answer is correct or not, and the rest of the response as an explanation (string: markdown).            `;
+        1. Provide a specific explanation (about what the user did wrong or correctly).
+        2. Provide a general explanation to "${correctAnswer}" (a translation of the response indicating the meaning and purpose of each word).
+
+        Return your response in strict JSON format (no markdown code blocks, just raw JSON):
+        {
+            "isCorrect": boolean, // evalua segun tu criterio si es correcta o no , no importa si es diferente a la respuesta correcta que yo te di
+            "specificExplanation": "string (markdown)", // explica en español
+            "generalExplanation": "string (markdown)" // explica en español
+        }
+            `;
 
             const rawResponse = await GeminiService.generateResponse(prompt, { raw: true });
 
             // Clean up potential code block markers just in case
-            const cleanedResponse = rawResponse.replace(/```/g, '').trim();
+            const cleanedResponse = rawResponse.replace(/```json/g, '').replace(/```/g, '').trim();
 
-            let isCorrect = true;
-            let explanationText = "";
+            let isCorrect = false;
+            let specific = "";
+            let general = "";
 
-            const firstSpaceIndex = cleanedResponse.indexOf(' ');
-
-            if (firstSpaceIndex === -1) {
-                // If there's no space, check if the single word is "true"
-                isCorrect = cleanedResponse.toLowerCase() === 'true';
-                explanationText = "No explanation provided.";
-            } else {
-                const firstWord = cleanedResponse.substring(0, firstSpaceIndex).toLowerCase().trim();
-                // Check if the first word is strictly "true" (handling potential punctuation like "true." or "true,")
-                isCorrect = firstWord.replace(/[^a-z]/g, '') === 'true';
-                explanationText = cleanedResponse.substring(firstSpaceIndex + 1).trim();
+            try {
+                const jsonResponse = JSON.parse(cleanedResponse);
+                isCorrect = jsonResponse.isCorrect;
+                specific = jsonResponse.specificExplanation;
+                general = jsonResponse.generalExplanation;
+            } catch (e) {
+                console.error("Error parsing AI JSON response:", e);
+                // Fallback or error handling
+                specific = "Error al procesar la explicación específica.";
+                general = "No se pudo obtener la explicación general.";
+                isCorrect = false;
             }
 
-            setExplanation(explanationText);
+            setExplanation({ specific, general });
             setModalType(isCorrect ? 'success' : 'error');
 
             // Notify parent to update UI state
@@ -67,7 +74,7 @@ export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonCon
                 correct: isCorrect,
                 message: isCorrect ? "¡Correcto según la IA!" : "Incorrecto según la IA"
             });
-
+            console.log(isCorrect);
         } catch (error) {
             console.error("Error fetching AI explanation:", error);
             Alert.alert("Error", "No se pudo obtener la evaluación de la IA en este momento.");
@@ -104,7 +111,8 @@ export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonCon
             <ExplanationCard
                 visible={!!explanation}
                 onClose={handleClose}
-                content={explanation || ''}
+                specificExplanation={explanation?.specific || ''}
+                generalExplanation={explanation?.general || ''}
                 title={modalType === 'success' ? "¡Bien hecho!" : "Corrección"}
                 type={modalType}
             />

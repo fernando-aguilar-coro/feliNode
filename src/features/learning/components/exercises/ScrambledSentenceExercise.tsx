@@ -8,13 +8,6 @@ import { TtsService } from '../../services/Tts.service';
 import { WordBank } from '../../helpers/drag-native/WordBank';
 import { AnswerArea } from '../../helpers/drag-native/AnswerArea';
 
-if (
-    Platform.OS === 'android' &&
-    UIManager.setLayoutAnimationEnabledExperimental
-) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
 interface Props {
     exercise: ScrambledSentenceExerciseType;
     onAnswer: (answer: string) => void;

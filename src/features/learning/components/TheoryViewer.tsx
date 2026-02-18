@@ -6,7 +6,23 @@ import Tts from 'react-native-tts';
 import { AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { TtsService } from '../services/Tts.service';
-import { getTableMarkdownStyles } from '../styles/md.style';
+import { getMarkdownStyles } from '../styles/md.style';
+
+const renderRules = {
+    table: (node: any, children: any, styles: any) => (
+        // contentContainerStyle es clave para que el padding no corte el contenido
+        <ScrollView
+            key={node.key}
+            horizontal
+            showsHorizontalScrollIndicator={true}
+            style={{ marginVertical: 10 }}
+            contentContainerStyle={{ flexGrow: 1 }} // Permite que crezca si el contenido es poco
+        >
+            {/* Pasamos los estilos de la tabla aquí */}
+            <View style={styles.table}>{children}</View>
+        </ScrollView>
+    ),
+};
 
 interface TheoryViewerProps {
     content: string;
@@ -18,7 +34,7 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
 
-    const mdStyles = useMemo(() => getTableMarkdownStyles(theme), [theme]);
+    const mdStyles = useMemo(() => getMarkdownStyles(theme), [theme]);
 
     useEffect(() => {
         // Listeners for TTS state
@@ -135,7 +151,7 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
             </View>
             <Spacer height={theme.spacing.lg} />
 
-            <Markdown style={mdStyles}>
+            <Markdown style={mdStyles} rules={renderRules}>
                 {content}
             </Markdown>
 

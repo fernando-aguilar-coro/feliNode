@@ -9,12 +9,13 @@ import { getMarkdownStyles } from '../styles/md.style';
 interface Props {
     visible: boolean;
     onClose: () => void;
-    content: string;
+    specificExplanation: string;
+    generalExplanation: string;
     title: string;
     type: 'success' | 'error';
 }
 
-export const ExplanationCard = ({ visible, onClose, content, title, type }: Props) => {
+export const ExplanationCard = ({ visible, onClose, specificExplanation, generalExplanation, title, type }: Props) => {
     const theme = useAppTheme();
     const color = type === 'success' ? theme.colors.success : theme.colors.error;
 
@@ -28,9 +29,10 @@ export const ExplanationCard = ({ visible, onClose, content, title, type }: Prop
             padding: theme.spacing.lg,
         },
         cardContainer: {
-            maxHeight: '95%',
+            maxHeight: '90%',
             width: '100%',
             overflow: 'hidden',
+            borderRadius: 16,
         },
         header: {
             flexDirection: 'row',
@@ -49,6 +51,21 @@ export const ExplanationCard = ({ visible, onClose, content, title, type }: Prop
         },
         scrollContent: {
             padding: theme.spacing.md,
+            paddingBottom: theme.spacing.xl,
+        },
+        section: {
+            marginBottom: theme.spacing.lg,
+        },
+        sectionHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: theme.spacing.xs,
+            gap: 8,
+        },
+        divider: {
+            height: 1,
+            backgroundColor: theme.colors.border,
+            marginVertical: theme.spacing.md,
         }
     }), [theme]);
 
@@ -62,15 +79,47 @@ export const ExplanationCard = ({ visible, onClose, content, title, type }: Prop
             <View style={styles.modalOverlay}>
                 <Card style={styles.cardContainer} padding={0}>
                     <View style={styles.header}>
-                        <AppText variant="lg" weight="bold" color={color}>{title}</AppText>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <MaterialCommunityIcons
+                                name={type === 'success' ? 'check-circle' : 'alert-circle'}
+                                size={24}
+                                color={color}
+                            />
+                            <AppText variant="lg" weight="bold" color={color}>{title}</AppText>
+                        </View>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                             <MaterialCommunityIcons name="close" size={24} color={theme.colors.text} />
                         </TouchableOpacity>
                     </View>
+
                     <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-                        <Markdown style={mdStyles}>
-                            {content}
-                        </Markdown>
+                        {/* Explicación Específica */}
+                        <View style={styles.section}>
+                            <View style={styles.sectionHeader}>
+                                <MaterialCommunityIcons name="text-box-search-outline" size={20} color={theme.colors.primary} />
+                                <AppText variant="md" weight="bold" color={theme.colors.primary}>
+                                    Análisis Específico
+                                </AppText>
+                            </View>
+                            <Markdown style={mdStyles}>
+                                {specificExplanation}
+                            </Markdown>
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        {/* Explicación General */}
+                        <View style={styles.section}>
+                            <View style={styles.sectionHeader}>
+                                <MaterialCommunityIcons name="lightbulb-on-outline" size={20} color={theme.colors.primary} />
+                                <AppText variant="md" weight="bold" color={theme.colors.primary}>
+                                    Respuesta correcta paso a paso
+                                </AppText>
+                            </View>
+                            <Markdown style={mdStyles}>
+                                {generalExplanation}
+                            </Markdown>
+                        </View>
                     </ScrollView>
                 </Card>
             </View>
