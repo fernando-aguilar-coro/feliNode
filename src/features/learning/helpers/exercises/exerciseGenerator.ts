@@ -29,7 +29,7 @@ export const generateListeningExercise = (ex: Exercise): Exercise | null => {
             // 'franc' returns 'spa' for Spanish.
             // We give it a minimum length context to avoid false positives on very short texts if needed,
             // but for now simple check is fine.
-            const lang = franc(translateEx.phrase);
+            const lang = franc(translateEx.phrase, { only: ['spa', 'eng'] });
             if (lang === 'spa') {
                 return null;
             }

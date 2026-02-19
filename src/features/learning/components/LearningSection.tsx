@@ -28,7 +28,6 @@ interface LearningSectionProps {
 export const LearningSection: React.FC<LearningSectionProps> = ({
     lessonId,
     loadingText = 'Cargando...',
-    headerTitle = 'Ejercicios',
     onExit,
     renderCompleted,
 }) => {
@@ -101,7 +100,6 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
             {status === 'exercises' && (
                 <View style={styles.exercisesContainer}>
                     <View style={styles.header}>
-                        <AppText variant="xl" weight="bold">{headerTitle}</AppText>
                         {initialTotal > 0 && (
                             <ProgressBar current={completedCount} total={initialTotal} />
                         )}

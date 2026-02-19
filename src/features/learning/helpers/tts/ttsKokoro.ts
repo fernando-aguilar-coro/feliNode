@@ -6,6 +6,7 @@ import {
     KOKORO_SMALL,
     KOKORO_VOICE_AF_HEART
 } from 'react-native-executorch';
+import { splitTextSmartly } from './textSplitter';
 
 /**
  * Manages Text-to-Speech operations using offline Kokoro TTS via Executorch.
@@ -47,6 +48,10 @@ class TtsManagerService {
         }
     }
 
+    public get isReady(): boolean {
+        return this.isInitialized;
+    }
+
     /**
      * Speaks the text using Kokoro TTS via Executorch.
      */
@@ -61,17 +66,51 @@ class TtsManagerService {
             this.isSpeaking = true;
 
             const speed = options?.rate || 1.0;
+            // Use smart splitter with 200 char limit (conservative)
+            const chunks = splitTextSmartly(text, 200);
 
-            console.log('TTS Manager: Generating audio...');
-            const pcmFloat32 = await this.ttsModule.forward(text, speed);
+            let allPcmData: Float32Array[] = [];
+            let totalLength = 0;
 
-            console.log(`TTS Manager: Audio generated. Samples: ${pcmFloat32.length}`);
+            console.log(`TTS Manager: Generating audio for ${chunks.length} chunks...`);
+
+            for (const chunk of chunks) {
+                const cleanChunk = chunk.trim();
+                if (cleanChunk.length === 0) continue;
+
+                try {
+                    const pcmFloat32 = await this.ttsModule.forward(cleanChunk, speed);
+                    allPcmData.push(pcmFloat32);
+                    totalLength += pcmFloat32.length;
+                } catch (error: any) {
+                    if (error?.message?.includes("The model's forward function did not succeed")) {
+                        console.debug(`TTS Manager: Speak failed for chunk "${cleanChunk.substring(0, 10)}..." (suppressed).`, error);
+                    } else {
+                        console.error('TTS Manager: Speak failed.', error);
+                    }
+                }
+            }
+
+            if (totalLength === 0) {
+                console.warn("TTS Manager: No audio generated.");
+                return;
+            }
+
+            // Concatenate all chunks
+            const combinedPcm = new Float32Array(totalLength);
+            let offset = 0;
+            for (const pcm of allPcmData) {
+                combinedPcm.set(pcm, offset);
+                offset += pcm.length;
+            }
+
+            console.log(`TTS Manager: Audio generated. Total Samples: ${totalLength}`);
 
             // Play the generated audio
-            await this.playPcmData(pcmFloat32);
+            await this.playPcmData(combinedPcm);
 
         } catch (error) {
-            console.error('TTS Manager: Speak failed.', error);
+            console.error('TTS Manager: General Speak failed.', error);
         } finally {
             this.isSpeaking = false;
         }
@@ -140,24 +179,19 @@ class TtsManagerService {
         let binary = '';
         const bytes = new Uint8Array(buffer);
         const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
+        const chunkSize = 0x8000; // 32768
+
+        for (let i = 0; i < len; i += chunkSize) {
+            // @ts-ignore - apply accepts numeric array
+            binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunkSize, len)));
         }
-        return btoa(binary); // Global btoa is available in RN
+        return btoa(binary);
     }
 
     private writeString(view: DataView, offset: number, string: string) {
         for (let i = 0; i < string.length; i++) {
             view.setUint8(offset + i, string.charCodeAt(i));
         }
-    }
-
-    /**
-     * Speaks long text.
-     */
-    public async speakLongText(text: string, language?: string) {
-        // Reuse speak for now
-        await this.speak(text);
     }
 
     public async stop() {
