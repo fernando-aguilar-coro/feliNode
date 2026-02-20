@@ -16,14 +16,6 @@ export const LearningSettingsSection = () => {
                 left={props => <List.Icon {...props} icon="translate" color={theme.colors.text} />}
                 onPress={() => console.log('TODO: Change Language')}
             />
-            <List.Item
-                title="Nivel de Dificultad"
-                titleStyle={{ color: theme.colors.text }}
-                description="Intermedio"
-                descriptionStyle={{ color: theme.colors.textSecondary }}
-                left={props => <List.Icon {...props} icon="school" color={theme.colors.text} />}
-                onPress={() => console.log('TODO: Change Difficulty')}
-            />
         </List.Section>
     );
 };

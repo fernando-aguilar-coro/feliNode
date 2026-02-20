@@ -27,10 +27,9 @@ const renderRules = {
 interface TheoryViewerProps {
     content: string;
     onContinue: () => void;
-    buttonText?: string;
 }
 
-export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue, buttonText }) => {
+export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue }) => {
     const theme = useAppTheme();
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -158,7 +157,7 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue,
 
             <Spacer height={theme.spacing.xl} />
             <AppButton
-                title={buttonText || "Comenzar Ejercicios"}
+                title="Ir al examen"
                 onPress={onContinue}
                 variant="primary"
             />

@@ -19,18 +19,18 @@ export const AudioSettingsSection = () => {
                 onPress={() => console.log('TODO: Change TTS Speed')}
             />
             <List.Item
-                title="Efectos de sonido"
-                titleStyle={{ color: theme.colors.text }}
-                left={props => <List.Icon {...props} icon="volume-high" color={theme.colors.text} />}
-                right={() => <Switch value={sfxEnabled} onValueChange={setSfxEnabled} />}
-            />
-            <List.Item
                 title="Voz"
                 titleStyle={{ color: theme.colors.text }}
                 description="Seleccionar voz del narrador"
                 descriptionStyle={{ color: theme.colors.textSecondary }}
                 left={props => <List.Icon {...props} icon="account-voice" color={theme.colors.text} />}
                 onPress={() => console.log('TODO: Select Voice')}
+            />
+            <List.Item
+                title="Efectos de sonido"
+                titleStyle={{ color: theme.colors.text }}
+                left={props => <List.Icon {...props} icon="volume-high" color={theme.colors.text} />}
+                right={() => <Switch value={sfxEnabled} onValueChange={setSfxEnabled} />}
             />
         </List.Section>
     );
