@@ -5,6 +5,7 @@ import { TranslateExercise as TranslateExerciseType } from '../../types/exercise
 import { AppText, AppTextInput } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { TtsService } from '../../services/Tts.service';
+import { franc } from 'franc';
 
 interface Props {
     exercise: TranslateExerciseType;
@@ -16,7 +17,12 @@ export const TranslateExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
     const theme = useAppTheme();
 
     useEffect(() => {
-        TtsService.speak(exercise.phrase);
+        const language = franc(exercise.phrase);
+        let lang = 'en-US';
+        if (language === 'spa' || language === 'ita') {
+            lang = 'es-ES';
+        }
+        TtsService.speak(exercise.phrase, { language: lang });
     }, []);
 
     const styles = useMemo(() => StyleSheet.create({

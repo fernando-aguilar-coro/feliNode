@@ -7,31 +7,34 @@ import { ExerciseContainer } from './exercises/ExerciseContainer';
 import { ProgressBar } from './ProgressBar';
 import { Screen, AppText, Spacer, AppButton } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 
 interface LearningSectionProps {
     lessonId: string;
     loadingText?: string;
     /**
-     * Optional title for the exercises header. Defaults to "Ejercicios".
-     */
-    headerTitle?: string;
-    /**
      * Callback for when the user wants to exit the flow (e.g. from an error screen or back button)
      */
     onExit?: () => void;
     /**
-     * Render prop for the content to show when the lesson/test is completed.
+     * Optional mode for the lesson.
+     * - 'theory': Only show theory, then finish.
+     * - 'practice': Skip theory, go straight to exercises.
+     * - undefined (default): Show theory then exercises.
      */
-    renderCompleted: () => React.ReactNode;
+    mode?: 'theory' | 'practice';
 }
 
 export const LearningSection: React.FC<LearningSectionProps> = ({
     lessonId,
     loadingText = 'Cargando...',
     onExit,
-    renderCompleted,
+    mode,
 }) => {
     const theme = useAppTheme();
+    const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
     const {
         status,
         theoryContent,
@@ -60,6 +63,13 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
         }
     }, [isFinished, status, completeLesson]);
 
+    // Effect to handle mode-specific logic
+    useEffect(() => {
+        if (status === 'theory' && mode === 'practice') {
+            startExercises();
+        }
+    }, [status, mode, startExercises]);
+
     const styles = useMemo(() => StyleSheet.create({
         centerContainer: {
             flex: 1, // Ensure it takes full height to center properly
@@ -85,7 +95,30 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
     }
 
     if (status === 'completed') {
-        return <>{renderCompleted()}</>;
+        return (
+            <Screen style={styles.centerContainer}>
+                <AppText variant="xxl" weight="bold" color={theme.colors.success} align="center">
+                    ¡Lección Completada!
+                </AppText>
+                <Spacer height={theme.spacing.md} />
+                <AppText variant="lg" align="center">
+                    ¡Buen trabajo! Has dominado esta lección.
+                </AppText>
+                <Spacer height={theme.spacing.xl} />
+                <View style={{ width: '100%', gap: theme.spacing.md }}>
+                    <AppButton
+                        title="Continuar"
+                        onPress={onExit}
+                        variant="outline"
+                    />
+                    <AppButton
+                        title="Más ejercicios (Infinito)"
+                        onPress={() => navigation.navigate('InfinityExercise', { lessonId })}
+                        variant="outline"
+                    />
+                </View>
+            </Screen>
+        );
     }
 
     // Handle case where status is 'theory' or 'exercises' but data might be missing/empty
@@ -93,8 +126,11 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
 
     return (
         <Screen>
-            {status === 'theory' && (
-                <TheoryViewer content={theoryContent} onContinue={startExercises} />
+            {status === 'theory' && mode !== 'practice' && (
+                <TheoryViewer
+                    content={theoryContent}
+                    onContinue={startExercises}
+                />
             )}
 
             {status === 'exercises' && (

@@ -1,4 +1,4 @@
-import { Exercise, ExerciseType, MultipleChoiceExercise, FillInTheBlankExercise, ScrambledSentenceExercise, TranslateExercise, PronunciationExercise, ListeningExercise } from '../../types/exercise';
+import { Exercise, ExerciseType, MultipleChoiceExercise, FillInTheBlankExercise, ScrambledSentenceExercise, TranslateExercise, PronunciationExercise, ListeningExercise, SelectPairsExercise } from '../../types/exercise';
 
 /**
  * Interface representing the raw structure from the database.
@@ -7,7 +7,7 @@ import { Exercise, ExerciseType, MultipleChoiceExercise, FillInTheBlankExercise,
 export interface DbExercise {
     id: number | string;
     type: string;
-    instruction: string;
+    instruction: string | null;
     content: string; // JSON string
 }
 
@@ -30,7 +30,7 @@ const mapMultipleChoice = (dbExercise: DbExercise, content: any): MultipleChoice
     return {
         id: dbExercise.id.toString(),
         type: ExerciseType.MULTIPLE_CHOICE,
-        question: dbExercise.instruction,
+        question: dbExercise.instruction || "",
         options: content.options?.map((o: any) => ({
             text: o.option_text,
             icon: o.icon
@@ -47,7 +47,7 @@ const mapFillInTheBlank = (dbExercise: DbExercise, content: any): FillInTheBlank
     return {
         id: dbExercise.id.toString(),
         type: ExerciseType.FILL_IN_THE_BLANK,
-        question: dbExercise.instruction,
+        question: dbExercise.instruction || "",
         sentence: sentence,
         correctAnswer: content.correct_answer,
     };
@@ -60,7 +60,7 @@ const mapScrambledSentence = (dbExercise: DbExercise, content: any): ScrambledSe
     return {
         id: dbExercise.id.toString(),
         type: ExerciseType.SCRAMBLED_SENTENCE,
-        question: dbExercise.instruction,
+        question: dbExercise.instruction || "",
         segments: segments,
         correctAnswer: text,
     };
@@ -69,7 +69,7 @@ const mapScrambledSentence = (dbExercise: DbExercise, content: any): ScrambledSe
 const mapTranslate = (dbExercise: DbExercise, content: any): TranslateExercise => ({
     id: dbExercise.id.toString(),
     type: ExerciseType.TRANSLATE,
-    question: dbExercise.instruction,
+    question: dbExercise.instruction || "Traduce la siguiente frase",
     phrase: content.phrase || '',
     correctAnswer: content.correct_answer || '',
 });
@@ -77,16 +77,29 @@ const mapTranslate = (dbExercise: DbExercise, content: any): TranslateExercise =
 const mapPronunciation = (dbExercise: DbExercise, content: any): PronunciationExercise => ({
     id: dbExercise.id.toString(),
     type: ExerciseType.PRONUNCIATION,
-    question: dbExercise.instruction,
+    question: dbExercise.instruction || "Pronuncia la siguiente frase",
     phrase: content.phrase || '',
 });
 
-const mapListening = (dbExercise: DbExercise, content: any): ListeningExercise => ({
+const mapListening = (dbExercise: DbExercise, content: any): ListeningExercise => {
+    const text = content.correct_answer || content.phrase || '';
+    const segments = text.replace(/[\.,\?¡!¿]/g, '').split(' ').filter((w: string) => w.trim() !== '').sort(() => Math.random() - 0.5);
+    return {
+        id: dbExercise.id.toString(),
+        type: ExerciseType.LISTENING,
+        question: dbExercise.instruction || "",
+        phrase: content.phrase || '',
+        correctAnswer: text,
+        segments,
+    };
+};
+
+const mapSelectPairs = (dbExercise: DbExercise, content: any): SelectPairsExercise => ({
     id: dbExercise.id.toString(),
-    type: ExerciseType.LISTENING,
-    question: dbExercise.instruction,
-    phrase: content.phrase || '',
-    correctAnswer: content.correct_answer || content.phrase || '',
+    type: ExerciseType.SELECT_PAIRS,
+    question: dbExercise.instruction || "Selecciona los pares correctos",
+    pairs: content.pairs || [],
+    correctAnswer: 'DONE',
 });
 
 /**
@@ -109,6 +122,8 @@ export const mapDbExerciseToAppExercise = (dbExercise: DbExercise): Exercise | n
             return mapPronunciation(dbExercise, content);
         case 'listening':
             return mapListening(dbExercise, content);
+        case 'select_pairs':
+            return mapSelectPairs(dbExercise, content);
         default:
             console.warn(`[ExerciseService] Unknown type: ${dbExercise.type}`);
             return null;

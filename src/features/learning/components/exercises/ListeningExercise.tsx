@@ -1,10 +1,13 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ListeningExercise as ListeningExerciseType } from '../../types/exercise';
-import { AppText, AppTextInput } from '../../../../components';
+import { AppText } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { TtsService } from '../../services/Tts.service';
+import { ReactNativeTts } from '../../helpers/tts/reactNativeTTS';
+import { WordBank } from '../../helpers/drag-native/WordBank';
+import { AnswerArea } from '../../helpers/drag-native/AnswerArea';
 
 interface Props {
     exercise: ListeningExerciseType;
@@ -14,11 +17,49 @@ interface Props {
 
 export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
     const theme = useAppTheme();
+    const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
     useEffect(() => {
         // Reproducir el audio al montar el componente
         TtsService.speak(exercise.phrase);
     }, [exercise.phrase]);
+
+    useEffect(() => {
+        // Reset when exercise changes
+        setSelectedIndices([]);
+    }, [exercise]);
+
+    useEffect(() => {
+        // Sync back to parent
+        const answer = selectedIndices.map(i => exercise.segments[i]).join(' ');
+        if (answer !== userAnswer) {
+            onAnswer(answer);
+        }
+    }, [selectedIndices, exercise.segments, onAnswer, userAnswer]);
+
+    const handleSelect = (index: number) => {
+        setSelectedIndices(current => [...current, index]);
+        TtsService.speak(exercise.segments[index]);
+    };
+
+    const handleRemove = (listIndex: number) => {
+        const word = exercise.segments[selectedIndices[listIndex]];
+        const newIndices = [...selectedIndices];
+        newIndices.splice(listIndex, 1);
+        setSelectedIndices(newIndices);
+        TtsService.speak(word);
+    };
+
+    const handleReorder = (fromIndex: number, toIndex: number) => {
+        const newIndices = [...selectedIndices];
+        const [movedItem] = newIndices.splice(fromIndex, 1);
+        newIndices.splice(toIndex, 0, movedItem);
+        setSelectedIndices(newIndices);
+    };
+
+    const selectedWords = useMemo(() =>
+        selectedIndices.map(i => exercise.segments[i]),
+        [selectedIndices, exercise.segments]);
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -68,10 +109,11 @@ export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
             fontSize: 12,
             color: theme.colors.textSecondary,
         },
-        input: {
-            minHeight: 100,
-            textAlignVertical: 'top',
-        }
+        instruction: {
+            marginBottom: theme.spacing.sm,
+            color: theme.colors.textSecondary,
+        },
+        divider: { height: 10 },
     }), [theme]);
 
     return (
@@ -92,7 +134,7 @@ export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
                 <View style={styles.controlsContainer}>
                     <View style={styles.controlItem}>
                         <TouchableOpacity
-                            onPress={() => TtsService.speak(exercise.phrase, { rate: 0.4 })}
+                            onPress={() => TtsService.speak(exercise.phrase)}
                             style={styles.playButton}
                             activeOpacity={0.7}
                         >
@@ -103,7 +145,7 @@ export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
 
                     <View style={styles.controlItem}>
                         <TouchableOpacity
-                            onPress={() => TtsService.speak(exercise.phrase, { rate: 0.15 })}
+                            onPress={() => TtsService.speak(exercise.phrase, { rate: 0.7 })}
                             style={[styles.playButton, styles.slowButton]}
                             activeOpacity={0.7}
                         >
@@ -111,24 +153,37 @@ export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
                         </TouchableOpacity>
                         <AppText style={styles.buttonLabel}>Lento</AppText>
                     </View>
+
+                    <View style={styles.controlItem}>
+                        <TouchableOpacity
+                            onPress={() => ReactNativeTts.speak(exercise.phrase, 'en-US', 0.1)}
+                            style={[styles.playButton, styles.slowButton, { backgroundColor: '#795548' }]}
+                            activeOpacity={0.7}
+                        >
+                            <MaterialCommunityIcons name="bug" size={24} color="white" />
+                        </TouchableOpacity>
+                        <AppText style={styles.buttonLabel}>Ultra Lento</AppText>
+                    </View>
                 </View>
 
-                <AppText
-                    variant="md"
-                    weight="medium"
-                    style={{ marginBottom: theme.spacing.sm, color: theme.colors.textSecondary }}
-                >
-                    Escribe lo que escuchas:
+                <AppText variant="md" weight="medium" style={styles.instruction}>
+                    Ordena las palabras que escuchas:
                 </AppText>
 
-                <AppTextInput
-                    value={userAnswer}
-                    onChangeText={onAnswer}
-                    placeholder="Escribe tu respuesta aquí..."
-                    autoCapitalize="none"
-                    multiline
-                    numberOfLines={3}
-                    style={styles.input}
+                <AnswerArea
+                    selectedWords={selectedWords}
+                    onRemove={handleRemove}
+                    onReorder={handleReorder}
+                    theme={theme}
+                />
+
+                <View style={styles.divider} />
+
+                <WordBank
+                    words={exercise.segments || []}
+                    selectedIndices={selectedIndices}
+                    onSelect={handleSelect}
+                    theme={theme}
                 />
             </ScrollView>
         </KeyboardAvoidingView>

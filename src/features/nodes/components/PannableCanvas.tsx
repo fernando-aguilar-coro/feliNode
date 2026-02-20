@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { StyleSheet, Dimensions, ViewStyle } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withDecay } from 'react-native-reanimated';
 
@@ -18,6 +18,7 @@ export interface PannableCanvasRef {
 }
 
 const clamp = (val: number, min: number, max: number) => {
+    'worklet';
     return Math.min(Math.max(val, min), max);
 };
 

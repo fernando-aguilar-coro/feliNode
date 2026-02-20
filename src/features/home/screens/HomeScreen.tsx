@@ -1,10 +1,9 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { TreeNodeScreen } from '../../nodes/screens/TreeNodeScreen';
-import { AppButton } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -44,11 +43,7 @@ export const HomeScreen = () => {
             fontWeight: 'bold',
             textAlign: 'center',
         },
-        practiceButtonContainer: {
-            padding: 10,
-            alignItems: 'center',
-            backgroundColor: theme.colors.background,
-        }
+
     }), [theme]);
 
     return (
@@ -59,14 +54,7 @@ export const HomeScreen = () => {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.practiceButtonContainer}>
-                <AppButton
-                    title="Práctica de Pronunciación"
-                    onPress={() => navigation.navigate('PronunciationAssessment')}
-                    variant="secondary"
-                    style={{ width: '100%' }}
-                />
-            </View>
+
 
             {netInfo.isConnected === false && (
                 <View style={styles.offlineContainer}>

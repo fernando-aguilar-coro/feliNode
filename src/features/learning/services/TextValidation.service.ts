@@ -64,7 +64,7 @@ export const TextValidationService = {
         return normalized
             .trim()
             .replace(/\s+/g, ' ')           // Collapse multiple spaces
-            .replace(/[.;]+$/g, '')     // Remove trailing punctuation
+            .replace(/[.;¡¿!]+$/g, '')     // Remove trailing punctuation
             .trim();
     }
 };

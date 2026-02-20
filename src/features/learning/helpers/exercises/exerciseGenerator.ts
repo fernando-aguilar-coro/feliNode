@@ -1,6 +1,10 @@
 import { Exercise, ExerciseType, PronunciationExercise, ScrambledSentenceExercise, TranslateExercise, FillInTheBlankExercise } from '../../types/exercise';
 import { franc } from 'franc';
 
+const scrambleString = (text: string): string[] => {
+    return text.replace(/[\.,\?¡!¿]/g, '').split(' ').filter((w: string) => w.trim() !== '').sort(() => Math.random() - 0.5);
+};
+
 /**
  * Logic to generate a listening exercise based on another exercise type.
  */
@@ -10,17 +14,19 @@ export const generateListeningExercise = (ex: Exercise): Exercise | null => {
             return {
                 id: `${ex.id}-listening`,
                 type: ExerciseType.LISTENING,
-                question: 'Escucha y escribe las palabras que escuchaste',
+                question: 'Escucha y ordena las palabras',
                 phrase: (ex as PronunciationExercise).phrase,
                 correctAnswer: (ex as PronunciationExercise).phrase,
+                segments: scrambleString((ex as PronunciationExercise).phrase),
             };
         case ExerciseType.SCRAMBLED_SENTENCE:
             return {
                 id: `${ex.id}-listening`, // Unique ID
                 type: ExerciseType.LISTENING,
-                question: 'Escucha y escribe la oración correcta',
+                question: 'Escucha y ordena la oración correcta',
                 phrase: (ex as ScrambledSentenceExercise).correctAnswer,
                 correctAnswer: (ex as ScrambledSentenceExercise).correctAnswer,
+                segments: scrambleString((ex as ScrambledSentenceExercise).correctAnswer),
             };
         case ExerciseType.TRANSLATE:
             const translateEx = ex as TranslateExercise;
@@ -37,9 +43,10 @@ export const generateListeningExercise = (ex: Exercise): Exercise | null => {
             return {
                 id: `${ex.id}-listening`,
                 type: ExerciseType.LISTENING,
-                question: 'Escribe la traducción de lo que escuchas',
+                question: 'Ordena la traducción de lo que escuchas',
                 phrase: translateEx.phrase, // Speak the target language
                 correctAnswer: translateEx.correctAnswer, // Expect matching text
+                segments: scrambleString(translateEx.correctAnswer),
             };
         case ExerciseType.FILL_IN_THE_BLANK:
             const fillEx = ex as FillInTheBlankExercise;
@@ -50,9 +57,10 @@ export const generateListeningExercise = (ex: Exercise): Exercise | null => {
             return {
                 id: `${ex.id}-listening`,
                 type: ExerciseType.LISTENING,
-                question: 'Escucha y escribe la oración completa',
+                question: 'Escucha y ordena la oración completa',
                 phrase: fullSentence,
                 correctAnswer: fullSentence,
+                segments: scrambleString(fullSentence),
             };
         default:
             return null;

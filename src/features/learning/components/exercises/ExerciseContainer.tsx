@@ -7,6 +7,7 @@ import { TranslateExercise } from './TranslateExercise';
 import { ScrambledSentenceExercise } from './ScrambledSentenceExercise';
 import { PronunciationExercise } from './PronunciationExercise';
 import { ListeningExercise } from './ListeningExercise';
+import { SelectPairsExercise } from './SelectPairsExercise';
 import { Card, AppButton, AppText, Spacer } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { AiExplainButton } from '../AiExplainButton';
@@ -89,6 +90,14 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
             case ExerciseType.LISTENING:
                 return (
                     <ListeningExercise
+                        exercise={exercise}
+                        onAnswer={setUserAnswer}
+                        userAnswer={userAnswer}
+                    />
+                );
+            case ExerciseType.SELECT_PAIRS:
+                return (
+                    <SelectPairsExercise
                         exercise={exercise}
                         onAnswer={setUserAnswer}
                         userAnswer={userAnswer}

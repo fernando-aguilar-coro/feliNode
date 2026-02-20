@@ -102,16 +102,26 @@ export const useExercises = (initialExercises: Exercise[]) => {
         }
     };
 
+    /**
+     * Adds new exercises to the current list.
+     * Useful for infinite scrolling / continuous learning.
+     */
+    const addExercises = (newExercises: Exercise[]) => {
+        setExercises(prev => [...prev, ...newExercises]);
+    };
+
     return {
         currentExercise,
         currentIndex,
         totalExercises: exercises.length, // List length might grow
-        initialTotal: initialExercises.length, // Fixed initial length for progress bar
+        initialTotal: initialExercises.length, // Fixed initial length for progress bar (or we might need to update this logic if we want dynamic progress)
         completedCount, // Actual progress
         isFinished,
         checkAnswer,
         nextExercise,
         lastResult,
         overrideResult,
+        addExercises,
+        exercises // Expose full list if needed
     };
 };

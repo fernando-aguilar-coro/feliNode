@@ -4,7 +4,7 @@ adb reverse tcp:8081 tcp:8081
 
 #shortCut 
 
-
+logo-octocat
 npx expo start --localhost
 
 /kkp7#X$_eZ7PsH

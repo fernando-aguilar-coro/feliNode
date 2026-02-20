@@ -81,7 +81,7 @@ class ReactNativeTtsService {
      * Speaks the provided text using the device's TTS engine.
      * @param text The text to speak.
      */
-    public async speak(text: string, language: string = 'en-US') {
+    public async speak(text: string, language: string = 'en-US', rate: number = 0.5) {
         // Clear long text queue if any
         this.speechQueue = [];
         this.currentSpeechIndex = 0;
@@ -93,7 +93,8 @@ class ReactNativeTtsService {
             .trim();
         try {
             Tts.stop();
-            await Tts.setDefaultLanguage(language)
+            await Tts.setDefaultLanguage(language);
+            await Tts.setDefaultRate(rate);
             Tts.speak(cleanText);
         } catch (error) {
             console.error('TTS Error:', error);

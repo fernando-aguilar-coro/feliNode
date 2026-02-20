@@ -5,6 +5,7 @@ export enum ExerciseType {
     SCRAMBLED_SENTENCE = 'SCRAMBLED_SENTENCE',
     PRONUNCIATION = 'PRONUNCIATION',
     LISTENING = 'LISTENING',
+    SELECT_PAIRS = 'SELECT_PAIRS',
 }
 
 export interface BaseExercise {
@@ -47,6 +48,13 @@ export interface ListeningExercise extends BaseExercise {
     type: ExerciseType.LISTENING;
     phrase: string;
     correctAnswer: string;
+    segments: string[];
 }
 
-export type Exercise = MultipleChoiceExercise | FillInTheBlankExercise | TranslateExercise | ScrambledSentenceExercise | PronunciationExercise | ListeningExercise;
+export interface SelectPairsExercise extends BaseExercise {
+    type: ExerciseType.SELECT_PAIRS;
+    pairs: { left: string; right: string }[];
+    correctAnswer: string;
+}
+
+export type Exercise = MultipleChoiceExercise | FillInTheBlankExercise | TranslateExercise | ScrambledSentenceExercise | PronunciationExercise | ListeningExercise | SelectPairsExercise;

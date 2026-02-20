@@ -51,6 +51,13 @@ export const initDatabase = async () => {
       is_synced BOOLEAN DEFAULT 0,
       updated_at TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS infinity_progress (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      target_id TEXT UNIQUE, -- lessonId OR topic name
+      max_score INTEGER DEFAULT 0,
+      updated_at TEXT
+    );
   `);
 
   console.log('Database initialized successfully');
