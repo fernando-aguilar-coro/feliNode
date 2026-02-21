@@ -68,7 +68,6 @@ export const AppButton: React.FC<AppButtonProps> = ({
     const isDisabled = disabled || loading;
 
     const handlePress = (e: any) => {
-        audioService.playClickSound();
         if (onPress) {
             onPress(e);
         }

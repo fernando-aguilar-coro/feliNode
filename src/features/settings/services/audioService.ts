@@ -1,11 +1,32 @@
 import { Audio } from 'expo-av';
 import { useSettingsStore } from '../../../store/SettingsStore';
+import { AppState, AppStateStatus } from 'react-native';
 
 class AudioService {
     private bgmSound: Audio.Sound | null = null;
     private static instance: AudioService;
+    private wasPlayingBeforeBackground: boolean = false;
 
-    private constructor() { }
+    private constructor() {
+        AppState.addEventListener('change', this.handleAppStateChange);
+    }
+
+    private handleAppStateChange = async (nextAppState: AppStateStatus) => {
+        if (nextAppState.match(/inactive|background/)) {
+            if (this.bgmSound) {
+                const status = await this.bgmSound.getStatusAsync();
+                this.wasPlayingBeforeBackground = 'isPlaying' in status && status.isPlaying;
+                if (this.wasPlayingBeforeBackground) {
+                    this.pauseBGM();
+                }
+            }
+        } else if (nextAppState === 'active') {
+            if (this.wasPlayingBeforeBackground) {
+                this.playBGM();
+                this.wasPlayingBeforeBackground = false;
+            }
+        }
+    };
 
     public static getInstance(): AudioService {
         if (!AudioService.instance) {
@@ -19,7 +40,7 @@ class AudioService {
         if (!sfxEnabled) return;
 
         console.log(`[AudioService] Playing SFX: ${description}`);
-        /* 
+
         // Uncomment once assets are available
         try {
             const { sound } = await Audio.Sound.createAsync(asset);
@@ -32,27 +53,27 @@ class AudioService {
         } catch (error) {
             console.error(`Failed to play ${description} sound`, error);
         }
-        */
     };
 
     public playClickSound = () => {
-        // this.playSfx(require('../../../assets/audio/click.mp3'), 'click');
-        this.playSfx(null, 'click');
+        this.playSfx(require('../../../../assets/audio/click.mp3'), 'click');
     };
 
     public playCorrectSound = () => {
-        // this.playSfx(require('../../../assets/audio/correct.mp3'), 'correct');
-        this.playSfx(null, 'correct');
+        this.playSfx(require('../../../../assets/audio/correct.wav'), 'correct');
     };
 
     public playIncorrectSound = () => {
-        // this.playSfx(require('../../../assets/audio/incorrect.mp3'), 'incorrect');
-        this.playSfx(null, 'incorrect');
+        const sounds = [
+            require('../../../../assets/audio/incorrect.wav'),
+            require('../../../../assets/audio/incorrect_1.wav')
+        ];
+        const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+        this.playSfx(randomSound, 'incorrect');
     };
 
     public playSuccessSound = () => {
-        // this.playSfx(require('../../../assets/audio/success.mp3'), 'success');
-        this.playSfx(null, 'success');
+        this.playSfx(require('../../../../assets/audio/success.wav'), 'success');
     };
 
     public playBGM = async () => {
@@ -63,8 +84,6 @@ class AudioService {
         }
 
         console.log(`[AudioService] Playing BGM`);
-        /*
-        // Uncomment once assets are available
         try {
             if (this.bgmSound) {
                 const status = await this.bgmSound.getStatusAsync();
@@ -75,7 +94,7 @@ class AudioService {
             }
 
             const { sound } = await Audio.Sound.createAsync(
-                require('../../../assets/audio/bgm.mp3'),
+                require('../../../../assets/audio/bg.mp3'),
                 { isLooping: true }
             );
             this.bgmSound = sound;
@@ -83,13 +102,11 @@ class AudioService {
         } catch (error) {
             console.error('Failed to play BGM', error);
         }
-        */
+
     };
 
     public stopBGM = async () => {
         console.log(`[AudioService] Stopping BGM`);
-        /*
-        // Uncomment once assets are available
         try {
             if (this.bgmSound) {
                 await this.bgmSound.stopAsync();
@@ -99,13 +116,10 @@ class AudioService {
         } catch (error) {
             console.error('Failed to stop BGM', error);
         }
-        */
     };
 
     public pauseBGM = async () => {
         console.log(`[AudioService] Pausing BGM`);
-        /*
-        // Uncomment once assets are available
         try {
             if (this.bgmSound) {
                 const status = await this.bgmSound.getStatusAsync();
@@ -116,7 +130,6 @@ class AudioService {
         } catch (error) {
             console.error('Failed to pause BGM', error);
         }
-        */
     }
 }
 

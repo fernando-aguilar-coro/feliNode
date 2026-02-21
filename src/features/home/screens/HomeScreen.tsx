@@ -1,26 +1,56 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TreeNodeScreen } from '../../nodes/screens/TreeNodeScreen';
+import { ModuleProgressScreen } from '../../nodes/screens/ModuleProgressScreen';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { MaterialIcons } from '@expo/vector-icons';
+import { audioService } from '../../settings/services/audioService';
 
 
 export const HomeScreen = () => {
     const netInfo = useNetInfo();
     const theme = useAppTheme();
+    const [viewMode, setViewMode] = useState<'tree' | 'list'>('tree');
+
+    const toggleViewMode = () => {
+        audioService.playClickSound();
+        setViewMode(prev => prev === 'tree' ? 'list' : 'tree');
+    };
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
             flex: 1,
             backgroundColor: theme.colors.background,
         },
-        header: {
-            padding: 10,
-            alignItems: 'flex-end',
-            borderBottomWidth: 1,
-            borderBottomColor: theme.colors.border,
-            backgroundColor: theme.colors.background,
+        banner: {
+            backgroundColor: theme.colors.primary,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginHorizontal: 16,
+            marginTop: 10,
+            marginBottom: 10,
+            borderRadius: 8,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 3,
+            elevation: 3,
+        },
+        bannerContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        bannerText: {
+            color: theme.colors.white,
+            fontSize: 16,
+            fontWeight: 'bold',
+            marginLeft: 8,
         },
         content: {
             flex: 1,
@@ -49,9 +79,21 @@ export const HomeScreen = () => {
                     </Text>
                 </View>
             )}
+            <TouchableOpacity onPress={toggleViewMode} style={styles.banner} activeOpacity={0.8}>
+                <View style={styles.bannerContent}>
+                    <MaterialIcons
+                        name={viewMode === 'tree' ? 'view-list' : 'account-tree'}
+                        size={24}
+                        color={theme.colors.white}
+                    />
+                    <Text style={styles.bannerText}>
+                        {viewMode === 'tree' ? 'Cambiar a Vista de Lista' : 'Cambiar a Mapa de Nodos'}
+                    </Text>
+                </View>
+            </TouchableOpacity>
 
             <View style={styles.content}>
-                <TreeNodeScreen />
+                {viewMode === 'tree' ? <TreeNodeScreen /> : <ModuleProgressScreen />}
             </View>
         </SafeAreaView>
     );

@@ -87,6 +87,10 @@ export const HomeTabNavigator = () => {
                         <Ionicons name="mic-outline" size={24} color={color} />
                     ),
                 }}
+                listeners={{
+                    focus: () => audioService.pauseBGM(),
+                    blur: () => audioService.playBGM(),
+                }}
             />
             <Tab.Screen
                 name="Settings"

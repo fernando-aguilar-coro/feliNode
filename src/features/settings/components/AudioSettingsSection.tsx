@@ -4,6 +4,7 @@ import { List, Switch, Portal, Dialog, RadioButton, Button } from 'react-native-
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useSettingsStore } from '../../../store/SettingsStore';
 import { ReactNativeTts } from '../../learning/helpers/tts/reactNativeTTS';
+import { audioService } from '../services/audioService';
 import {
     KOKORO_VOICE_AF_HEART, KOKORO_VOICE_AF_RIVER, KOKORO_VOICE_AF_SARAH,
     KOKORO_VOICE_AM_ADAM, KOKORO_VOICE_AM_MICHAEL, KOKORO_VOICE_AM_SANTA,
@@ -25,6 +26,7 @@ export const AudioSettingsSection = () => {
     const theme = useAppTheme();
     const {
         sfxEnabled, setSfxEnabled,
+        bgmEnabled, setBgmEnabled,
         englishVoice, setEnglishVoice,
         spanishVoiceId, setSpanishVoiceId
     } = useSettingsStore();
@@ -86,7 +88,15 @@ export const AudioSettingsSection = () => {
                 title="Música de fondo"
                 titleStyle={{ color: theme.colors.text }}
                 left={props => <List.Icon {...props} icon="music-note" color={theme.colors.text} />}
-                right={() => <Switch value={useSettingsStore(s => s.bgmEnabled)} onValueChange={useSettingsStore(s => s.setBgmEnabled)} />}
+                right={() => <Switch value={bgmEnabled} onValueChange={(val) => {
+                    setBgmEnabled(val);
+                    if (val) {
+                        useSettingsStore.setState({ bgmEnabled: val }); // immediately update just in case
+                        audioService.playBGM();
+                    } else {
+                        audioService.stopBGM();
+                    }
+                }} />}
             />
 
             {/* Spanish Voice Dialog */}

@@ -15,12 +15,11 @@ export const InfinityPairsService = {
         const prompt = `
         Genera ${batchSize} pares de palabras y frases variadas para ${topic}.
         Tu salida DEBE ser estrictamente un objeto JSON válido con un arreglo "pairs".
-
         Estructura:
         {
           "pairs": [
-             { "left": "Inglés1", "right": "Español1" },
-             { "left": "Inglés2", "right": "Español2" }
+             { "left": "word or phrase in english", "right": "translation in spanish" },
+             { "left": "word or phrase in english", "right": "translation in spanish" }
           ]
         }
         NO incluyas texto fuera del JSON. Devuelve pares únicos.

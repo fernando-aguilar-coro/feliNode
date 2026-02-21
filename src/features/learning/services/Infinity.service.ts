@@ -37,49 +37,19 @@ export const InfinityService = {
     generateInfiniteExercises: async (topic: string = 'General English', count: number = 5): Promise<Exercise[]> => {
         // Updated prompt based on user's successful "COMPLETE LESSON" prompt, 
         // extracting only the exercises part for this service.
-        const prompt = `
-        Tu tarea es generar una lista de ejercicios de práctica para el tema: "${topic}".
+        const prompt = `Genera ${count} ejercicios de inglés sobre: "${topic}".
+        Responde SOLO con JSON válido:
+        { "exercises": [...] }
 
-        Tu salida DEBE ser estrictamente un objeto JSON válido con la siguiente estructura:
-        {
-          "exercises": [
-             // Array de mínimo ${count} ejercicios variados
-          ]
-        }
+        Tipos y esquemas:
+        - multiple_choice: {question, content:{options:[{option_text,is_correct}]}} (min 3 opciones)
+        - scrambled_sentence: {question, content:{correct_answer}}
+        - fill_blank: {question, content:{phrase,correct_answer}}
+        - translate: {content:{phrase,correct_answer}}
+        - pronunciation: {content:{phrase}}
+        - select_pairs: {content:{pairs:[{left,right}]}} (min 3 pares)
 
-        ### DETALLES DE "exercises" (Tipos Permitidos y sus esquemas de content):
-        Cada ejercicio debe tener:
-        - "type": (uno de los siguientes)
-        - "question": (Instrucción O Pregunta. NO repitas el texto del ejercicio aquí si ya está en 'content')
-        - "content": (según el tipo)
-
-        1. **"multiple_choice"**
-           - \`question\`: "La pregunta completa aquí (ej: '¿Cómo se dice gato? o rellena la frase')"
-           - \`content\`: { "options": [{ "option_text": "...", "is_correct": boolean }] } 
-            - minimo 3 opciones
-        2. **"scrambled_sentence"**
-           - \`question\`: "Ordena las palabras para formar la oración correcta." (O similar)
-           - \`content\`: { "correct_answer": "Full sentence to be scrambled" }
-
-        3. **"fill_blank"**
-           - \`question\`: "Completa la frase con el verbo correcto." (Genérico)
-           - \`content\`: { "phrase": "I ____ play football", "correct_answer": "can" }
-
-        4. **"translate"**
-           - \`content\`: { "phrase": "English phrase to translate", "correct_answer": "Frase en Español" }
-
-        5. **"pronunciation"**
-           - \`content\`: { "phrase": "English phrase to pronounce" }
-
-        6. **"select_pairs"**
-           - \`content\`: { "pairs": [{ "left": "string", "right": "string" }, { "left": "string", "right": "string" }] }
-            - minimo 3 pares 
-        ### REGLAS IMPORTANTES:
-        - **NO** incluyas texto fuera del JSON.
-        - Evita la redundancia: si el texto a trabajar está en \`content.phrase\`, NO lo pongas en \`question\`.
-        - "question" para tipos distintos a multiple_choice debe ser una instrucción corta en Español.
-        - Genera ejercicios diversos y relevantes para el nivel implícito del tema.
-        `;
+        Reglas: instrucciones cortas en español, ejercicios variados y relevantes.`;
 
         try {
             const responseText = await GeminiService.generateResponse(prompt, { raw: true });

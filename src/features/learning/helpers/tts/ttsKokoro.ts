@@ -81,8 +81,10 @@ class TtsManagerService {
             this.isSpeaking = true;
 
             const speed = options?.rate || 1.0;
-            // Use smart splitter with 200 char limit (conservative)
-            const chunks = splitTextSmartly(text, 200);
+            // Use smart splitter with dynamic size based on speed to prevent buffer overflow (Error 18)
+            // Slower speeds generate more audio per character, needing smaller chunks.
+            const maxChunkSize = Math.max(30, Math.floor(200 * speed));
+            const chunks = splitTextSmartly(text, maxChunkSize);
 
             let allPcmData: Float32Array[] = [];
             let totalLength = 0;
@@ -91,7 +93,8 @@ class TtsManagerService {
 
             for (const chunk of chunks) {
                 const cleanChunk = chunk.trim();
-                if (cleanChunk.length === 0) continue;
+                // Skip empty chunks or chunks without letters/numbers (which cause Error 2: InvalidArgument)
+                if (cleanChunk.length === 0 || !/[\p{L}\p{N}]/u.test(cleanChunk)) continue;
 
                 try {
                     const pcmFloat32 = await this.ttsModule.forward(cleanChunk, speed);
