@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { useInfinityPairs, InfinityPairItem } from '../hooks/useInfinityPairs';
+import { audioService } from '../../settings/services/audioService';
 
 type InfinitySelectPairsNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'InfinitySelectPairs'>;
 type InfinitySelectPairsRouteProp = RouteProp<HomeStackParamList, 'InfinitySelectPairs'>;
@@ -41,6 +42,22 @@ export const InfinitySelectPairsScreen = () => {
         initialLives: 7,
         initialTime: 90
     });
+
+    React.useEffect(() => {
+        if (score > 0) audioService.playCorrectSound();
+    }, [score]);
+
+    React.useEffect(() => {
+        if (lives < 7 && !isGameOver) audioService.playIncorrectSound();
+    }, [lives]);
+
+    React.useEffect(() => {
+        if (roundNum > 1) audioService.playSuccessSound();
+    }, [roundNum]);
+
+    React.useEffect(() => {
+        if (isGameOver && score > 0) audioService.playSuccessSound();
+    }, [isGameOver]);
 
     const handleExit = () => {
         navigation.goBack();

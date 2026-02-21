@@ -7,6 +7,7 @@ import {
     KOKORO_VOICE_AF_HEART
 } from 'react-native-executorch';
 import { splitTextSmartly } from './textSplitter';
+import { useSettingsStore } from '../../../../store/SettingsStore';
 
 /**
  * Manages Text-to-Speech operations using offline Kokoro TTS via Executorch.
@@ -16,6 +17,7 @@ class TtsManagerService {
     private isInitialized = false;
     private isSpeaking = false;
     private soundObject: Audio.Sound | null = null;
+    private currentVoiceSource: any;
 
     constructor() {
         this.ttsModule = new TextToSpeechModule();
@@ -29,10 +31,14 @@ class TtsManagerService {
         try {
             console.log('TTS Manager: Initializing Executorch TTS...');
 
+            const state = useSettingsStore.getState();
+            const selectedVoice = state.englishVoice || KOKORO_VOICE_AF_HEART;
+            this.currentVoiceSource = selectedVoice.voiceSource;
+
             // Prepare configuration using library constants (Auto-Download from HuggingFace)
             const config: TextToSpeechConfig = {
                 model: KOKORO_SMALL,
-                voice: KOKORO_VOICE_AF_HEART,
+                voice: selectedVoice,
             };
 
             await this.ttsModule.load(config, (progress) => {
@@ -56,6 +62,15 @@ class TtsManagerService {
      * Speaks the text using Kokoro TTS via Executorch.
      */
     public async speak(text: string, options?: { rate?: number }) {
+        const state = useSettingsStore.getState();
+        const selectedVoice = state.englishVoice || KOKORO_VOICE_AF_HEART;
+
+        if (this.currentVoiceSource !== selectedVoice.voiceSource) {
+            console.log('TTS Manager: Voice changed, re-initializing...');
+            this.isInitialized = false;
+            await this.initialize();
+        }
+
         if (!this.isInitialized) {
             console.warn('TTS Manager: Executorch TTS not initialized.');
             return;
@@ -160,6 +175,14 @@ class TtsManagerService {
             const base64 = this.arrayBufferToBase64(buffer);
 
             await RNFS.writeFile(wavPath, base64, 'base64');
+
+            // Ensure audio mode allows playback even if in background/silent
+            await Audio.setAudioModeAsync({
+                playsInSilentModeIOS: true,
+                staysActiveInBackground: true,
+                shouldDuckAndroid: true,
+                playThroughEarpieceAndroid: false,
+            });
 
             // 3. Play with Expo AV
             const { sound } = await Audio.Sound.createAsync({ uri: `file://${wavPath}` });

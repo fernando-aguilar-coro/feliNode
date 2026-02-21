@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useAppTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
+import { audioService } from '../features/settings/services/audioService';
 
 interface AppButtonProps extends TouchableOpacityProps {
     title: string;
@@ -23,6 +24,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
     textColor,
     style,
     disabled,
+    onPress,
     ...props
 }) => {
     const theme = useAppTheme();
@@ -65,6 +67,13 @@ export const AppButton: React.FC<AppButtonProps> = ({
     const variantStyles = getVariantStyles(variant);
     const isDisabled = disabled || loading;
 
+    const handlePress = (e: any) => {
+        audioService.playClickSound();
+        if (onPress) {
+            onPress(e);
+        }
+    };
+
     return (
         <TouchableOpacity
             style={[
@@ -79,6 +88,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
                 style,
             ]}
             disabled={isDisabled}
+            onPress={handlePress}
             {...props}
         >
             {loading ? (

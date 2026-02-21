@@ -1,4 +1,5 @@
 import Tts from 'react-native-tts';
+import { useSettingsStore } from '../../../../store/SettingsStore';
 
 class ReactNativeTtsService {
     private speechQueue: string[] = [];
@@ -61,8 +62,15 @@ class ReactNativeTtsService {
     private playNextChunk = async () => {
         if (this.currentSpeechIndex < this.speechQueue.length) {
             try {
+                const state = useSettingsStore.getState();
+                const selectedVoice = state.spanishVoiceId;
+
                 // Ensure language is set before speaking each chunk (just in case)
                 await Tts.setDefaultLanguage(this.currentLanguage);
+                if (selectedVoice) {
+                    await Tts.setDefaultVoice(selectedVoice);
+                }
+
                 // Re-apply rate if needed, or rely on stored state? 
                 // In original snippet rate was hardcoded 0.5 here.
                 await Tts.setDefaultRate(0.6);
@@ -93,7 +101,13 @@ class ReactNativeTtsService {
             .trim();
         try {
             Tts.stop();
+            const state = useSettingsStore.getState();
+            const selectedVoice = state.spanishVoiceId;
+
             await Tts.setDefaultLanguage(language);
+            if (selectedVoice) {
+                await Tts.setDefaultVoice(selectedVoice);
+            }
             await Tts.setDefaultRate(rate);
             Tts.speak(cleanText);
         } catch (error) {
@@ -178,6 +192,40 @@ class ReactNativeTtsService {
             }
         } catch (error) {
             console.error('TTS Resume Error:', error);
+        }
+    }
+
+    /**
+     * Retrieves and filters available voices, placing Spanish voices first.
+     */
+    public async getAvailableVoices() {
+        try {
+            const allVoices = await Tts.voices();
+            // Filter only Spanish voices
+            const esVoices = allVoices.filter(v => v.language.toLowerCase().startsWith('es') || v.language === 'spa');
+
+            // Order:
+            // 1. Google engine first (com.google.android.tts)
+            // 2. Network voices first (higher quality typically)
+            esVoices.sort((a, b) => {
+                const aIsGoogle = a.name.includes('google') || a.id.includes('google') || a.name.includes('com.google.android.tts');
+                const bIsGoogle = b.name.includes('google') || b.id.includes('google') || b.name.includes('com.google.android.tts');
+                const aIsNetwork = a.name.includes('network') || a.id.includes('network');
+                const bIsNetwork = b.name.includes('network') || b.id.includes('network');
+
+                if (aIsGoogle && !bIsGoogle) return -1;
+                if (!aIsGoogle && bIsGoogle) return 1;
+
+                if (aIsNetwork && !bIsNetwork) return -1;
+                if (!aIsNetwork && bIsNetwork) return 1;
+
+                return a.name.localeCompare(b.name);
+            });
+
+            return esVoices.map(v => ({ id: v.id, name: v.name, language: v.language }));
+        } catch (error) {
+            console.error('Error fetching voices:', error);
+            return [];
         }
     }
 }

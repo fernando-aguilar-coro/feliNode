@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { TreeCanvas } from '../components/TreeCanvas';
 import { PannableCanvasRef } from '../components/PannableCanvas';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { audioService } from '../../settings/services/audioService';
 
 
 
@@ -22,6 +23,7 @@ export const TreeNodeScreen = () => {
     const canvasRef = useRef<PannableCanvasRef>(null);
 
     const handleNodePress = (node: TreeNode) => {
+        audioService.playClickSound();
         if (node.status !== 'locked') {
             navigation.navigate('Lesson', { lessonId: node.id });
         } else {
@@ -30,6 +32,7 @@ export const TreeNodeScreen = () => {
     };
 
     const handleResetView = () => {
+        audioService.playClickSound();
         canvasRef.current?.reset();
     };
 

@@ -10,6 +10,7 @@ import { useAppTheme } from '../../../theme/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
+import { audioService } from '../../settings/services/audioService';
 
 interface LearningSectionProps {
     lessonId: string;
@@ -59,6 +60,7 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
     // Effect to bridge the "finished exercises" state to "completeLesson"
     useEffect(() => {
         if (isFinished && status === 'exercises') {
+            audioService.playSuccessSound();
             completeLesson();
         }
     }, [isFinished, status, completeLesson]);

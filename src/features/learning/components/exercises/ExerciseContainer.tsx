@@ -11,6 +11,7 @@ import { SelectPairsExercise } from './SelectPairsExercise';
 import { Card, AppButton, AppText, Spacer } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { AiExplainButton } from '../AiExplainButton';
+import { audioService } from '../../../settings/services/audioService';
 
 interface Props {
     exercise: Exercise;
@@ -41,8 +42,13 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
     }, [exercise]);
 
     const handleCheck = () => {
-        onCheck(userAnswer);
+        const result = onCheck(userAnswer);
         setHasChecked(true);
+        if (result === true) {
+            audioService.playCorrectSound();
+        } else if (result === false) {
+            audioService.playIncorrectSound();
+        }
     };
 
     const renderContent = () => {

@@ -9,6 +9,7 @@ import { InfinityService } from '../services/Infinity.service';
 import { saveInfinityScore } from '../../../db_local/api_local';
 import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { Exercise } from '../types/exercise';
+import { audioService } from '../../settings/services/audioService';
 
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 
@@ -132,6 +133,7 @@ export const InfinityExerciseScreen = () => {
                 const newLives = prev - 1;
                 if (newLives <= 0) {
                     setGameOver(true);
+                    audioService.playSuccessSound();
                     const targetId = lessonId || 'General English';
                     saveInfinityScore(targetId, currentIndex).then(() => {
                         console.log('Score saved for', targetId);

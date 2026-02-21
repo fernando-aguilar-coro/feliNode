@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { HomeScreen } from '../screens/HomeScreen';
 import { PronunciationAssessmentScreen } from '../../learning/screens/PronunciationAssessmentScreen';
@@ -6,6 +7,7 @@ import { InfinityLandingScreen } from '../../learning/screens/InfinityLandingScr
 import { SettingsScreen } from '../../settings/screens/SettingsScreen';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { audioService } from '../../settings/services/audioService';
 
 export type HomeTabParamList = {
     HomeMain: undefined;
@@ -18,6 +20,17 @@ const Tab = createMaterialTopTabNavigator<HomeTabParamList>();
 
 export const HomeTabNavigator = () => {
     const theme = useAppTheme();
+
+    useFocusEffect(
+        useCallback(() => {
+            audioService.playBGM();
+
+            return () => {
+                // audioService.stopBGM(); // Pause or stop when navigating away
+                audioService.pauseBGM();
+            };
+        }, [])
+    );
 
     return (
         <Tab.Navigator
