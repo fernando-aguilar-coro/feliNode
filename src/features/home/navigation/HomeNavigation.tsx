@@ -5,6 +5,7 @@ import { LessonScreen } from '../../learning/screens/LessonScreen';
 import { LessonModeSelectionScreen } from '../../learning/screens/LessonModeSelectionScreen';
 import { InfinityExerciseScreen } from '../../learning/screens/InfinityExerciseScreen';
 import { InfinitySelectPairsScreen } from "../../learning/screens/InfinitySelectPairsScreen";
+import { StreakDetailsScreen } from '../../gamification/screens/StreakDetailsScreen';
 
 export type HomeStackParamList = {
     Main: undefined;
@@ -14,6 +15,7 @@ export type HomeStackParamList = {
     InfinitySelectPairs: { lessonId: string };
     PronunciationAssessment: undefined;
     Settings: undefined;
+    StreakDetails: undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -26,6 +28,7 @@ export const HomeNavigation = () => {
             <Stack.Screen name="LessonSession" component={LessonScreen} />
             <Stack.Screen name="InfinityExercise" component={InfinityExerciseScreen} />
             <Stack.Screen name="InfinitySelectPairs" component={InfinitySelectPairsScreen} />
+            <Stack.Screen name="StreakDetails" component={StreakDetailsScreen} />
         </Stack.Navigator>
     );
 };

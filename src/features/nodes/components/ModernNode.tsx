@@ -41,7 +41,26 @@ export const ModernNode: React.FC<ModernNodeProps> = React.memo(({ node, onPress
     }, [node.status, theme]);
 
     // Truncate title if too long
-    const title = node.title.length > 20 ? node.title.substring(0, 18) + '...' : node.title;
+    const titleLines = useMemo(() => {
+        const words = node.title.split(' ');
+        const lines: string[] = [];
+        let currentLine = '';
+        words.forEach(word => {
+            if ((currentLine + word).length > 20 && currentLine !== '') {
+                lines.push(currentLine.trim());
+                currentLine = word + ' ';
+            } else {
+                currentLine += word + ' ';
+            }
+        });
+        if (currentLine) {
+            lines.push(currentLine.trim());
+        }
+        return lines;
+    }, [node.title]);
+    const lineHeight = 14;
+    // Optical center adjustment + center the block of text vertically
+    const startY = node.y + 2 - ((titleLines.length - 1) * lineHeight) / 2;
 
     return (
         <G onPress={() => onPress(node)}>
@@ -69,17 +88,20 @@ export const ModernNode: React.FC<ModernNodeProps> = React.memo(({ node, onPress
             )}
 
             {/* Title */}
-            <SvgText
-                x={node.x}
-                y={node.y + 4} // Optical center adjustment
-                fill={textColor}
-                fontSize="14"
-                fontWeight={node.status !== 'locked' ? "bold" : "normal"}
-                textAnchor="middle"
-                alignmentBaseline="middle"
-            >
-                {title}
-            </SvgText>
+            {titleLines.map((line, index) => (
+                <SvgText
+                    key={index}
+                    x={node.x}
+                    y={startY + index * lineHeight}
+                    fill={textColor}
+                    fontSize="14"
+                    fontWeight={node.status !== 'locked' ? "bold" : "normal"}
+                    textAnchor="middle"
+                    alignmentBaseline="middle"
+                >
+                    {line}
+                </SvgText>
+            ))}
         </G>
     );
 });

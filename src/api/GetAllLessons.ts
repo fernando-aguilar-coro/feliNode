@@ -1,4 +1,3 @@
-
 import { supabase } from './supabaseClient';
 import { SeedLesson } from '../db_local/seed/types';
 

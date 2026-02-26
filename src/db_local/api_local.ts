@@ -25,8 +25,125 @@ export const getLessonById = async (lessonId: string) => {
     return await db!.getFirstAsync('SELECT * FROM lessons WHERE id = ?', [lessonId]);
 };
 
+// --- STREAK OPERATIONS ---
 
+export const getStreak = async (): Promise<{ current_streak: number, highest_streak: number, last_active_date: string | null, history: string[], freezes_available: number, freezes_used: number }> => {
+    if (!db) await init();
+    try {
+        const result: any = await db!.getFirstAsync('SELECT current_streak, highest_streak, last_active_date, history, freezes_available, freezes_used FROM user_streaks LIMIT 1');
+        if (result) {
+            if (result.history && typeof result.history === 'string') {
+                try {
+                    result.history = JSON.parse(result.history);
+                } catch (e) {
+                    result.history = [];
+                }
+            } else if (!result.history) {
+                result.history = [];
+            }
+            return result;
+        } else {
+            // Inicializar si no existe
+            await db!.runAsync('INSERT INTO user_streaks (current_streak, highest_streak, last_active_date, history, freezes_available, freezes_used) VALUES (0, 0, NULL, "[]", 2, 0)');
+            return { current_streak: 0, highest_streak: 0, last_active_date: null, history: [], freezes_available: 2, freezes_used: 0 };
+        }
+    } catch (error) {
+        console.error('[DB] Error getting streak:', error);
+        return { current_streak: 0, highest_streak: 0, last_active_date: null, history: [], freezes_available: 2, freezes_used: 0 };
+    }
+};
 
+const getLocalDateStr = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+export const updateStreak = async (): Promise<{ current_streak: number, highest_streak: number, last_active_date: string | null, streak_extended: boolean, history: string[], freezes_available: number, freezes_used: number }> => {
+    if (!db) await init();
+    try {
+        const streakData = await getStreak();
+        const todayStr = getLocalDateStr();
+
+        if (streakData.last_active_date === todayStr) {
+            // Ya extendió la racha hoy
+            return { ...streakData, streak_extended: false };
+        }
+
+        let newCurrentStreak = streakData.current_streak;
+        let newHistory = Array.isArray(streakData.history) ? [...streakData.history] : [];
+        let newFreezesAvailable = streakData.freezes_available || 0;
+        let newFreezesUsed = streakData.freezes_used || 0;
+
+        if (streakData.last_active_date) {
+            // Usamos UTC para calcular diferencia de dias de forma mas robusta asumiendo que last_active_date es del local timezone tambien.
+            const [lastYear, lastMonth, lastDay] = streakData.last_active_date.split('-').map(Number);
+            const [todayYear, todayMonth, todayDay] = todayStr.split('-').map(Number);
+
+            const lastDate = new Date(lastYear, lastMonth - 1, lastDay);
+            const todayDate = new Date(todayYear, todayMonth - 1, todayDay);
+
+            const diffTime = todayDate.getTime() - lastDate.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                // Día consecutivo
+                newCurrentStreak += 1;
+                if (!newHistory.includes(todayStr)) newHistory.push(todayStr);
+            } else if (diffDays > 1) {
+                // Perdió uno o más días. Intentar usar protector de racha (freeze).
+                let daysMissed = diffDays - 1;
+                while (daysMissed > 0 && newFreezesAvailable > 0) {
+                    newFreezesAvailable -= 1;
+                    newFreezesUsed += 1;
+                    daysMissed -= 1;
+                }
+
+                if (daysMissed > 0) {
+                    // No le alcanzaron los protectores, la racha se reinicia
+                    newCurrentStreak = 1;
+                    newHistory = [todayStr];
+                } else {
+                    // Los protectores lo salvaron
+                    newCurrentStreak += 1;
+                    if (!newHistory.includes(todayStr)) newHistory.push(todayStr);
+                }
+            } else if (diffDays < 0) {
+                // Por si el usuario cambia la fecha del dispositivo al pasado o algo raro pasa
+                newCurrentStreak = 1;
+                newHistory = [todayStr];
+            }
+        } else {
+            // Primera vez
+            newCurrentStreak = 1;
+            newHistory = [todayStr];
+        }
+
+        const newHighestStreak = Math.max(streakData.highest_streak, newCurrentStreak);
+        const nowIso = new Date().toISOString();
+
+        await db!.runAsync(
+            'UPDATE user_streaks SET current_streak = ?, highest_streak = ?, last_active_date = ?, history = ?, freezes_available = ?, freezes_used = ?, updated_at = ?',
+            [newCurrentStreak, newHighestStreak, todayStr, JSON.stringify(newHistory), newFreezesAvailable, newFreezesUsed, nowIso]
+        );
+
+        return {
+            current_streak: newCurrentStreak,
+            highest_streak: newHighestStreak,
+            last_active_date: todayStr,
+            streak_extended: true,
+            history: newHistory,
+            freezes_available: newFreezesAvailable,
+            freezes_used: newFreezesUsed
+        };
+
+    } catch (error) {
+        console.error('[DB] Error updating streak:', error);
+        throw error;
+    }
+};
 export const getExercisesByLessonId = async (lessonId: string) => {
     if (!db) await init();
     // Simplified query: No joins needed, just SELECT *
@@ -85,6 +202,12 @@ export const saveUserProgress = async (lessonId: string, score: number) => {
                     );
                 }
             }
+        }
+        // Check and update streak
+        try {
+            await updateStreak();
+        } catch (e) {
+            console.error('[DB] Error attempting to update streak:', e);
         }
 
         // [SYNC] Attempt to sync with backend (non-blocking)

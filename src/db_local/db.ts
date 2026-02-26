@@ -58,6 +58,17 @@ export const initDatabase = async () => {
       max_score INTEGER DEFAULT 0,
       updated_at TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS user_streaks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      current_streak INTEGER DEFAULT 0,
+      highest_streak INTEGER DEFAULT 0,
+      last_active_date TEXT, -- YYYY-MM-DD
+      history TEXT DEFAULT '[]', -- JSON array of YYYY-MM-DD strings
+      freezes_available INTEGER DEFAULT 2,
+      freezes_used INTEGER DEFAULT 0,
+      updated_at TEXT
+    );
   `);
 
   console.log('Database initialized successfully');
