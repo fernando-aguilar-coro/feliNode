@@ -6,30 +6,11 @@ import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useStreak } from '../hooks/useStreak';
 import { audioService } from '../../settings/services/audioService';
-
+import { StreakCalendar } from '../components/StreakCalendar';
 export const StreakDetailsScreen = () => {
     const navigation = useNavigation();
     const theme = useAppTheme();
     const { streak, loading } = useStreak();
-
-    // Calendar logic
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 = Sunday
-
-    // Adjust so Monday is the first day of the week (optional but common for these apps)
-    const firstDayIndex = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-
-    // Generate calendar days
-    const calendarDays = [];
-    for (let i = 0; i < firstDayIndex; i++) {
-        calendarDays.push(null); // Empty slots for previous month
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-        calendarDays.push(i);
-    }
 
     const handleGoBack = () => {
         audioService.playClickSound();
@@ -62,7 +43,7 @@ export const StreakDetailsScreen = () => {
                     <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
                         <Ionicons name="close" size={28} color={theme.colors.text} />
                     </TouchableOpacity>
-                    <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Detalles de Racha</Text>
+                    <Text style={[styles.headerTitle, { color: theme.colors.text }]}></Text>
                     <View style={{ width: 28 }} />
                 </View>
 
@@ -123,6 +104,9 @@ export const StreakDetailsScreen = () => {
                     </Text>
                 </View>
 
+                {/* Calendar Section */}
+                <StreakCalendar history={streak.history || []} />
+
             </ScrollView>
         </SafeAreaView>
     );
@@ -148,7 +132,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     backButton: {
-        padding: 8,
+        marginBottom: -20
     },
     headerTitle: {
         fontSize: 20,
@@ -157,7 +141,6 @@ const styles = StyleSheet.create({
     },
     fireSection: {
         alignItems: 'center',
-        marginBottom: 32,
     },
     fireCircle: {
         width: 160,
@@ -267,39 +250,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: 'Nunito-Bold',
         fontWeight: 'bold',
-    },
-    calendarGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'flex-start',
-    },
-    dayCell: {
-        width: '14.28%', // 100% / 7 days
-        aspectRatio: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    dayHeader: {
-        fontFamily: 'Nunito-Bold',
-        fontSize: 14,
-    },
-    dayCircle: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    dayCircleStreak: {
-        backgroundColor: '#FF8C00',
-    },
-    dayCircleToday: {
-        borderWidth: 2,
-        borderColor: '#FF8C00',
-    },
-    dayText: {
-        fontFamily: 'Nunito-Bold',
-        fontSize: 16,
     },
 });

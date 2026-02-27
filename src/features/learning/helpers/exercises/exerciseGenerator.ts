@@ -2,7 +2,7 @@ import { Exercise, ExerciseType, PronunciationExercise, ScrambledSentenceExercis
 import { franc } from 'franc';
 
 const scrambleString = (text: string): string[] => {
-    return text.replace(/[\.,\?¡!¿]/g, '').split(' ').filter((w: string) => w.trim() !== '').sort(() => Math.random() - 0.5);
+    return text.replace(/[\.\¡!¿]/g, '').split(' ').filter((w: string) => w.trim() !== '').sort(() => Math.random() - 0.5);
 };
 
 /**

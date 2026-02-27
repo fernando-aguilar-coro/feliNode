@@ -1,12 +1,11 @@
 
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { scheduleOnRN } from 'react-native-worklets';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withTiming,
-    runOnJS,
     withSpring
 } from 'react-native-reanimated';
 import { WordBubble } from './WordBubble';
@@ -45,7 +44,7 @@ export const SortableDraggableWord = ({
         })
         .onEnd((event) => {
             isDragging.value = false;
-            runOnJS(onDrop)(index, event.absoluteX, event.absoluteY);
+            scheduleOnRN(onDrop, index, event.absoluteX, event.absoluteY);
 
             // Snap back visually - the parent will handle reordering the actual list
             translateX.value = withTiming(0, { duration: 200 });
@@ -56,7 +55,7 @@ export const SortableDraggableWord = ({
         .enabled(!disabled)
         .onEnd(() => {
             if (onPress) {
-                runOnJS(onPress)();
+                scheduleOnRN(onPress);
             }
         });
 

@@ -144,6 +144,30 @@ export const updateStreak = async (): Promise<{ current_streak: number, highest_
         throw error;
     }
 };
+
+export const updateStreakFromCloud = async (cloudData: Partial<{ current_streak: number, highest_streak: number, last_active_date: string | null, history: string[], freezes_available: number, freezes_used: number }>) => {
+    if (!db) await init();
+    try {
+        const streakData = await getStreak();
+
+        const newCurrentStreak = cloudData.current_streak ?? streakData.current_streak;
+        const newHighestStreak = cloudData.highest_streak ?? streakData.highest_streak;
+        const newLastActiveDate = cloudData.last_active_date !== undefined ? cloudData.last_active_date : streakData.last_active_date;
+        const newHistory = cloudData.history ?? streakData.history;
+        const newFreezesAvailable = cloudData.freezes_available ?? streakData.freezes_available;
+        const newFreezesUsed = cloudData.freezes_used ?? streakData.freezes_used;
+        const nowIso = new Date().toISOString();
+
+        await db!.runAsync(
+            'UPDATE user_streaks SET current_streak = ?, highest_streak = ?, last_active_date = ?, history = ?, freezes_available = ?, freezes_used = ?, updated_at = ?',
+            [newCurrentStreak, newHighestStreak, newLastActiveDate, JSON.stringify(newHistory), newFreezesAvailable, newFreezesUsed, nowIso]
+        );
+        return await getStreak();
+    } catch (error) {
+        console.error('[DB] Error updating streak from cloud:', error);
+        throw error;
+    }
+};
 export const getExercisesByLessonId = async (lessonId: string) => {
     if (!db) await init();
     // Simplified query: No joins needed, just SELECT *
