@@ -39,6 +39,10 @@ class AudioService {
         const { sfxEnabled } = useSettingsStore.getState();
         if (!sfxEnabled) return;
 
+        if (AppState.currentState !== 'active') {
+            return;
+        }
+
         console.log(`[AudioService] Playing SFX: ${description}`);
 
         // Uncomment once assets are available
@@ -80,6 +84,11 @@ class AudioService {
         const { bgmEnabled } = useSettingsStore.getState();
         if (!bgmEnabled) {
             this.stopBGM();
+            return;
+        }
+
+        if (AppState.currentState !== 'active') {
+            console.log(`[AudioService] Skipping playBGM because AppState is ${AppState.currentState}`);
             return;
         }
 

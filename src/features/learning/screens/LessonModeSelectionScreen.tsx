@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { getLessonById } from '../../../db_local/api_local';
 
 type LessonModeSelectionRouteProp = RouteProp<HomeStackParamList, 'Lesson'>; // Using 'Lesson' for now, assuming this screen takes over that route name
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -14,6 +15,21 @@ export const LessonModeSelectionScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<LessonModeSelectionRouteProp>();
     const { lessonId } = route.params || { lessonId: 'lesson_verbs_intro' }; // Default for testing
+    const [lessonTitle, setLessonTitle] = useState<string>('');
+
+    useEffect(() => {
+        const fetchLesson = async () => {
+            try {
+                const lesson: any = await getLessonById(lessonId);
+                if (lesson && lesson.title) {
+                    setLessonTitle(lesson.title);
+                }
+            } catch (error) {
+                console.error('Failed to fetch lesson:', error);
+            }
+        };
+        fetchLesson();
+    }, [lessonId]);
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -40,6 +56,10 @@ export const LessonModeSelectionScreen = () => {
     return (
         <Screen style={styles.container}>
             <AppText variant="xxl" weight="bold" align="center">
+                {lessonTitle || 'Cargando...'}
+            </AppText>
+            <Spacer height={theme.spacing.sm} />
+            <AppText variant="lg" align="center" style={{ opacity: 0.8 }}>
                 Elige tu modo
             </AppText>
             <Spacer height={theme.spacing.xl} />

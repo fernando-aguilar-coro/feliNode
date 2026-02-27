@@ -11,7 +11,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
 
 import { useUserStore } from '../store/UserStore';
+import { useSettingsStore } from '../store/SettingsStore';
 import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
+import { KokoroDisclaimerScreen } from '../features/learning/screens/KokoroDisclaimerScreen';
 
 const Stack = createNativeStackNavigator();
 const minCount = 1;
@@ -19,6 +21,7 @@ const minCount = 1;
 
 export const Navigation = () => {
     const { isAuthenticated, checkSession } = useUserStore();
+    const { hasDecidedKokoroDownload } = useSettingsStore();
     const netInfo = useNetInfo();
     const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
     const [isLoadingLessons, setIsLoadingLessons] = useState(false);
@@ -78,7 +81,16 @@ export const Navigation = () => {
                             />
                         </>
                     ) : null}
-                    <Stack.Screen name="Home" component={HomeNavigation} />
+
+                    {!hasDecidedKokoroDownload && netInfo.isConnected ? (
+                        <Stack.Screen
+                            name="KokoroDisclaimer"
+                            component={KokoroDisclaimerScreen}
+                            options={{ headerShown: false }}
+                        />
+                    ) : (
+                        <Stack.Screen name="Home" component={HomeNavigation} />
+                    )}
                 </Stack.Group>
             ) : (
                 <Stack.Group>

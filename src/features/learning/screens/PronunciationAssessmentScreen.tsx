@@ -141,11 +141,7 @@ export const PronunciationAssessmentScreen = () => {
     return (
         <Screen>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <AppText variant="md" color={theme.colors.primary} weight="bold">{'< Volver'}</AppText>
-                </TouchableOpacity>
                 <AppText variant="lg" weight="bold" style={styles.title}>Evaluación de Voz</AppText>
-                <View style={styles.placeholder} />
             </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

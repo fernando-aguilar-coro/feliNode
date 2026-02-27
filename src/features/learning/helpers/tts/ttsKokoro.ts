@@ -21,13 +21,17 @@ class TtsManagerService {
 
     constructor() {
         this.ttsModule = new TextToSpeechModule();
-        this.initialize();
+        // Only auto-initialize if the user has previously downloaded it
+        const state = useSettingsStore.getState();
+        if (state.isKokoroDownloaded) {
+            this.initialize();
+        }
     }
 
     /**
      * Initializes the offline TTS engine.
      */
-    private async initialize() {
+    public async initialize(onProgress?: (progress: number) => void) {
         try {
             console.log('TTS Manager: Initializing Executorch TTS...');
 
@@ -42,6 +46,7 @@ class TtsManagerService {
             };
 
             await this.ttsModule.load(config, (progress) => {
+                if (onProgress) onProgress(progress);
                 console.log(`TTS Load Progress: ${progress * 100}%`);
             });
 
@@ -65,6 +70,11 @@ class TtsManagerService {
         const state = useSettingsStore.getState();
         const selectedVoice = state.englishVoice || KOKORO_VOICE_AF_HEART;
 
+        if (!state.isKokoroDownloaded) {
+            console.warn('TTS Manager: Kokoro TTS not downloaded yet.');
+            return;
+        }
+
         if (this.currentVoiceSource !== selectedVoice.voiceSource) {
             console.log('TTS Manager: Voice changed, re-initializing...');
             this.isInitialized = false;
@@ -72,8 +82,9 @@ class TtsManagerService {
         }
 
         if (!this.isInitialized) {
-            console.warn('TTS Manager: Executorch TTS not initialized.');
-            return;
+            console.warn('TTS Manager: Executorch TTS not initialized. Trying to initialize now...');
+            await this.initialize();
+            if (!this.isInitialized) return;
         }
 
         try {
