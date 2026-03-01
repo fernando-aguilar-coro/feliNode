@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import { NodeService } from '../services/NodeService';
 import { TreeNode, TreeLink } from '../types/NodeTypes';
+import { useNodesStore } from '../../../store/NodesStore';
 
 export const useNodes = (width: number, height: number) => {
     const [nodes, setNodes] = useState<TreeNode[]>([]);
@@ -10,6 +10,7 @@ export const useNodes = (width: number, height: number) => {
     const [canvasHeight, setCanvasHeight] = useState(height);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const refreshTrigger = useNodesStore(state => state.refreshTrigger);
 
     const refreshNodes = async () => {
         try {
@@ -28,11 +29,9 @@ export const useNodes = (width: number, height: number) => {
         }
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            refreshNodes();
-        }, [width, height])
-    );
+    useEffect(() => {
+        refreshNodes();
+    }, [width, height, refreshTrigger]);
 
     return {
         nodes,

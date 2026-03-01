@@ -12,7 +12,7 @@ export const StreakBadge = () => {
 
     return (
         <View style={[styles.container, isActive ? styles.activeContainer : styles.inactiveContainer]}>
-            <FontAwesome5 name="fire" size={16} color={isActive ? "#FFA500" : "#B0B0B0"} />
+            <FontAwesome5 name="fire" size={32} color={isActive ? "#FFA500" : "#B0B0B0"} />
             <Text style={[styles.text, isActive ? styles.activeText : styles.inactiveText]}>
                 {streak.current_streak}
             </Text>
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 8,
-        paddingVertical: 4,
+        paddingVertical: 8,
         borderRadius: 12,
         marginLeft: 8,
     },

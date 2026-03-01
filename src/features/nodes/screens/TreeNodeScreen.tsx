@@ -8,18 +8,15 @@ import { TreeCanvas } from '../components/TreeCanvas';
 import { PannableCanvasRef } from '../components/PannableCanvas';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { audioService } from '../../settings/services/audioService';
-
-
+import { StreakBadge } from '../../gamification/components/StreakBadge';
+import { CurrencyBadge } from '../../gamification/components/CurrencyBadge';
+import { useSettingsStore } from '../../../store/SettingsStore';
 
 export const TreeNodeScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
-    // We pass 0, 0 initially, or dimensions doesn't matter much for the *request* 
-    // if the service calculates total size independent of view size.
-    // However, NodeService might use width/height for spacing. 
-    // Let's keep passing defaults or screen size as "minimums" if needed, 
-    // but the hook now returns the *graph* size.
-    const { nodes, links, canvasWidth, canvasHeight, isLoading, error } = useNodes(400, 600); // 400/600 are just params for the layout algo spacing if used
+    const showStreak = useSettingsStore(state => state.showStreak);
+    const { nodes, links, canvasWidth, canvasHeight, isLoading, error } = useNodes(400, 600);
     const canvasRef = useRef<PannableCanvasRef>(null);
 
     const handleNodePress = (node: TreeNode) => {
@@ -34,6 +31,11 @@ export const TreeNodeScreen = () => {
     const handleResetView = () => {
         audioService.playClickSound();
         canvasRef.current?.reset();
+    };
+
+    const navigateToStreakDetails = () => {
+        audioService.playClickSound();
+        navigation.navigate('StreakDetails');
     };
 
     const styles = useMemo(() => StyleSheet.create({
@@ -70,6 +72,14 @@ export const TreeNodeScreen = () => {
             shadowRadius: 4.65,
             elevation: 8,
         },
+        topRightContainer: {
+            position: 'absolute',
+            right: 16,
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 8,
+            zIndex: 10,
+        },
     }), [theme]);
 
     if (isLoading) {
@@ -98,6 +108,18 @@ export const TreeNodeScreen = () => {
                 links={links}
                 onNodePress={handleNodePress}
             />
+
+            <View style={styles.topRightContainer} pointerEvents="box-none">
+                {showStreak && (
+                    <TouchableOpacity
+                        onPress={navigateToStreakDetails}
+                        activeOpacity={0.8}
+                    >
+                        <StreakBadge />
+                    </TouchableOpacity>
+                )}
+                <CurrencyBadge />
+            </View>
 
             {/* Reset View FAB */}
             <TouchableOpacity style={styles.fab} onPress={handleResetView} activeOpacity={0.7}>

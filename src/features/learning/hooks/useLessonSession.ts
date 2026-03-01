@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { LessonService } from '../services/Lesson.service';
 import { Exercise } from '../types/exercise';
+import { useNodesStore } from '../../../store/NodesStore';
+import { CurrencyService } from '../../gamification/services/CurrencyService';
 
 export type LessonStatus = 'loading' | 'theory' | 'exercises' | 'completed';
 
@@ -52,6 +54,8 @@ export const useLessonSession = (lessonId: string) => {
         try {
             // Assuming perfect score for now as we don't track detailed scoring yet
             await LessonService.completeLesson(lessonId, 100);
+            await CurrencyService.addRewards(100, 30);
+            useNodesStore.getState().triggerRefresh();
         } catch (error) {
             console.error('Failed to complete lesson:', error);
         }

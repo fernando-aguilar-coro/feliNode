@@ -77,6 +77,12 @@ export const initDatabase = async () => {
             freezes_used INTEGER DEFAULT 0,
             updated_at TEXT
           );
+          CREATE TABLE IF NOT EXISTS user_currencies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            xp INTEGER DEFAULT 0,
+            michi_coins INTEGER DEFAULT 0,
+            updated_at TEXT
+          );
         `);
 
         console.log('Database initialized successfully');
