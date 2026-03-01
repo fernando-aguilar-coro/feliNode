@@ -1,4 +1,4 @@
-import { getModules, getLessonsByModuleId, getCompletedLessons } from '../../../db_local/api_local';
+import { moduleRepository, lessonRepository, userProgressRepository } from '../../../db_local/repositories';
 
 export interface LessonProgress {
     id: string;
@@ -17,13 +17,13 @@ export interface ModuleProgress {
 }
 
 export const getModuleProgressView = async (): Promise<ModuleProgress[]> => {
-    const modules: any[] = await getModules();
-    const completedLessons = await getCompletedLessons();
+    const modules: any[] = await moduleRepository.getModules();
+    const completedLessons = await userProgressRepository.getCompletedLessons();
 
     const result: ModuleProgress[] = [];
 
     for (const mod of modules) {
-        const lessons: any[] = await getLessonsByModuleId(mod.id);
+        const lessons: any[] = await lessonRepository.getLessonsByModuleId(mod.id);
 
         const mappedLessons: LessonProgress[] = lessons.map(l => {
             let status: 'available' | 'completed' = 'available';

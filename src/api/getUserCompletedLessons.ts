@@ -1,5 +1,5 @@
 
-import { getCompletedLessons } from '../db_local/api_local';
+import { userProgressRepository } from '../db_local/repositories';
 
 /**
  * Fetches the count of completed lessons from the local database.
@@ -7,7 +7,7 @@ import { getCompletedLessons } from '../db_local/api_local';
  */
 export const getUserCompletedLessons = async (): Promise<number> => {
     try {
-        const completedLessons = await getCompletedLessons();
+        const completedLessons = await userProgressRepository.getCompletedLessons();
         return completedLessons.length;
     } catch (error) {
         console.error('Error fetching user completed lessons:', error);

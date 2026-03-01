@@ -55,33 +55,15 @@ export const StreakCalendar: React.FC<StreakCalendarProps> = ({ history, current
         return `${y}-${mm}-${dd}`;
     };
 
-    // Use string parsing manually to avoid time zone issues: YYYY-MM-DD
-    const getTsFromDateStr = (dateStr: string) => {
-        const [yy, mm, dd] = dateStr.split('-').map(Number);
-        return new Date(yy, mm - 1, dd).getTime();
-    };
-
-    const lastActiveTs = lastActiveDate ? getTsFromDateStr(lastActiveDate) : 0;
-
-    let activeStreakStartTs = 0;
-    if (currentStreak > 0 && lastActiveDate) {
-        const d = new Date(lastActiveTs);
-        d.setDate(d.getDate() - (currentStreak - 1));
-        activeStreakStartTs = d.getTime();
-    }
-
     const todayStr = getLocalDateStr(today.getFullYear(), today.getMonth(), today.getDate());
 
     const getDayState = (dayStr: string) => {
         if (history.includes(dayStr)) {
             return 'completed'; // Green
         }
-
-        const dayTs = getTsFromDateStr(dayStr);
-        if (activeStreakStartTs > 0 && lastActiveTs > 0 && dayTs >= activeStreakStartTs && dayTs <= lastActiveTs) {
+        if (history.includes(`${dayStr}_frozen`)) {
             return 'frozen'; // Blue
         }
-
         return 'none';
     };
 

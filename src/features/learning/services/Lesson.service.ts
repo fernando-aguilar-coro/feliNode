@@ -1,4 +1,4 @@
-import { getLessonById, saveUserProgress } from '../../../db_local/api_local';
+import { lessonRepository, userProgressRepository } from '../../../db_local/repositories';
 import { ExerciseService } from './Exercise.service';
 
 export const LessonService = {
@@ -6,7 +6,7 @@ export const LessonService = {
      * Fetches theory content for a specific lesson.
      */
     getTheory: async (lessonId: string) => {
-        const lesson: any = await getLessonById(lessonId);
+        const lesson: any = await lessonRepository.getLessonById(lessonId);
         return lesson?.theory || '';
     },
 
@@ -21,13 +21,13 @@ export const LessonService = {
      * Marks a lesson as completed.
      */
     completeLesson: async (lessonId: string, score: number) => {
-        await saveUserProgress(lessonId, score);
+        await userProgressRepository.saveUserProgress(lessonId, score);
     },
 
     /**
      * Fetches the full lesson object.
      */
     getLesson: async (lessonId: string) => {
-        return await getLessonById(lessonId);
+        return await lessonRepository.getLessonById(lessonId);
     }
 };

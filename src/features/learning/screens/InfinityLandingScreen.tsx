@@ -4,7 +4,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Screen, AppText, AppButton, Spacer, AppTextInput } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import { getInfinityScore } from '../../../db_local/api_local';
+import { infinityProgressRepository } from '../../../db_local/repositories';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 
@@ -21,7 +21,7 @@ export const InfinityLandingScreen = () => {
         setLoading(true);
         try {
             const targetId = topic.trim() ? `Lesson: ${topic.trim()}` : 'General English';
-            const score = await getInfinityScore(targetId);
+            const score = await infinityProgressRepository.getInfinityScore(targetId);
             setMaxScore(score);
         } catch (error) {
             console.error('Failed to fetch max score', error);

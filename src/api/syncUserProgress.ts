@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { getCompletedLessons, setCompletedLessons } from '../db_local/api_local';
+import { userProgressRepository } from '../db_local/repositories';
 
 export const syncUserProgress = async () => {
     try {
@@ -11,7 +11,7 @@ export const syncUserProgress = async () => {
         }
 
         // 1. Fetch Local Data
-        const localCompleted = await getCompletedLessons();;
+        const localCompleted = await userProgressRepository.getCompletedLessons();;
 
         // 2. Fetch Remote Data
         const { data: remoteProfile, error: remoteError } = await supabase
@@ -44,7 +44,7 @@ export const syncUserProgress = async () => {
 
         if (hasNewForLocal) {
             console.log('[Sync] Updating local database...');
-            await setCompletedLessons(mergedCompleted);
+            await userProgressRepository.setCompletedLessons(mergedCompleted);
         }
 
         // 5. Update Remote if different

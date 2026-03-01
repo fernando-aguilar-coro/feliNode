@@ -1,5 +1,6 @@
 import { supabase } from '../../../api/supabaseClient';
-import { getStreak, updateStreakFromCloud } from '../../../db_local/api_local';
+import { streakRepository } from '../../../db_local/repositories';
+import { NotificationService } from './Notification.service';
 
 export interface StreakData {
     current_streak: number;
@@ -10,7 +11,6 @@ export interface StreakData {
     freezes_used: number;
 }
 
-import { NotificationService } from './Notification.service';
 
 export const StreakCloudService = {
     syncUp: async (localData: StreakData) => {
@@ -89,7 +89,7 @@ export const StreakCloudService = {
 
     syncWithLocal: async () => {
         try {
-            const localData = await getStreak();
+            const localData = await streakRepository.getStreak();
             const cloudData = await StreakCloudService.syncDown();
 
             if (!cloudData) {
@@ -135,10 +135,13 @@ export const StreakCloudService = {
                     freezes_available: newFreezesAvailable,
                     freezes_used: newFreezesUsed
                 };
-                await updateStreakFromCloud(mergedData);
+                await streakRepository.updateStreakFromCloud(mergedData);
                 console.log('[StreakCloud] Local DB updated from cloud sync.');
+
+                // Reschedule with the new synced data
+                await NotificationService.scheduleStreakReminder(mergedData.current_streak, mergedData.last_active_date);
             } else {
-                // Push local changes up just in case
+                // Push local changes up just in case (already handles notification rescheduling)
                 await StreakCloudService.syncUp(localData);
             }
         } catch (error) {

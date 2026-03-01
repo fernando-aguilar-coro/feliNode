@@ -1,5 +1,5 @@
 import { Exercise, ExerciseType } from '../types/exercise';
-import { getExercisesByLessonId } from '../../../db_local/api_local';
+import { exerciseRepository } from '../../../db_local/repositories';
 import { mapDbExerciseToAppExercise } from '../helpers/exercises/exerciseMapper';
 import { generateListeningExercise } from '../helpers/exercises/exerciseGenerator';
 
@@ -20,7 +20,7 @@ export const ExerciseService = {
     getExercisesForLesson: async (lessonId: string): Promise<Exercise[]> => {
         try {
             console.log(`[ExerciseService] Fetching exercises for lesson: ${lessonId}`);
-            const dbExercises = await getExercisesByLessonId(lessonId);
+            const dbExercises = await exerciseRepository.getExercisesByLessonId(lessonId);
 
             // 1. Map DB exercises to App exercises
             const mapped = dbExercises

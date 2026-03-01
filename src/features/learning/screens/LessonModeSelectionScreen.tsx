@@ -5,7 +5,7 @@ import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { getLessonById } from '../../../db_local/api_local';
+import { lessonRepository } from '../../../db_local/repositories';
 
 type LessonModeSelectionRouteProp = RouteProp<HomeStackParamList, 'Lesson'>; // Using 'Lesson' for now, assuming this screen takes over that route name
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -20,7 +20,7 @@ export const LessonModeSelectionScreen = () => {
     useEffect(() => {
         const fetchLesson = async () => {
             try {
-                const lesson: any = await getLessonById(lessonId);
+                const lesson: any = await lessonRepository.getLessonById(lessonId);
                 if (lesson && lesson.title) {
                     setLessonTitle(lesson.title);
                 }

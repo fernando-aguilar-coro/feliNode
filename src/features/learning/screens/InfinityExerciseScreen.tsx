@@ -6,7 +6,7 @@ import { useAppTheme } from '../../../theme/ThemeContext';
 import { useExercises } from '../hooks/useExercises';
 import { ExerciseContainer } from '../components/exercises/ExerciseContainer';
 import { InfinityService } from '../services/Infinity.service';
-import { saveInfinityScore } from '../../../db_local/api_local';
+import { infinityProgressRepository } from '../../../db_local/repositories';
 import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { Exercise } from '../types/exercise';
 import { audioService } from '../../settings/services/audioService';
@@ -135,7 +135,7 @@ export const InfinityExerciseScreen = () => {
                     setGameOver(true);
                     audioService.playSuccessSound();
                     const targetId = lessonId || 'General English';
-                    saveInfinityScore(targetId, currentIndex).then(() => {
+                    infinityProgressRepository.saveInfinityScore(targetId, currentIndex).then(() => {
                         console.log('Score saved for', targetId);
                         syncInfinityStats(); // Sync after saving new score
                     });

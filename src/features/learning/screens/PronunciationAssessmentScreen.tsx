@@ -7,7 +7,7 @@ import { PronunciationExercise } from '../components/exercises/PronunciationExer
 import { ExerciseType, PronunciationExercise as PronunciationExerciseType } from '../types/exercise';
 import { RecommendationButton } from '../components/RecommendationButton';
 import { useEffect } from 'react';
-import { getCompletedLessons, getLessonById, getLessonNodes } from '../../../db_local/api_local';
+import { userProgressRepository, lessonRepository } from '../../../db_local/repositories';
 
 export const PronunciationAssessmentScreen = () => {
     const theme = useAppTheme();
@@ -19,17 +19,17 @@ export const PronunciationAssessmentScreen = () => {
     useEffect(() => {
         const fetchContext = async () => {
             try {
-                const nodes = await getLessonNodes();
+                const nodes = await lessonRepository.getLessonNodes();
                 const available = nodes.filter(n => n.status === 'available');
 
                 if (available.length > 0) {
                     const titles = available.map(n => n.title).join(", ");
                     setCurrentLessonTitle(titles);
                 } else {
-                    const completed = await getCompletedLessons();
+                    const completed = await userProgressRepository.getCompletedLessons();
                     if (completed.length > 0) {
                         const lastId = completed[completed.length - 1];
-                        const lesson: any = await getLessonById(lastId);
+                        const lesson: any = await lessonRepository.getLessonById(lastId);
                         if (lesson?.title) setCurrentLessonTitle(lesson.title);
                     }
                 }

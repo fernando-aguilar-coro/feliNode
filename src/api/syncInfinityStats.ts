@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { getAllInfinityProgress, saveInfinityScoreBulk } from '../db_local/api_local';
+import { infinityProgressRepository } from '../db_local/repositories';
 
 export const syncInfinityStats = async () => {
     try {
@@ -14,7 +14,7 @@ export const syncInfinityStats = async () => {
         console.log('[SyncStats] Starting synchronization...');
 
         // 1. Fetch Local Data
-        const localProgress = await getAllInfinityProgress();
+        const localProgress = await infinityProgressRepository.getAllInfinityProgress();
         // Map: target_id -> max_score
         const localMap = new Map<string, number>();
         localProgress.forEach(p => localMap.set(p.target_id, p.max_score));
@@ -69,7 +69,7 @@ export const syncInfinityStats = async () => {
         // 4. Execute Updates
         if (toUpdateLocal.length > 0) {
             console.log(`[SyncStats] Updating ${toUpdateLocal.length} local records...`);
-            await saveInfinityScoreBulk(toUpdateLocal);
+            await infinityProgressRepository.saveInfinityScoreBulk(toUpdateLocal);
         }
 
         if (toUpdateRemote.length > 0) {

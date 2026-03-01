@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../features/auth/services/authService';
-import { clearUserProgress } from '../db_local/api_local';
+import { userProgressRepository } from '../db_local/repositories';
 import NetInfo from '@react-native-community/netinfo';
 
 interface UserState {
@@ -120,7 +120,7 @@ export const useUserStore = create<UserState>()(
                 try {
                     await authService.signOut();
                     // Clear local DB to prevent data leak to next user
-                    await clearUserProgress();
+                    await userProgressRepository.clearUserProgress();
                     // State clear will happen below
                 } catch (error) {
                     console.error('Logout error:', error);

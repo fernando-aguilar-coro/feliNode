@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getStreak, updateStreak as updateStreakInDb } from '../../../db_local/api_local';
+import { streakRepository } from '../../../db_local/repositories';
 import { useFocusEffect } from '@react-navigation/native';
 import { StreakCloudService } from '../services/StreakCloud.service';
 export const useStreak = () => {
@@ -15,12 +15,12 @@ export const useStreak = () => {
 
     const fetchStreak = useCallback(async () => {
         try {
-            const data = await getStreak();
+            const data = await streakRepository.getStreak();
             setStreak(data);
 
             // Background sync
             StreakCloudService.syncWithLocal()
-                .then(() => getStreak())
+                .then(() => streakRepository.getStreak())
                 .then(updatedData => {
                     // Update UI only if values legitimately changed
                     setStreak(prev => {
@@ -48,7 +48,7 @@ export const useStreak = () => {
 
     const updateStreak = async () => {
         try {
-            const newData = await updateStreakInDb();
+            const newData = await streakRepository.updateStreak();
             setStreak({
                 current_streak: newData.current_streak,
                 highest_streak: newData.highest_streak,

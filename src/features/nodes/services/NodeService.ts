@@ -1,5 +1,5 @@
 import dagre from 'dagre';
-import { getLessonNodes } from '../../../db_local/api_local';
+import { lessonRepository } from '../../../db_local/repositories';
 import { TreeNode, TreeLink } from '../types/NodeTypes';
 
 export const NodeService = {
@@ -7,7 +7,7 @@ export const NodeService = {
      * Fetches lessons from the database and calculates their positions using dagre for DAG layout.
      */
     async getLayout(width: number = 400, height: number = 600): Promise<{ nodes: TreeNode[], links: TreeLink[], width: number, height: number }> {
-        const lessons = await getLessonNodes();
+        const lessons = await lessonRepository.getLessonNodes();
 
         if (lessons.length === 0) {
             return { nodes: [], links: [], width, height };
