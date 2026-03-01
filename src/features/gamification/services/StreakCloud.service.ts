@@ -10,9 +10,14 @@ export interface StreakData {
     freezes_used: number;
 }
 
+import { NotificationService } from './Notification.service';
+
 export const StreakCloudService = {
     syncUp: async (localData: StreakData) => {
         try {
+            // Schedule notification based on current active state
+            await NotificationService.scheduleStreakReminder(localData.current_streak, localData.last_active_date);
+
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             const user = session?.user;
             if (sessionError || !user) {
