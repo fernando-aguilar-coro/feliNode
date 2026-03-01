@@ -97,7 +97,11 @@ class AudioService {
             if (this.bgmSound) {
                 const status = await this.bgmSound.getStatusAsync();
                 if ('isPlaying' in status && !status.isPlaying) {
-                    await this.bgmSound.playAsync();
+                    if (AppState.currentState === 'active') {
+                        await this.bgmSound.playAsync();
+                    } else {
+                        console.log('[AudioService] Skipping resume because app state is not active');
+                    }
                 }
                 return;
             }
@@ -107,11 +111,20 @@ class AudioService {
                 { isLooping: true }
             );
             this.bgmSound = sound;
-            await this.bgmSound.playAsync();
-        } catch (error) {
-            console.error('Failed to play BGM', error);
-        }
 
+            if (AppState.currentState === 'active') {
+                await this.bgmSound.playAsync();
+            } else {
+                console.log('[AudioService] App became inactive while creating BGM sound. Pausing.');
+            }
+        } catch (error: any) {
+            if (error?.message?.includes?.('AudioFocusNotAcquiredException')) {
+                console.warn('[AudioService] Could not acquire audio focus (app in background/transition).');
+                this.wasPlayingBeforeBackground = true;
+            } else {
+                console.error('Failed to play BGM', error);
+            }
+        }
     };
 
     public stopBGM = async () => {

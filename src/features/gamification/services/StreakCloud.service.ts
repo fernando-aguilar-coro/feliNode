@@ -13,9 +13,10 @@ export interface StreakData {
 export const StreakCloudService = {
     syncUp: async (localData: StreakData) => {
         try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            if (userError || !user) {
-                console.log('[StreakCloud] No active session, skipping upstream sync.');
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            const user = session?.user;
+            if (sessionError || !user) {
+                console.log('[StreakCloud] No active session, skipping upstream sync.', sessionError?.message || '');
                 return;
             }
 
@@ -44,8 +45,10 @@ export const StreakCloudService = {
 
     syncDown: async (): Promise<StreakData | null> => {
         try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            if (userError || !user) {
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            const user = session?.user;
+            if (sessionError || !user) {
+                console.log('[StreakCloud] No active session, skipping downstream sync.', sessionError?.message || '');
                 return null;
             }
 
@@ -81,10 +84,15 @@ export const StreakCloudService = {
 
     syncWithLocal: async () => {
         try {
-            const cloudData = await StreakCloudService.syncDown();
-            if (!cloudData) return;
-
             const localData = await getStreak();
+            const cloudData = await StreakCloudService.syncDown();
+
+            if (!cloudData) {
+                // If there's no cloud data (PGRST116 or other), push local up to initialize
+                console.log('[StreakCloud] No cloud data found, initializing with local data.');
+                await StreakCloudService.syncUp(localData);
+                return;
+            }
 
             // Merge strategy matching user request to prioritize highest numbers:
             let shouldUpdateLocal = false;

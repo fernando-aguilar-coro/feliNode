@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { List, Switch } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useSettingsStore } from '../../../store/SettingsStore';
 
 export const NotificationSettingsSection = () => {
     const theme = useAppTheme();
-    const [streakEnabled, setStreakEnabled] = useState(true);
+    const showStreak = useSettingsStore(state => state.showStreak);
+    const setShowStreak = useSettingsStore(state => state.setShowStreak);
 
     return (
         <List.Section>
@@ -15,7 +17,7 @@ export const NotificationSettingsSection = () => {
                 description="Ver contador de días seguidos"
                 descriptionStyle={{ color: theme.colors.textSecondary }}
                 left={props => <List.Icon {...props} icon="fire" color={theme.colors.text} />}
-                right={() => <Switch value={streakEnabled} onValueChange={setStreakEnabled} />}
+                right={() => <Switch value={showStreak} onValueChange={setShowStreak} />}
             />
         </List.Section>
     );

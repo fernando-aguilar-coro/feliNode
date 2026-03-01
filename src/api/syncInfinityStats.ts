@@ -3,10 +3,11 @@ import { getAllInfinityProgress, saveInfinityScoreBulk } from '../db_local/api_l
 
 export const syncInfinityStats = async () => {
     try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const user = session?.user;
 
-        if (userError || !user) {
-            console.log('[SyncStats] No active session, skipping stats sync.');
+        if (sessionError || !user) {
+            console.log('[SyncStats] No active session, skipping stats sync.', sessionError?.message || '');
             return;
         }
 
@@ -46,13 +47,16 @@ export const syncInfinityStats = async () => {
             const remoteScore = remoteMap.get(targetId) || 0;
             const maxScore = Math.max(localScore, remoteScore);
 
-            // If verified max is greater than local, update local
-            if (maxScore > localScore) {
+            const isMissingRemote = !remoteMap.has(targetId);
+            const isMissingLocal = !localMap.has(targetId);
+
+            // If verified max is greater than local, or if the record doesn't exist locally, update local
+            if (maxScore > localScore || isMissingLocal) {
                 toUpdateLocal.push({ target_id: targetId, max_score: maxScore });
             }
 
-            // If verified max is greater than remote, update remote
-            if (maxScore > remoteScore) {
+            // If verified max is greater than remote, or if the record doesn't exist remotely, update remote
+            if (maxScore > remoteScore || isMissingRemote) {
                 toUpdateRemote.push({
                     user_id: user.id,
                     target_id: targetId,

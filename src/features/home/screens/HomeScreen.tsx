@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,12 +10,34 @@ import { useAppTheme } from '../../../theme/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { audioService } from '../../settings/services/audioService';
 import { StreakBadge } from '../../gamification/components/StreakBadge';
+import { syncInfinityStats } from '../../../api/syncInfinityStats';
+import { StreakCloudService } from '../../gamification/services/StreakCloud.service';
+import { useSettingsStore } from '../../../store/SettingsStore';
 
 export const HomeScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
     const netInfo = useNetInfo();
     const theme = useAppTheme();
     const [viewMode, setViewMode] = useState<'tree' | 'list'>('tree');
+    const hasSyncedOnStart = useRef(false);
+    const showStreak = useSettingsStore(state => state.showStreak);
+
+    useEffect(() => {
+        if (netInfo.isConnected && !hasSyncedOnStart.current) {
+            hasSyncedOnStart.current = true;
+            console.log('[HomeScreen] Internet detected. Triggering initial background sync...');
+
+            // Sync asynchronously Without blocking
+            Promise.all([
+                StreakCloudService.syncWithLocal(),
+                syncInfinityStats()
+            ]).then(() => {
+                console.log('[HomeScreen] Initial sync completed successfully.');
+            }).catch(e => {
+                console.error('[HomeScreen] Error in initial sync:', e);
+            });
+        }
+    }, [netInfo.isConnected]);
 
     const toggleViewMode = () => {
         audioService.playClickSound();
@@ -103,12 +125,17 @@ export const HomeScreen = () => {
                 </View>
             )}
 
-            <View style={styles.headerContainer}>
-                <Text style={styles.greetingText}>:3</Text>
-                <TouchableOpacity onPress={navigateToStreakDetails} activeOpacity={0.8}>
-                    <StreakBadge />
-                </TouchableOpacity>
-            </View>
+            {showStreak &&
+                (
+                    <View style={styles.headerContainer}>
+                        <Text style={styles.greetingText}>:3</Text>
+
+                        <TouchableOpacity onPress={navigateToStreakDetails} activeOpacity={0.8}>
+                            <StreakBadge />
+                        </TouchableOpacity>
+
+                    </View>
+                )}
 
             <TouchableOpacity onPress={toggleViewMode} style={styles.banner} activeOpacity={0.8}>
                 <View style={styles.bannerContent}>

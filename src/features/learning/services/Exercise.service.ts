@@ -41,13 +41,4 @@ export const ExerciseService = {
         }
     },
 
-    /**
-     * Validates the user's answer against the correct answer.
-     * Performs a case-insensitive trim comparison.
-     */
-    validateAnswer: (exercise: Exercise, answer: string): boolean => {
-        if (!exercise) return false;
-        if (exercise.type === ExerciseType.PRONUNCIATION) return true;
-        return answer.trim().toLowerCase() === exercise.correctAnswer.trim().toLowerCase();
-    }
 };

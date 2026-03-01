@@ -11,12 +11,14 @@ interface SettingsState {
     bgmEnabled: boolean;
     isKokoroDownloaded: boolean;
     hasDecidedKokoroDownload: boolean;
+    showStreak: boolean;
     setEnglishVoice: (voice: VoiceConfig) => void;
     setSpanishVoiceId: (id: string) => void;
     setSfxEnabled: (enabled: boolean) => void;
     setBgmEnabled: (enabled: boolean) => void;
     setKokoroDownloaded: (downloaded: boolean) => void;
     setHasDecidedKokoroDownload: (decided: boolean) => void;
+    setShowStreak: (show: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -28,12 +30,14 @@ export const useSettingsStore = create<SettingsState>()(
             bgmEnabled: true,
             isKokoroDownloaded: false,
             hasDecidedKokoroDownload: false,
+            showStreak: true,
             setEnglishVoice: (voice) => set({ englishVoice: voice }),
             setSpanishVoiceId: (id) => set({ spanishVoiceId: id }),
             setSfxEnabled: (enabled) => set({ sfxEnabled: enabled }),
             setBgmEnabled: (enabled: boolean) => set({ bgmEnabled: enabled }),
             setKokoroDownloaded: (downloaded: boolean) => set({ isKokoroDownloaded: downloaded }),
             setHasDecidedKokoroDownload: (decided: boolean) => set({ hasDecidedKokoroDownload: decided }),
+            setShowStreak: (show: boolean) => set({ showStreak: show }),
         }),
         {
             name: 'settings-storage',

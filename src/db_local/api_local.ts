@@ -41,7 +41,7 @@ export const getStreak = async (): Promise<{ current_streak: number, highest_str
             } else if (!result.history) {
                 result.history = [];
             }
-            return result;
+            return await processProtectorsOnLoad(result);
         } else {
             // Inicializar si no existe
             await db!.runAsync('INSERT INTO user_streaks (current_streak, highest_streak, last_active_date, history, freezes_available, freezes_used) VALUES (0, 0, NULL, "[]", 2, 0)');
@@ -51,6 +51,81 @@ export const getStreak = async (): Promise<{ current_streak: number, highest_str
         console.error('[DB] Error getting streak:', error);
         return { current_streak: 0, highest_streak: 0, last_active_date: null, history: [], freezes_available: 2, freezes_used: 0 };
     }
+};
+
+const processProtectorsOnLoad = async (streakData: any) => {
+    if (!streakData.last_active_date || streakData.current_streak === 0) return streakData;
+
+    const todayStr = getLocalDateStr();
+    if (streakData.last_active_date === todayStr) return streakData;
+
+    const [lastYear, lastMonth, lastDay] = streakData.last_active_date.split('-').map(Number);
+    const [todayYear, todayMonth, todayDay] = todayStr.split('-').map(Number);
+
+    const lastDate = new Date(lastYear, lastMonth - 1, lastDay);
+    const todayDate = new Date(todayYear, todayMonth - 1, todayDay);
+    const diffTime = todayDate.getTime() - lastDate.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 1) {
+        let daysMissed = diffDays - 1; // Until yesterday
+        let newFreezesAvailable = streakData.freezes_available || 0;
+        let newFreezesUsed = streakData.freezes_used || 0;
+        let newCurrentStreak = streakData.current_streak;
+        let newLastActiveDate = streakData.last_active_date;
+        let changed = false;
+
+        let savedDays = 0;
+        while (daysMissed > 0 && newFreezesAvailable > 0) {
+            newFreezesAvailable -= 1;
+            newFreezesUsed += 1;
+            daysMissed -= 1;
+            savedDays += 1;
+            changed = true;
+        }
+
+        if (daysMissed > 0) {
+            // Not enough protectors, streak is broken
+            newCurrentStreak = 0;
+            changed = true;
+        } else if (savedDays > 0) {
+            // Protectores salvadores aplicaditos
+            const updatedLastDate = new Date(lastDate);
+            updatedLastDate.setDate(updatedLastDate.getDate() + savedDays);
+            const uy = updatedLastDate.getFullYear();
+            const um = String(updatedLastDate.getMonth() + 1).padStart(2, '0');
+            const ud = String(updatedLastDate.getDate()).padStart(2, '0');
+            newLastActiveDate = `${uy}-${um}-${ud}`;
+        }
+
+        if (changed) {
+            const nowIso = new Date().toISOString();
+            await db!.runAsync(
+                'UPDATE user_streaks SET current_streak = ?, last_active_date = ?, freezes_available = ?, freezes_used = ?, updated_at = ?',
+                [newCurrentStreak, newLastActiveDate, newFreezesAvailable, newFreezesUsed, nowIso]
+            );
+            return {
+                ...streakData,
+                current_streak: newCurrentStreak,
+                last_active_date: newLastActiveDate,
+                freezes_available: newFreezesAvailable,
+                freezes_used: newFreezesUsed
+            };
+        }
+    } else if (diffDays < 0) {
+        // Fecha en el pasado
+        const nowIso = new Date().toISOString();
+        await db!.runAsync(
+            'UPDATE user_streaks SET current_streak = 0, freezes_available = ?, freezes_used = ?, updated_at = ?',
+            [streakData.freezes_available, streakData.freezes_used, nowIso]
+        );
+        return {
+            ...streakData,
+            current_streak: 0
+        };
+    }
+
+    return streakData;
 };
 
 const getLocalDateStr = () => {
@@ -89,29 +164,15 @@ export const updateStreak = async (): Promise<{ current_streak: number, highest_
             const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
-                // Día consecutivo
+                // Día consecutivo o bien ha sido salvado preventivamente en getStreak
                 newCurrentStreak += 1;
                 if (!newHistory.includes(todayStr)) newHistory.push(todayStr);
             } else if (diffDays > 1) {
-                // Perdió uno o más días. Intentar usar protector de racha (freeze).
-                let daysMissed = diffDays - 1;
-                while (daysMissed > 0 && newFreezesAvailable > 0) {
-                    newFreezesAvailable -= 1;
-                    newFreezesUsed += 1;
-                    daysMissed -= 1;
-                }
-
-                if (daysMissed > 0) {
-                    // No le alcanzaron los protectores, la racha se reinicia
-                    newCurrentStreak = 1;
-                    newHistory = [todayStr];
-                } else {
-                    // Los protectores lo salvaron
-                    newCurrentStreak += 1;
-                    if (!newHistory.includes(todayStr)) newHistory.push(todayStr);
-                }
+                // Si la diferencia sigue siendo mayor a 1 aún después de getStreak, significa que NO alcanzaron los protectores.
+                newCurrentStreak = 1;
+                newHistory = [todayStr];
             } else if (diffDays < 0) {
-                // Por si el usuario cambia la fecha del dispositivo al pasado o algo raro pasa
+                // Por si el usuario cambia la fecha del dispositivo al pasado
                 newCurrentStreak = 1;
                 newHistory = [todayStr];
             }

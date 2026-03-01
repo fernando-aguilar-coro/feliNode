@@ -5,9 +5,11 @@ import { useAppTheme } from '../../../theme/ThemeContext';
 
 interface StreakCalendarProps {
     history: string[]; // ['2026-02-25', '2026-02-27']
+    currentStreak: number;
+    lastActiveDate: string | null;
 }
 
-export const StreakCalendar: React.FC<StreakCalendarProps> = ({ history }) => {
+export const StreakCalendar: React.FC<StreakCalendarProps> = ({ history, currentStreak, lastActiveDate }) => {
     const theme = useAppTheme();
     const today = new Date();
 
@@ -53,17 +55,20 @@ export const StreakCalendar: React.FC<StreakCalendarProps> = ({ history }) => {
         return `${y}-${mm}-${dd}`;
     };
 
-    const minDateStr = history.length > 0 ? history[0] : null;
-    const maxDateStr = history.length > 0 ? history[history.length - 1] : null;
-
     // Use string parsing manually to avoid time zone issues: YYYY-MM-DD
     const getTsFromDateStr = (dateStr: string) => {
         const [yy, mm, dd] = dateStr.split('-').map(Number);
         return new Date(yy, mm - 1, dd).getTime();
     };
 
-    const minTs = minDateStr ? getTsFromDateStr(minDateStr) : 0;
-    const maxTs = maxDateStr ? getTsFromDateStr(maxDateStr) : 0;
+    const lastActiveTs = lastActiveDate ? getTsFromDateStr(lastActiveDate) : 0;
+
+    let activeStreakStartTs = 0;
+    if (currentStreak > 0 && lastActiveDate) {
+        const d = new Date(lastActiveTs);
+        d.setDate(d.getDate() - (currentStreak - 1));
+        activeStreakStartTs = d.getTime();
+    }
 
     const todayStr = getLocalDateStr(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -73,8 +78,7 @@ export const StreakCalendar: React.FC<StreakCalendarProps> = ({ history }) => {
         }
 
         const dayTs = getTsFromDateStr(dayStr);
-        // Checked against strictly greater than minTs and strictly less than maxTs
-        if (minTs > 0 && maxTs > 0 && dayTs > minTs && dayTs < maxTs) {
+        if (activeStreakStartTs > 0 && lastActiveTs > 0 && dayTs >= activeStreakStartTs && dayTs <= lastActiveTs) {
             return 'frozen'; // Blue
         }
 

@@ -36,7 +36,7 @@ export const InfinitySelectPairsScreen = () => {
         restartGame
     } = useInfinityPairs({
         lessonId,
-        visibleCount: 8,
+        visibleCount: 7,
         batchSize: 20,
         fillBatchSize: 3,
         initialLives: 7,

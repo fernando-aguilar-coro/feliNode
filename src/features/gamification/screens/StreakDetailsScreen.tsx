@@ -105,7 +105,11 @@ export const StreakDetailsScreen = () => {
                 </View>
 
                 {/* Calendar Section */}
-                <StreakCalendar history={streak.history || []} />
+                <StreakCalendar
+                    history={streak.history || []}
+                    currentStreak={current_streak}
+                    lastActiveDate={streak.last_active_date}
+                />
 
             </ScrollView>
         </SafeAreaView>
