@@ -13,12 +13,12 @@ export class UserCurrenciesRepository extends BaseRepository {
             if (result) {
                 return { xp: result.xp, michi_coins: result.michi_coins };
             } else {
-                await db.runAsync('INSERT INTO user_currencies (xp, michi_coins, updated_at) VALUES (0, 0, ?)', [new Date().toISOString()]);
-                return { xp: 0, michi_coins: 0 };
+                await db.runAsync('INSERT INTO user_currencies (xp, michi_coins, updated_at) VALUES (0, 300, ?)', [new Date().toISOString()]);
+                return { xp: 0, michi_coins: 300 };
             }
         } catch (error) {
             console.error('[DB] Error getting user currencies:', error);
-            return { xp: 0, michi_coins: 0 };
+            return { xp: 0, michi_coins: 300 };
         }
     }
 

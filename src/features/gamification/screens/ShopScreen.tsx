@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'rea
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useCurrencies } from '../hooks/useCurrencies';
 import { useStreak } from '../hooks/useStreak';
-import { CurrencyService } from '../services/CurrencyService';
+import { CurrencyService } from '../services/Currency.service';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAppTheme } from '../../../theme/ThemeContext';
 
 export const ShopScreen = () => {
+    const theme = useAppTheme();
     const { currencies, loading: currencyLoading, loadCurrencies } = useCurrencies();
     const { streak, loading: streakLoading, fetchStreak } = useStreak();
     const [buying, setBuying] = useState(false);
@@ -56,35 +58,35 @@ export const ShopScreen = () => {
 
     if (currencyLoading || streakLoading) {
         return (
-            <View style={styles.loadingContainer}>
-                <Text>Loading shop...</Text>
+            <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
+                <Text style={{ color: theme.colors.text }}>Loading shop...</Text>
             </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.header}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+            <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
                 <View style={styles.balanceContainer}>
                     <FontAwesome5 name="star" size={24} color="#FFD700" solid />
-                    <Text style={styles.balanceText}>{currencies.xp} XP</Text>
+                    <Text style={[styles.balanceText, { color: theme.colors.text }]}>{currencies.xp} XP</Text>
                 </View>
                 <View style={styles.balanceContainer}>
                     <FontAwesome5 name="coins" size={24} color="#FFBA08" />
-                    <Text style={styles.balanceText}>{currencies.michi_coins}</Text>
+                    <Text style={[styles.balanceText, { color: theme.colors.text }]}>{currencies.michi_coins}</Text>
                 </View>
             </View>
 
             <ScrollView contentContainerStyle={styles.container}>
-                <Text style={styles.title}>Shop</Text>
+                <Text style={[styles.title, { color: theme.colors.text }]}>Shop</Text>
 
-                <View style={styles.itemCard}>
+                <View style={[styles.itemCard, { backgroundColor: theme.colors.surface }]}>
                     <View style={styles.itemIconContainer}>
                         <FontAwesome5 name="snowflake" size={32} color="#00BFFF" />
                     </View>
                     <View style={styles.itemDetails}>
-                        <Text style={styles.itemName}>Streak Protector</Text>
-                        <Text style={styles.itemDescription}>
+                        <Text style={[styles.itemName, { color: theme.colors.text }]}>Streak Protector</Text>
+                        <Text style={[styles.itemDescription, { color: theme.colors.textSecondary || '#666' }]}>
                             Protects your streak if you miss a day.
                             (You have {streak.freezes_available} / 2)
                         </Text>
@@ -106,7 +108,6 @@ export const ShopScreen = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#F8F9FA',
     },
     loadingContainer: {
         flex: 1,
@@ -117,9 +118,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         padding: 16,
-        backgroundColor: '#FFF',
         borderBottomWidth: 1,
-        borderBottomColor: '#E9ECEF',
     },
     balanceContainer: {
         flexDirection: 'row',
@@ -129,7 +128,6 @@ const styles = StyleSheet.create({
     balanceText: {
         fontSize: 18,
         fontFamily: 'Nunito-Bold',
-        color: '#333',
     },
     container: {
         padding: 16,
@@ -137,12 +135,10 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontFamily: 'Nunito-Bold',
-        color: '#333',
         marginBottom: 16,
     },
     itemCard: {
         flexDirection: 'row',
-        backgroundColor: '#FFF',
         borderRadius: 16,
         padding: 16,
         alignItems: 'center',
@@ -168,7 +164,6 @@ const styles = StyleSheet.create({
     itemName: {
         fontSize: 18,
         fontFamily: 'Nunito-Bold',
-        color: '#333',
     },
     itemDescription: {
         fontSize: 14,

@@ -80,7 +80,7 @@ export const initDatabase = async () => {
           CREATE TABLE IF NOT EXISTS user_currencies (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             xp INTEGER DEFAULT 0,
-            michi_coins INTEGER DEFAULT 0,
+            michi_coins INTEGER DEFAULT 300,
             updated_at TEXT
           );
         `);

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { LessonService } from '../services/Lesson.service';
 import { Exercise } from '../types/exercise';
 import { useNodesStore } from '../../../store/NodesStore';
-import { CurrencyService } from '../../gamification/services/CurrencyService';
+import { CurrencyService } from '../../gamification/services/Currency.service';
 
 export type LessonStatus = 'loading' | 'theory' | 'exercises' | 'completed';
 

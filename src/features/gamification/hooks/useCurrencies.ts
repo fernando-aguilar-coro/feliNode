@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { CurrencyService } from '../services/CurrencyService';
+import { CurrencyService } from '../services/Currency.service';
 
 export const useCurrencies = () => {
-    const [currencies, setCurrencies] = useState({ xp: 0, michi_coins: 0 });
+    const [currencies, setCurrencies] = useState({ xp: 0, michi_coins: 300 });
     const [loading, setLoading] = useState(true);
 
     const loadCurrencies = useCallback(async () => {

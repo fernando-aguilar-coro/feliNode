@@ -5,6 +5,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { PronunciationAssessmentScreen } from '../../learning/screens/PronunciationAssessmentScreen';
 import { InfinityLandingScreen } from '../../learning/screens/InfinityLandingScreen';
 import { SettingsScreen } from '../../settings/screens/SettingsScreen';
+import { ShopScreen } from '../../gamification/screens/ShopScreen';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { audioService } from '../../settings/services/audioService';
@@ -13,6 +14,7 @@ export type HomeTabParamList = {
     HomeMain: undefined;
     InfinityLanding: undefined;
     Pronunciation: undefined;
+    Shop: undefined;
     Settings: undefined;
 };
 
@@ -90,6 +92,16 @@ export const HomeTabNavigator = () => {
                 listeners={{
                     focus: () => audioService.pauseBGM(),
                     blur: () => audioService.playBGM(),
+                }}
+            />
+            <Tab.Screen
+                name="Shop"
+                component={ShopScreen}
+                options={{
+                    tabBarLabel: 'Tienda',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="cart-outline" size={24} color={color} />
+                    ),
                 }}
             />
             <Tab.Screen
