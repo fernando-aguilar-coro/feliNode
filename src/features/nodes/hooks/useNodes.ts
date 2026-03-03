@@ -1,31 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { NodeService } from '../services/NodeService';
-import { TreeNode, TreeLink } from '../types/NodeTypes';
 import { useNodesStore } from '../../../store/NodesStore';
 
 export const useNodes = (width: number, height: number) => {
-    const [nodes, setNodes] = useState<TreeNode[]>([]);
-    const [links, setLinks] = useState<TreeLink[]>([]);
-    const [canvasWidth, setCanvasWidth] = useState(width);
-    const [canvasHeight, setCanvasHeight] = useState(height);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const refreshTrigger = useNodesStore(state => state.refreshTrigger);
+
+    // Select state needed for the screen (exclude large arrays to avoid unnecessary renders)
+    const isTreeLoading = useNodesStore(state => state.isTreeLoading);
+    const treeError = useNodesStore(state => state.treeError);
+    const canvasWidth = useNodesStore(state => state.canvasWidth);
+    const canvasHeight = useNodesStore(state => state.canvasHeight);
 
     const refreshNodes = async () => {
         try {
-            setIsLoading(true);
+            useNodesStore.getState().setTreeLoading(true);
             const data = await NodeService.getLayout(width, height);
-            setNodes(data.nodes);
-            setLinks(data.links);
-            setCanvasWidth(data.width);
-            setCanvasHeight(data.height);
-            setError(null);
+            useNodesStore.getState().setTreeData(data.nodes, data.links, data.width, data.height);
         } catch (err) {
             console.error('Error loading nodes:', err);
-            setError('Failed to load curriculum tree.');
-        } finally {
-            setIsLoading(false);
+            useNodesStore.getState().setTreeError('Failed to load curriculum tree.');
         }
     };
 
@@ -34,12 +27,10 @@ export const useNodes = (width: number, height: number) => {
     }, [width, height, refreshTrigger]);
 
     return {
-        nodes,
-        links,
         canvasWidth,
         canvasHeight,
-        isLoading,
-        error,
+        isLoading: isTreeLoading,
+        error: treeError,
         refreshNodes
     };
 };

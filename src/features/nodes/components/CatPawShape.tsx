@@ -10,7 +10,7 @@ export interface CatPawShapeProps {
     rotation?: number;
 }
 
-export const CatPawShape: React.FC<CatPawShapeProps> = ({
+export const CatPawShape: React.FC<CatPawShapeProps> = React.memo(({
     fillColor,
     strokeColor,
     strokeWidth,
@@ -57,4 +57,4 @@ export const CatPawShape: React.FC<CatPawShapeProps> = ({
             />
         </G>
     );
-};
+});

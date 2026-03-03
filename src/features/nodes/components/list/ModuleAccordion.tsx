@@ -12,7 +12,7 @@ interface ModuleAccordionProps {
     onToggle: (moduleId: number) => void;
 }
 
-export const ModuleAccordion: React.FC<ModuleAccordionProps> = ({ module, isExpanded, onToggle }) => {
+export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ module, isExpanded, onToggle }) => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
 
@@ -161,4 +161,4 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = ({ module, isExpa
             )}
         </View>
     );
-};
+});

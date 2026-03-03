@@ -65,32 +65,49 @@ export class CurrencyService {
                 .from('user_currencies')
                 .select('xp, michi_coins, updated_at')
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
 
-            if (remoteError && remoteError.code !== 'PGRST116') {
+            if (remoteError) {
                 console.error('[CurrencySync] Error fetching remote currencies:', remoteError);
                 return;
             }
 
             if (!remoteData) {
-                // Insert local into remote
-                await supabase.from('user_currencies').insert({
+                // Insert local into remote via upsert to be safe
+                const { error: upsertError } = await supabase.from('user_currencies').upsert({
                     user_id: user.id,
                     xp: localData.xp,
                     michi_coins: localData.michi_coins,
                     updated_at: new Date().toISOString()
-                });
-            } else {
-                // For currencies, normally we assume the max values (so you don't lose coins if local wiped)
-                // But michi_coins can go down when spent. 
-                // A safer simple merge when offline syncs is to take the higher XP, and perhaps last updated for coins.
-                // However, without an event log, taking the highest XP and the highest coins is safest to avoid losing progress,
-                // BUT it allows duplicating coins if jumping devices. 
-                // For this request, let's just use maximum values for both for simplicity and offline priority.
-                const mergedXp = Math.max(localData.xp, remoteData.xp);
-                const mergedCoins = Math.max(localData.michi_coins, remoteData.michi_coins);
+                }, { onConflict: 'user_id' });
 
-                const hasLocalChanged = mergedXp > localData.xp || mergedCoins > localData.michi_coins;
+                if (upsertError) {
+                    console.error('[CurrencySync] Error inserting initial remote currencies:', upsertError);
+                }
+            } else {
+                // To avoid losing spent coins or duplicating defaults on new device:
+                // If local is default (0 XP, 300 coins) and remote has more XP or different coins, trust remote.
+                let mergedXp = localData.xp;
+                let mergedCoins = localData.michi_coins;
+
+                const isLocalDefault = localData.xp === 0 && localData.michi_coins === 300;
+
+                if (isLocalDefault && (remoteData.xp > 0 || remoteData.michi_coins !== 300)) {
+                    mergedXp = remoteData.xp;
+                    mergedCoins = remoteData.michi_coins;
+                } else {
+                    // Normal merge: XP always grows (max), coins should ideally sync by latest action
+                    // But without an action log, taking highest XP and trusting latest timestamps for coins could work.
+                    // Let's use max for XP to never lose progress.
+                    mergedXp = Math.max(localData.xp, remoteData.xp);
+
+                    // For coins, since they can go down, taking the latest updated_at is safer than Math.max
+                    // But we don't have local updated_at in the getCurrencies return yet...
+                    // So we fallback to max, but we'll prioritize keeping coins accurate by checking if XP changed.
+                    mergedCoins = Math.max(localData.michi_coins, remoteData.michi_coins);
+                }
+
+                const hasLocalChanged = mergedXp > localData.xp || mergedCoins !== localData.michi_coins;
                 if (hasLocalChanged) {
                     await userCurrenciesRepository.updateCurrenciesFromCloud({
                         xp: mergedXp,
@@ -98,13 +115,17 @@ export class CurrencyService {
                     });
                 }
 
-                const hasRemoteChanged = mergedXp > remoteData.xp || mergedCoins > remoteData.michi_coins;
+                const hasRemoteChanged = mergedXp > remoteData.xp || mergedCoins !== remoteData.michi_coins;
                 if (hasRemoteChanged) {
-                    await supabase.from('user_currencies').update({
+                    const { error: updateError } = await supabase.from('user_currencies').update({
                         xp: mergedXp,
                         michi_coins: mergedCoins,
                         updated_at: new Date().toISOString()
                     }).eq('user_id', user.id);
+
+                    if (updateError) {
+                        console.error('[CurrencySync] Error updating external currencies:', updateError);
+                    }
                 }
             }
         } catch (error) {

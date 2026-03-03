@@ -1,9 +1,9 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useCallback, useState } from 'react';
 import { View, Text, Dimensions, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNodes } from '../hooks/useNodes';
 import { TreeNode } from '../types/NodeTypes';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { TreeCanvas } from '../components/TreeCanvas';
 import { PannableCanvasRef } from '../components/PannableCanvas';
 import { useAppTheme } from '../../../theme/ThemeContext';
@@ -11,22 +11,39 @@ import { audioService } from '../../settings/services/audioService';
 import { StreakBadge } from '../../gamification/components/StreakBadge';
 import { CurrencyBadge } from '../../gamification/components/CurrencyBadge';
 import { useSettingsStore } from '../../../store/SettingsStore';
+import { LoadingScreen } from '../../../components/LoadingScreen';
 
 export const TreeNodeScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
     const showStreak = useSettingsStore(state => state.showStreak);
-    const { nodes, links, canvasWidth, canvasHeight, isLoading, error } = useNodes(400, 600);
+    const { canvasWidth, canvasHeight, isLoading, error } = useNodes(400, 600);
     const canvasRef = useRef<PannableCanvasRef>(null);
+    const [isCanvasReady, setIsCanvasReady] = useState(false);
 
-    const handleNodePress = (node: TreeNode) => {
+    useFocusEffect(
+        useCallback(() => {
+            // Esperamos a que termine la transición de navegación (aprox 300-350ms)
+            const timeout = setTimeout(() => {
+                setIsCanvasReady(true);
+            }, 350);
+
+            return () => {
+                clearTimeout(timeout);
+                // Ocultamos el árbol pesado cuando se pierde el foco
+                setIsCanvasReady(false);
+            };
+        }, [])
+    );
+
+    const handleNodePress = useCallback((node: TreeNode) => {
         audioService.playClickSound();
         if (node.status !== 'locked') {
             navigation.navigate('Lesson', { lessonId: node.id });
         } else {
             console.log('Lesson is locked');
         }
-    };
+    }, [navigation]);
 
     const handleResetView = () => {
         audioService.playClickSound();
@@ -82,12 +99,8 @@ export const TreeNodeScreen = () => {
         },
     }), [theme]);
 
-    if (isLoading) {
-        return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-            </View>
-        );
+    if (isLoading || !isCanvasReady) {
+        return <View style={styles.centerContainer}><Text style={styles.errorText}>Preparando mapa...</Text></View>;
     }
 
     if (error) {
@@ -104,8 +117,6 @@ export const TreeNodeScreen = () => {
                 ref={canvasRef}
                 width={canvasWidth}
                 height={canvasHeight}
-                nodes={nodes}
-                links={links}
                 onNodePress={handleNodePress}
             />
 

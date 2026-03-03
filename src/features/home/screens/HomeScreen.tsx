@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, InteractionManager } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TreeNodeScreen } from '../../nodes/screens/TreeNodeScreen';
@@ -113,7 +113,11 @@ export const HomeScreen = () => {
             </TouchableOpacity>
 
             <View style={styles.content}>
-                {viewMode === 'tree' ? <TreeNodeScreen /> : <ModuleProgressScreen />}
+                {viewMode === 'tree' ? (
+                    <TreeNodeScreen />
+                ) : (
+                    <ModuleProgressScreen />
+                )}
             </View>
         </SafeAreaView>
     );

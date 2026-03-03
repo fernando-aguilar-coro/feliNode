@@ -1,17 +1,18 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { audioService } from '../../settings/services/audioService';
-import { getModuleProgressView, ModuleProgress } from '../services/ModuleProgress.service';
+import { getModuleProgressView } from '../services/ModuleProgress.service';
 import { ModuleAccordion } from '../components/list/ModuleAccordion';
+import { useNodesStore } from '../../../store/NodesStore';
 
 export const ModuleProgressScreen = () => {
     const theme = useAppTheme();
     const isFocused = useIsFocused();
 
-    const [modules, setModules] = useState<ModuleProgress[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const modules = useNodesStore(state => state.modules);
+    const isLoading = useNodesStore(state => state.isModulesLoading);
     const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set());
 
     useEffect(() => {
@@ -21,22 +22,23 @@ export const ModuleProgressScreen = () => {
     }, [isFocused]);
 
     const loadData = async () => {
-        setIsLoading(true);
+        if (useNodesStore.getState().modules.length === 0) {
+            useNodesStore.getState().setModulesLoading(true);
+        }
         try {
             const data = await getModuleProgressView();
-            setModules(data);
+            useNodesStore.getState().setModules(data);
             if (data.length > 0 && expandedModules.size === 0) {
                 // Expand the first module by default if none are expanded
                 setExpandedModules(new Set([data[0].id]));
             }
         } catch (error) {
             console.error('Failed to load module progress', error);
-        } finally {
-            setIsLoading(false);
+            useNodesStore.getState().setModulesLoading(false);
         }
     };
 
-    const toggleModule = (moduleId: number) => {
+    const toggleModule = useCallback((moduleId: number) => {
         audioService.playClickSound();
         setExpandedModules(prev => {
             const newSet = new Set(prev);
@@ -47,7 +49,7 @@ export const ModuleProgressScreen = () => {
             }
             return newSet;
         });
-    };
+    }, []);
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
