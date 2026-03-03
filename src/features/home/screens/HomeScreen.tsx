@@ -9,11 +9,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { audioService } from '../../settings/services/audioService';
 import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { StreakCloudService } from '../../gamification/services/StreakCloud.service';
+import { useSettingsStore } from '../../../store/SettingsStore';
 
 export const HomeScreen = () => {
     const netInfo = useNetInfo();
     const theme = useAppTheme();
-    const [viewMode, setViewMode] = useState<'tree' | 'list'>('tree');
+    const homeViewMode = useSettingsStore(state => state.homeViewMode);
+    const setHomeViewMode = useSettingsStore(state => state.setHomeViewMode);
     const hasSyncedOnStart = useRef(false);
 
     useEffect(() => {
@@ -35,7 +37,7 @@ export const HomeScreen = () => {
 
     const toggleViewMode = () => {
         audioService.playClickSound();
-        setViewMode(prev => prev === 'tree' ? 'list' : 'tree');
+        setHomeViewMode(homeViewMode === 'tree' ? 'list' : 'tree');
     };
 
     const styles = useMemo(() => StyleSheet.create({
@@ -102,18 +104,18 @@ export const HomeScreen = () => {
             <TouchableOpacity onPress={toggleViewMode} style={styles.banner} activeOpacity={0.8}>
                 <View style={styles.bannerContent}>
                     <MaterialIcons
-                        name={viewMode === 'tree' ? 'view-list' : 'account-tree'}
+                        name={homeViewMode === 'tree' ? 'view-list' : 'account-tree'}
                         size={24}
                         color={theme.colors.white}
                     />
                     <Text style={styles.bannerText}>
-                        {viewMode === 'tree' ? 'Cambiar a Vista de Lista' : 'Cambiar a Mapa de Nodos'}
+                        {homeViewMode === 'tree' ? 'Cambiar a Vista de Lista' : 'Cambiar a Mapa de Nodos'}
                     </Text>
                 </View>
             </TouchableOpacity>
 
             <View style={styles.content}>
-                {viewMode === 'tree' ? (
+                {homeViewMode === 'tree' ? (
                     <TreeNodeScreen />
                 ) : (
                     <ModuleProgressScreen />

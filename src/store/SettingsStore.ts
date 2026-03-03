@@ -19,6 +19,8 @@ interface SettingsState {
     setKokoroDownloaded: (downloaded: boolean) => void;
     setHasDecidedKokoroDownload: (decided: boolean) => void;
     setShowStreak: (show: boolean) => void;
+    homeViewMode: 'tree' | 'list';
+    setHomeViewMode: (mode: 'tree' | 'list') => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -38,6 +40,8 @@ export const useSettingsStore = create<SettingsState>()(
             setKokoroDownloaded: (downloaded: boolean) => set({ isKokoroDownloaded: downloaded }),
             setHasDecidedKokoroDownload: (decided: boolean) => set({ hasDecidedKokoroDownload: decided }),
             setShowStreak: (show: boolean) => set({ showStreak: show }),
+            homeViewMode: 'tree',
+            setHomeViewMode: (mode: 'tree' | 'list') => set({ homeViewMode: mode }),
         }),
         {
             name: 'settings-storage',

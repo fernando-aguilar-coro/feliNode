@@ -61,7 +61,7 @@ export const StreakDetailsScreen = () => {
                         {current_streak}
                     </Text>
                     <Text style={[styles.streakLabel, { color: theme.colors.text }]}>
-                        {current_streak === 1 ? 'días de racha' : 'días de racha'}
+                        {current_streak === 1 ? 'día de racha' : 'días de racha'}
                     </Text>
 
                     <View style={styles.statsRow}>

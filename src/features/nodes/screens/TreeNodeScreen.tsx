@@ -3,7 +3,7 @@ import { View, Text, Dimensions, ActivityIndicator, StyleSheet, TouchableOpacity
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNodes } from '../hooks/useNodes';
 import { TreeNode } from '../types/NodeTypes';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { TreeCanvas } from '../components/TreeCanvas';
 import { PannableCanvasRef } from '../components/PannableCanvas';
 import { useAppTheme } from '../../../theme/ThemeContext';
@@ -11,7 +11,6 @@ import { audioService } from '../../settings/services/audioService';
 import { StreakBadge } from '../../gamification/components/StreakBadge';
 import { CurrencyBadge } from '../../gamification/components/CurrencyBadge';
 import { useSettingsStore } from '../../../store/SettingsStore';
-import { LoadingScreen } from '../../../components/LoadingScreen';
 
 export const TreeNodeScreen = () => {
     const theme = useAppTheme();
@@ -19,22 +18,7 @@ export const TreeNodeScreen = () => {
     const showStreak = useSettingsStore(state => state.showStreak);
     const { canvasWidth, canvasHeight, isLoading, error } = useNodes(400, 600);
     const canvasRef = useRef<PannableCanvasRef>(null);
-    const [isCanvasReady, setIsCanvasReady] = useState(false);
 
-    useFocusEffect(
-        useCallback(() => {
-            // Esperamos a que termine la transición de navegación (aprox 300-350ms)
-            const timeout = setTimeout(() => {
-                setIsCanvasReady(true);
-            }, 350);
-
-            return () => {
-                clearTimeout(timeout);
-                // Ocultamos el árbol pesado cuando se pierde el foco
-                setIsCanvasReady(false);
-            };
-        }, [])
-    );
 
     const handleNodePress = useCallback((node: TreeNode) => {
         audioService.playClickSound();
@@ -99,9 +83,6 @@ export const TreeNodeScreen = () => {
         },
     }), [theme]);
 
-    if (isLoading || !isCanvasReady) {
-        return <View style={styles.centerContainer}><Text style={styles.errorText}>Preparando mapa...</Text></View>;
-    }
 
     if (error) {
         return (

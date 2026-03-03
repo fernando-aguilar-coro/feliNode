@@ -1,11 +1,12 @@
 import React from 'react';
-import { View } from 'react-native';
-import Svg from 'react-native-svg';
-import { TreeNode, TreeLink } from '../types/NodeTypes';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { Canvas } from '@shopify/react-native-skia';
+import { TreeNode } from '../types/NodeTypes';
 import { BezierLink } from './BezierLink';
 import { ModernNode } from './ModernNode';
 import { PannableCanvas, PannableCanvasRef } from './PannableCanvas';
 import { useNodesStore } from '../../../store/NodesStore';
+import { useAppTheme } from '../../../theme/ThemeContext';
 
 interface TreeCanvasProps {
     width: number;
@@ -13,26 +14,78 @@ interface TreeCanvasProps {
     onNodePress: (node: TreeNode) => void;
 }
 
+const NodeOverlay = React.memo(({ node, onPress }: { node: TreeNode, onPress: () => void }) => {
+    const theme = useAppTheme();
+    const colors = theme?.colors || {
+        textSecondary: '#666',
+        text: '#000',
+        textLight: '#999',
+        background: '#fff'
+    };
+
+    let tc = colors.textSecondary;
+    if (node.status === 'completed') tc = colors.text;
+    else if (node.status === 'available') tc = colors.text;
+    else tc = colors.textLight;
+
+    return (
+        <TouchableOpacity
+            style={{
+                position: 'absolute',
+                left: node.x - 50,
+                top: node.y - 45,
+                width: 100,
+                height: 110,
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+            }}
+            onPress={onPress}
+            activeOpacity={0.7}
+        >
+            <View style={{ height: 85, width: '100%' }} />
+            <Text
+                numberOfLines={2}
+                style={{
+                    color: tc,
+                    fontSize: 14,
+                    fontWeight: node.status !== 'locked' ? 'bold' : 'normal',
+                    textAlign: 'center',
+                    width: '100%',
+                    textShadowColor: colors.background,
+                    textShadowOffset: { width: 0, height: 1 },
+                    textShadowRadius: 2,
+                }}
+            >
+                {node.title}
+            </Text>
+        </TouchableOpacity>
+    );
+});
+
 export const TreeCanvas = React.forwardRef<PannableCanvasRef, TreeCanvasProps>(({ width, height, onNodePress }, ref) => {
-    // Memoize nodes and links rendering to prevent unnecessary re-calculations if props don't change
-    // profound change: removed Filters, Gradients, and Patterns for raw performance.
     const links = useNodesStore(state => state.links);
     const nodes = useNodesStore(state => state.nodes);
 
     return (
         <PannableCanvas ref={ref} width={width} height={height}>
             <View style={{ width, height }}>
-                <Svg width={width} height={height}>
-                    {/* 1. Render Links First (Background) */}
+                <Canvas style={{ width, height }} pointerEvents="none">
                     {links.map((link, index) => (
                         <BezierLink key={`link-${index}`} link={link} />
                     ))}
-
-                    {/* 2. Render Nodes (Foreground) */}
                     {nodes.map((node) => (
-                        <ModernNode key={node.id} node={node} onPress={onNodePress} />
+                        <ModernNode key={node.id} node={node} />
                     ))}
-                </Svg>
+                </Canvas>
+                <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+                    {nodes.map((node) => (
+                        <NodeOverlay
+                            key={`overlay-${node.id}`}
+                            node={node}
+                            onPress={() => onNodePress(node)}
+                        />
+                    ))}
+                </View>
             </View>
         </PannableCanvas>
     );
