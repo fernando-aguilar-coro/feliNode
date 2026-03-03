@@ -4,9 +4,11 @@ import { useNavigation } from '@react-navigation/native';
 
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { theme } from '../../../theme';
+import { useSettingsStore } from '../../../store/SettingsStore';
 
 export const ChoseInitialTest = () => {
     const navigation = useNavigation<any>();
+    const { setHasDecidedPlacementTest } = useSettingsStore();
 
     const handleSelectTest = (lessonId: string) => {
         navigation.navigate('PlacementEvaluation', { lessonId });
@@ -24,6 +26,19 @@ export const ChoseInitialTest = () => {
                 </AppText>
 
                 <Spacer height={theme.spacing.xl} />
+
+                <AppButton
+                    title="Empezar de 0"
+                    onPress={() => setHasDecidedPlacementTest(true)}
+                    variant="primary"
+                    style={styles.button}
+                />
+                <Spacer height={theme.spacing.lg} />
+
+                <AppText variant="sm" color={theme.colors.textSecondary} align="center">
+                    O toma una prueba de nivel:
+                </AppText>
+                <Spacer height={theme.spacing.md} />
 
                 <AppButton
                     title="Nivel Básico"

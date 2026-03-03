@@ -9,6 +9,8 @@ export interface SeedExerciseContent {
     correct_answer?: string;
     options?: SeedOption[];
     phrase?: string; // For translate
+    pairs?: { left: string; right: string }[];
+    unlocks_lesson_id?: string;
     // Add other fields as needed for different exercise types
 }
 

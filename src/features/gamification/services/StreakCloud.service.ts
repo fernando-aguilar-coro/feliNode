@@ -21,7 +21,7 @@ export const StreakCloudService = {
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             const user = session?.user;
             if (sessionError || !user) {
-                console.log('[StreakCloud] No active session, skipping upstream sync.', sessionError?.message || '');
+
                 return;
             }
 
@@ -41,7 +41,7 @@ export const StreakCloudService = {
             if (syncError) {
                 console.warn('[StreakCloud] Failed to sync streak up:', syncError.message);
             } else {
-                console.log('[StreakCloud] Streak synced UP successfully.');
+
             }
         } catch (error) {
             console.error('[StreakCloud] Error syncing up:', error);
@@ -53,7 +53,7 @@ export const StreakCloudService = {
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             const user = session?.user;
             if (sessionError || !user) {
-                console.log('[StreakCloud] No active session, skipping downstream sync.', sessionError?.message || '');
+
                 return null;
             }
 
@@ -94,7 +94,7 @@ export const StreakCloudService = {
 
             if (!cloudData) {
                 // If there's no cloud data (PGRST116 or other), push local up to initialize
-                console.log('[StreakCloud] No cloud data found, initializing with local data.');
+
                 await StreakCloudService.syncUp(localData);
                 return;
             }
@@ -136,7 +136,7 @@ export const StreakCloudService = {
                     freezes_used: newFreezesUsed
                 };
                 await streakRepository.updateStreakFromCloud(mergedData);
-                console.log('[StreakCloud] Local DB updated from cloud sync.');
+
 
                 // Reschedule with the new synced data
                 await NotificationService.scheduleStreakReminder(mergedData.current_streak, mergedData.last_active_date);

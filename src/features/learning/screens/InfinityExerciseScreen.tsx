@@ -136,7 +136,7 @@ export const InfinityExerciseScreen = () => {
                     audioService.playSuccessSound();
                     const targetId = lessonId || 'General English';
                     infinityProgressRepository.saveInfinityScore(targetId, currentIndex).then(() => {
-                        console.log('Score saved for', targetId);
+
                         syncInfinityStats(); // Sync after saving new score
                     });
                 }

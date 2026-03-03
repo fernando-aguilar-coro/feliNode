@@ -19,7 +19,7 @@ class ReactNativeTtsService {
 
                 if (googleEngine) {
                     await Tts.setDefaultEngine('com.google.android.tts');
-                    console.log("Motor de Google configurado con éxito");
+
                 } else {
                     console.warn("Google TTS no está instalado, se usará el motor por defecto.");
                 }

@@ -25,7 +25,7 @@ export const TreeNodeScreen = () => {
         if (node.status !== 'locked') {
             navigation.navigate('Lesson', { lessonId: node.id });
         } else {
-            console.log('Lesson is locked');
+
         }
     }, [navigation]);
 

@@ -55,7 +55,7 @@ export class CurrencyService {
             const { data: { user }, error: userError } = await supabase.auth.getUser();
 
             if (userError || !user) {
-                console.log('[CurrencySync] No active session, skipping cloud sync.');
+
                 return;
             }
 

@@ -33,7 +33,7 @@ class TtsManagerService {
      */
     public async initialize(onProgress?: (progress: number) => void) {
         try {
-            console.log('TTS Manager: Initializing Executorch TTS...');
+
 
             const state = useSettingsStore.getState();
             const selectedVoice = state.englishVoice || KOKORO_VOICE_AF_HEART;
@@ -47,11 +47,11 @@ class TtsManagerService {
 
             await this.ttsModule.load(config, (progress) => {
                 if (onProgress) onProgress(progress);
-                console.log(`TTS Load Progress: ${progress * 100}%`);
+
             });
 
             this.isInitialized = true;
-            console.log('TTS Manager: Executorch TTS Initialized successfully.');
+
 
         } catch (error) {
             console.error('TTS Manager: Initialization failed', error);
@@ -76,7 +76,7 @@ class TtsManagerService {
         }
 
         if (this.currentVoiceSource !== selectedVoice.voiceSource) {
-            console.log('TTS Manager: Voice changed, re-initializing...');
+
             this.isInitialized = false;
             await this.initialize();
         }
@@ -100,7 +100,7 @@ class TtsManagerService {
             let allPcmData: Float32Array[] = [];
             let totalLength = 0;
 
-            console.log(`TTS Manager: Generating audio for ${chunks.length} chunks...`);
+
 
             for (const chunk of chunks) {
                 const cleanChunk = chunk.trim();
@@ -113,7 +113,7 @@ class TtsManagerService {
                     totalLength += pcmFloat32.length;
                 } catch (error: any) {
                     if (error?.message?.includes("The model's forward function did not succeed")) {
-                        console.debug(`TTS Manager: Speak failed for chunk "${cleanChunk.substring(0, 10)}..." (suppressed).`, error);
+
                     } else {
                         console.error('TTS Manager: Speak failed.', error);
                     }
@@ -133,7 +133,7 @@ class TtsManagerService {
                 offset += pcm.length;
             }
 
-            console.log(`TTS Manager: Audio generated. Total Samples: ${totalLength}`);
+
 
             // Play the generated audio
             await this.playPcmData(combinedPcm);

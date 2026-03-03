@@ -30,7 +30,7 @@ export class UserProgressRepository extends BaseRepository {
         const db = await this.db;
         try {
             await db.runAsync('DELETE FROM user_progress');
-            console.log('[DB] User progress cleared.');
+
         } catch (error) {
             console.error('[DB] Error clearing user progress:', error);
         }
@@ -89,7 +89,7 @@ export class UserProgressRepository extends BaseRepository {
             }
 
             updateUser(completed).catch(err => {
-                console.log('[Sync] Background sync failed (harmless for local usage):', err);
+
             });
         }
     }

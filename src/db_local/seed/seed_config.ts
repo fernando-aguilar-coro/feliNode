@@ -10,7 +10,7 @@ export const ensureModule = async (db: SQLite.SQLiteDatabase, moduleData: SeedMo
     } else {
         const moduleResult = await db.runAsync('INSERT INTO modules (title, order_index) VALUES (?, ?)', [moduleData.title, moduleData.order_index]);
         moduleId = moduleResult.lastInsertRowId;
-        console.log('[DB_SEED] Module created with ID:', moduleId);
+
     }
     return moduleId;
 };
@@ -38,7 +38,7 @@ export const ensureDependencies = async (db: SQLite.SQLiteDatabase, dependencies
                 'INSERT INTO lesson_dependencies (lesson_id, prerequisite_id) VALUES (?, ?)',
                 [dep.child, dep.parent]
             );
-            console.log(`[DB_SEED] Added dependency: ${dep.parent} -> ${dep.child}`);
+
         }
     }
 };

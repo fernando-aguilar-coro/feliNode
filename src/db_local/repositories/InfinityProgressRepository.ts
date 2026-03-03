@@ -9,13 +9,13 @@ export class InfinityProgressRepository extends BaseRepository {
             if (existing) {
                 if (score > existing.max_score) {
                     await db.runAsync('UPDATE infinity_progress SET max_score = ?, updated_at = ? WHERE target_id = ?', [score, new Date().toISOString(), targetId]);
-                    console.log(`[DB] Updated max score for ${targetId} to ${score}`);
+
                 } else {
-                    console.log(`[DB] Score ${score} not higher than existing ${existing.max_score} for ${targetId}`);
+
                 }
             } else {
                 await db.runAsync('INSERT INTO infinity_progress (target_id, max_score, updated_at) VALUES (?, ?, ?)', [targetId, score, new Date().toISOString()]);
-                console.log(`[DB] Inserted new score for ${targetId}: ${score}`);
+
             }
         } catch (error) {
             console.error('[DB] Error saving infinity score:', error);
@@ -63,7 +63,7 @@ export class InfinityProgressRepository extends BaseRepository {
                     );
                 }
             });
-            console.log(`[DB] Bulk sync attempted for ${records.length} infinity scores.`);
+
         } catch (error) {
             console.error('[DB] Error bulk saving infinity scores:', error);
         }

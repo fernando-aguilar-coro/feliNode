@@ -34,7 +34,7 @@ export const PronunciationAssessmentScreen = () => {
                     }
                 }
             } catch (e) {
-                console.log("Error fetching context for recommendation", e);
+
             }
         };
         fetchContext();

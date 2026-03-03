@@ -57,7 +57,7 @@ export const InfinityService = {
             // Cleanup markdown code blocks if present
             const cleanText = responseText.replace(/```json|```/g, '').trim();
 
-            console.log("Raw JSON response:", cleanText);
+
 
             let parsedData: GeminiResponse;
             try {

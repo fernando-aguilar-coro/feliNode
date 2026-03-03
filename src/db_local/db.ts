@@ -85,7 +85,7 @@ export const initDatabase = async () => {
           );
         `);
 
-        console.log('Database initialized successfully');
+
         dbInstance = db;
         return db;
       } catch (error) {

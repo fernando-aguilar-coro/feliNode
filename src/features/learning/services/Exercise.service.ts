@@ -19,7 +19,7 @@ export const ExerciseService = {
      */
     getExercisesForLesson: async (lessonId: string): Promise<Exercise[]> => {
         try {
-            console.log(`[ExerciseService] Fetching exercises for lesson: ${lessonId}`);
+
             const dbExercises = await exerciseRepository.getExercisesByLessonId(lessonId);
 
             // 1. Map DB exercises to App exercises

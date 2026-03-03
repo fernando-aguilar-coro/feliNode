@@ -6,7 +6,7 @@ export const syncUserProgress = async () => {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
         if (userError || !user) {
-            console.log('[Sync] No active session, skipping cloud sync.');
+
             return;
         }
 
@@ -43,7 +43,7 @@ export const syncUserProgress = async () => {
         const hasNewForLocal = mergedCompleted.some(id => !localSet.has(id));
 
         if (hasNewForLocal) {
-            console.log('[Sync] Updating local database...');
+
             await userProgressRepository.setCompletedLessons(mergedCompleted);
         }
 

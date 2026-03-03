@@ -12,6 +12,7 @@ export interface BaseExercise {
     id: string;
     type: ExerciseType;
     question: string;
+    unlocksLessonId?: string;
 }
 
 export interface MultipleChoiceExercise extends BaseExercise {

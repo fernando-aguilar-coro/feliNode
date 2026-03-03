@@ -67,13 +67,13 @@ export const authService = {
         } catch (error: any) {
             if (error.code === statusCodes.SIGN_IN_CANCELLED) {
                 // user cancelled the login flow
-                console.log('User cancelled login');
+
             } else if (error.code === statusCodes.IN_PROGRESS) {
                 // operation (e.g. sign in) is in progress already
-                console.log('Sign in is in progress');
+
             } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
                 // play services not available or outdated
-                console.log('Play services not available');
+
             } else {
                 // some other error happened
                 console.error(error);

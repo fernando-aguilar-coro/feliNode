@@ -17,7 +17,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ uri }) => {
     useEffect(() => {
         return () => {
             if (sound) {
-                console.log('Unloading Sound');
+
                 sound.unloadAsync();
             }
         };
@@ -41,7 +41,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ uri }) => {
                 // No, we need to be careful. The 'sound' variable in the effect cleanup is the OLD state.
                 // So yes, simple cleanup effect is correct.
 
-                console.log('Loading Sound form URI:', uri);
+
                 const { sound: newSound } = await Audio.Sound.createAsync(
                     { uri },
                     { shouldPlay: false },

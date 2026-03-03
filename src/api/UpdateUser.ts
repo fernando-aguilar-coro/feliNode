@@ -6,7 +6,7 @@ export const updateUser = async (completedLessons: string[]) => {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
         if (userError || !user) {
-            console.log('[Sync] No active session, skipping cloud sync.');
+
             return;
         }
 
@@ -26,7 +26,7 @@ export const updateUser = async (completedLessons: string[]) => {
             throw new Error(`Sync failed: ${syncError.message}`);
         }
 
-        console.log('[Sync] Progress synced successfully to Supabase.');
+
 
     } catch (error) {
         console.error('[Sync] Error syncing progress:', error);

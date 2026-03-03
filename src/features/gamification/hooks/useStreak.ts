@@ -30,7 +30,7 @@ export const useStreak = () => {
                         return prev;
                     });
                 })
-                .catch(e => console.log('[Sync] Background sync check failed:', e));
+
 
         } catch (error) {
             console.error('Failed to fetch streak:', error);
@@ -59,7 +59,7 @@ export const useStreak = () => {
             });
 
             // Upload streak change asynchronously
-            StreakCloudService.syncUp(newData).catch(e => console.log('[Sync] Background sync push failed:', e));
+
 
             return newData;
         } catch (error) {

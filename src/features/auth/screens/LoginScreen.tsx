@@ -18,7 +18,7 @@ export default function LoginScreen() {
             try {
                 await useUserStore.getState().signInWithGoogle()
             } catch (error) {
-                console.log('Error checking Google Sign In:', error);
+
             }
         };
         checkGoogleSignIn();

@@ -14,7 +14,7 @@ export const LearningSettingsSection = () => {
                 description="Español"
                 descriptionStyle={{ color: theme.colors.textSecondary }}
                 left={props => <List.Icon {...props} icon="translate" color={theme.colors.text} />}
-                onPress={() => console.log('TODO: Change Language')}
+                onPress={() => { }}
             />
         </List.Section>
     );

@@ -43,7 +43,7 @@ class AudioService {
             return;
         }
 
-        console.log(`[AudioService] Playing SFX: ${description}`);
+
 
         // Uncomment once assets are available
         try {
@@ -88,19 +88,17 @@ class AudioService {
         }
 
         if (AppState.currentState !== 'active') {
-            console.log(`[AudioService] Skipping playBGM because AppState is ${AppState.currentState}`);
+
             return;
         }
 
-        console.log(`[AudioService] Playing BGM`);
+
         try {
             if (this.bgmSound) {
                 const status = await this.bgmSound.getStatusAsync();
                 if ('isPlaying' in status && !status.isPlaying) {
                     if (AppState.currentState === 'active') {
                         await this.bgmSound.playAsync();
-                    } else {
-                        console.log('[AudioService] Skipping resume because app state is not active');
                     }
                 }
                 return;
@@ -115,20 +113,15 @@ class AudioService {
             if (AppState.currentState === 'active') {
                 await this.bgmSound.playAsync();
             } else {
-                console.log('[AudioService] App became inactive while creating BGM sound. Pausing.');
+
             }
         } catch (error: any) {
-            if (error?.message?.includes?.('AudioFocusNotAcquiredException')) {
-                console.warn('[AudioService] Could not acquire audio focus (app in background/transition).');
-                this.wasPlayingBeforeBackground = true;
-            } else {
-                console.error('Failed to play BGM', error);
-            }
+            console.warn('[AudioService] error', error);
         }
     };
 
     public stopBGM = async () => {
-        console.log(`[AudioService] Stopping BGM`);
+
         try {
             if (this.bgmSound) {
                 await this.bgmSound.stopAsync();
@@ -141,7 +134,7 @@ class AudioService {
     };
 
     public pauseBGM = async () => {
-        console.log(`[AudioService] Pausing BGM`);
+
         try {
             if (this.bgmSound) {
                 const status = await this.bgmSound.getStatusAsync();

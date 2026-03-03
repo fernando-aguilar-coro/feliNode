@@ -36,6 +36,7 @@ const mapMultipleChoice = (dbExercise: DbExercise, content: any): MultipleChoice
             icon: o.icon
         })) || [],
         correctAnswer: correctOption?.option_text || '',
+        unlocksLessonId: content.unlocks_lesson_id,
     };
 };
 
@@ -50,6 +51,7 @@ const mapFillInTheBlank = (dbExercise: DbExercise, content: any): FillInTheBlank
         question: dbExercise.instruction || "",
         sentence: sentence,
         correctAnswer: content.correct_answer,
+        unlocksLessonId: content.unlocks_lesson_id,
     };
 };
 
@@ -63,6 +65,7 @@ const mapScrambledSentence = (dbExercise: DbExercise, content: any): ScrambledSe
         question: dbExercise.instruction || "",
         segments: segments,
         correctAnswer: text,
+        unlocksLessonId: content.unlocks_lesson_id,
     };
 };
 
@@ -72,6 +75,7 @@ const mapTranslate = (dbExercise: DbExercise, content: any): TranslateExercise =
     question: dbExercise.instruction || "Traduce la siguiente frase",
     phrase: content.phrase || '',
     correctAnswer: content.correct_answer || '',
+    unlocksLessonId: content.unlocks_lesson_id,
 });
 
 const mapPronunciation = (dbExercise: DbExercise, content: any): PronunciationExercise => ({
@@ -79,6 +83,7 @@ const mapPronunciation = (dbExercise: DbExercise, content: any): PronunciationEx
     type: ExerciseType.PRONUNCIATION,
     question: dbExercise.instruction || "Pronuncia la siguiente frase",
     phrase: content.phrase || '',
+    unlocksLessonId: content.unlocks_lesson_id,
 });
 
 const mapListening = (dbExercise: DbExercise, content: any): ListeningExercise => {
@@ -91,6 +96,7 @@ const mapListening = (dbExercise: DbExercise, content: any): ListeningExercise =
         phrase: content.phrase || '',
         correctAnswer: text,
         segments,
+        unlocksLessonId: content.unlocks_lesson_id,
     };
 };
 
@@ -100,6 +106,7 @@ const mapSelectPairs = (dbExercise: DbExercise, content: any): SelectPairsExerci
     question: dbExercise.instruction || "Selecciona los pares correctos",
     pairs: content.pairs || [],
     correctAnswer: 'DONE',
+    unlocksLessonId: content.unlocks_lesson_id,
 });
 
 /**

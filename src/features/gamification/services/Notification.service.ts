@@ -64,7 +64,7 @@ export const NotificationService = {
                     },
                     trigger18,
                 );
-                console.log('[NotificationService] Scheduled 18:00 streak reminder for', targetDate18.toLocaleString());
+
             }
 
             // 6. Schedule 23:00 Warning Notification if it's in the future
@@ -95,7 +95,7 @@ export const NotificationService = {
                     },
                     trigger23,
                 );
-                console.log('[NotificationService] Scheduled 23:00 streak reminder for', targetDate23.toLocaleString());
+
             }
         } catch (error) {
             console.error('[NotificationService] Error scheduling notification:', error);

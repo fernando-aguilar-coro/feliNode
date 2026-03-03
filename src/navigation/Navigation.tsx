@@ -21,7 +21,7 @@ const minCount = 1;
 
 export const Navigation = () => {
     const { isAuthenticated, checkSession } = useUserStore();
-    const { hasDecidedKokoroDownload } = useSettingsStore();
+    const { hasDecidedKokoroDownload, hasDecidedPlacementTest } = useSettingsStore();
     const netInfo = useNetInfo();
     const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
     const [isLoadingLessons, setIsLoadingLessons] = useState(false);
@@ -67,7 +67,7 @@ export const Navigation = () => {
         <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
             {isAuthenticated ? (
                 <Stack.Group>
-                    {completedLessonsCount <= minCount ? (
+                    {completedLessonsCount <= minCount && !hasDecidedPlacementTest ? (
                         <>
                             <Stack.Screen
                                 name="PlacementSelection"

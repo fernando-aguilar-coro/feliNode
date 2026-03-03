@@ -20,16 +20,16 @@ export const seedDatabase = async () => {
 
         const hasSeeded = await AsyncStorage.getItem('HAS_SEEDED_DB');
         if (hasSeeded === 'true') {
-            console.log('[DB_SEED] Already seeded. Skipping.');
+
             return;
         }
 
-        console.log('[DB_SEED] Starting seed process...');
+
 
         // Seed Placement Tests
         if (INITIAL_DATA.placement_tests && INITIAL_DATA.placement_tests.length > 0) {
             const fallbackModule: SeedModule = {
-                title: 'initial_exam',
+                title: 'Examenes',
                 order_index: 0,
                 lessons: [],
                 dependencies: []
@@ -41,12 +41,12 @@ export const seedDatabase = async () => {
         }
 
         // Seed from Supabase
-        console.log('[DB_SEED] Fetching lessons from Supabase...');
+
 
         const supabaseLessons = await getAllLessons();
 
         if (supabaseLessons.length > 0) {
-            console.log(`[DB_SEED] Found ${supabaseLessons.length} lessons from Supabase.`);
+
 
             // Group by module
             const lessonsByModule = new Map<number, SeedLesson[]>();
@@ -82,21 +82,21 @@ export const seedDatabase = async () => {
             }
 
             // Seed Dependencies
-            console.log('[DB_SEED] Fetching dependencies from Supabase...');
+
             const dependencies = await getAllDependencies();
             if (dependencies.length > 0) {
-                console.log(`[DB_SEED] Found ${dependencies.length} dependencies.`);
+
                 const { ensureDependencies } = await import('./seed_config');
                 await ensureDependencies(dbInstance, dependencies);
             } else {
-                console.log('[DB_SEED] No dependencies found.');
+
             }
 
         } else {
-            console.log('[DB_SEED] No lessons found in Supabase.');
+
         }
 
-        console.log('[DB_SEED] Seeding complete successfully.');
+
         await AsyncStorage.setItem('HAS_SEEDED_DB', 'true');
     } catch (error) {
         console.error('[DB_SEED] Error during database seeding:', error);

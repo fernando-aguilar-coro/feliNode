@@ -74,7 +74,7 @@ export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonCon
                 correct: isCorrect,
                 message: isCorrect ? "¡Correcto según la IA!" : "Incorrecto según la IA"
             });
-            console.log(isCorrect);
+
         } catch (error) {
             console.error("Error fetching AI explanation:", error);
             Alert.alert("Error", "No se pudo obtener la evaluación de la IA en este momento.");

@@ -29,7 +29,7 @@ export const useMicrophone = (
         (async () => {
             try {
                 const { status } = await Audio.requestPermissionsAsync();
-                console.log("Microphone permission status:", status);
+
                 setPermissionStatus(status);
 
                 if (status === 'granted') {
@@ -48,7 +48,7 @@ export const useMicrophone = (
     }, []);
 
     const stopRecording = useCallback(async () => {
-        console.log("Stopping recording...");
+
 
         // Clear auto-stop timer if it exists
         if (autoStopTimerRef.current) {
@@ -59,12 +59,12 @@ export const useMicrophone = (
         try {
             // Stop recording and get the file path
             let uri = await AudioRecord.stop();
-            console.log("Recording stopped, path:", uri);
+
 
             if (!uri.startsWith('file://')) {
                 uri = 'file://' + uri;
             }
-            console.log("Recording stopped, URI:", uri);
+
             setIsRecording(false);
 
             // Reset audio mode
@@ -88,7 +88,7 @@ export const useMicrophone = (
     }, []);
 
     const startRecording = useCallback(async () => {
-        console.log("Starting recording... Permission:", permissionStatus);
+
 
         if (permissionStatus !== 'granted') {
             const { status } = await Audio.requestPermissionsAsync();
@@ -119,13 +119,13 @@ export const useMicrophone = (
 
             AudioRecord.start();
             setIsRecording(true);
-            console.log("Recording started");
+
 
             if (onRecordingStartRef.current) onRecordingStartRef.current();
 
             // Auto-stop timer
             autoStopTimerRef.current = setTimeout(() => {
-                console.log(`Max recording time (${MAX_RECORDING_TIME_SECONDS}s) reached.`);
+
                 stopRecording();
             }, MAX_RECORDING_TIME_SECONDS * 1000);
 

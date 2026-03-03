@@ -122,9 +122,9 @@ export const PronunciationService = {
             if (!response.ok) throw new Error(`Backend Error (${response.status}): ${await response.text()}`);
 
             const text = await response.text();
-            console.log("Raw Server Response:", text);
+
             const parsed: BackendResponse = JSON.parse(text);
-            console.log("Parsed data:", JSON.stringify(parsed, null, 2));
+
 
             const data = parsed.azure_analysis;
             const geminiFeedback = parsed.gemini_feedback;
@@ -151,7 +151,7 @@ export const PronunciationService = {
             };
 
             const bestAssessment = getAssessment(best);
-            console.log("Best Assessment Object:", JSON.stringify(bestAssessment, null, 2));
+
 
             return {
                 overallScore: getScore(best),

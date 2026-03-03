@@ -21,14 +21,14 @@ export const HomeScreen = () => {
     useEffect(() => {
         if (netInfo.isConnected && !hasSyncedOnStart.current) {
             hasSyncedOnStart.current = true;
-            console.log('[HomeScreen] Internet detected. Triggering initial background sync...');
+
 
             // Sync asynchronously Without blocking
             Promise.all([
                 StreakCloudService.syncWithLocal(),
                 syncInfinityStats()
             ]).then(() => {
-                console.log('[HomeScreen] Initial sync completed successfully.');
+
             }).catch(e => {
                 console.error('[HomeScreen] Error in initial sync:', e);
             });

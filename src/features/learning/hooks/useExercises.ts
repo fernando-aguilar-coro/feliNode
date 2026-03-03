@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Exercise, ExerciseType } from '../types/exercise';
 import { TextValidationService } from '../services/TextValidation.service';
+import { userProgressRepository } from '../../../db_local/repositories';
 
 /**
  * Hook to manage the state and logic of a set of exercises.
@@ -47,6 +48,9 @@ export const useExercises = (initialExercises: Exercise[]) => {
 
         if (isCorrect) {
             setCompletedCount(prev => prev + 1);
+            if (currentExercise.unlocksLessonId) {
+                userProgressRepository.saveUserProgress(currentExercise.unlocksLessonId, 100).catch((err: any) => console.error('[useExercises] Error unlocking lesson:', err));
+            }
         } else {
             // Si te equivocas, el ejercicio se añade al final de la cola para repetirlo
             setExercises(prev => [...prev, currentExercise]);

@@ -38,7 +38,7 @@ export const InfinityPairsService = {
             }
 
             if (data.pairs && Array.isArray(data.pairs)) {
-                console.log("Gemini select pairs response", data.pairs);
+
                 return data.pairs;
             }
             return [];

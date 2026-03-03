@@ -7,11 +7,11 @@ export const syncInfinityStats = async () => {
         const user = session?.user;
 
         if (sessionError || !user) {
-            console.log('[SyncStats] No active session, skipping stats sync.', sessionError?.message || '');
+
             return;
         }
 
-        console.log('[SyncStats] Starting synchronization...');
+
 
         // 1. Fetch Local Data
         const localProgress = await infinityProgressRepository.getAllInfinityProgress();
@@ -68,12 +68,12 @@ export const syncInfinityStats = async () => {
 
         // 4. Execute Updates
         if (toUpdateLocal.length > 0) {
-            console.log(`[SyncStats] Updating ${toUpdateLocal.length} local records...`);
+
             await infinityProgressRepository.saveInfinityScoreBulk(toUpdateLocal);
         }
 
         if (toUpdateRemote.length > 0) {
-            console.log(`[SyncStats] Updating ${toUpdateRemote.length} remote records...`);
+
             const { error: upsertError } = await supabase
                 .from('stats')
                 .upsert(toUpdateRemote, { onConflict: 'user_id, target_id' }); // Conflict on unique constraint
@@ -81,11 +81,11 @@ export const syncInfinityStats = async () => {
             if (upsertError) {
                 console.error('[SyncStats] Failed to update remote stats:', upsertError);
             } else {
-                console.log('[SyncStats] Remote stats updated successfully.');
+
             }
         }
 
-        console.log('[SyncStats] Synchronization complete.');
+
 
     } catch (error) {
         console.error('[SyncStats] Critical error during stats sync:', error);

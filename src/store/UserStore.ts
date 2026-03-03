@@ -30,7 +30,7 @@ export const useUserStore = create<UserState>()(
                 if (!state.isConnected) {
                     // Offline: Trust persisted state if authenticated
                     if (wasAuthenticated) {
-                        console.log('User is offline, using persisted session');
+
                         return; // Keep existing state
                     }
                 }
