@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { audioService } from '../../settings/services/audioService';
+import { audioService } from '../../settings/services/audio.service';
 import { getModuleProgressView } from '../services/ModuleProgress.service';
 import { ModuleAccordion } from '../components/list/ModuleAccordion';
 import { useNodesStore } from '../../../store/NodesStore';

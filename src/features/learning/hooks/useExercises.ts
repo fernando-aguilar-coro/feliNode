@@ -7,9 +7,10 @@ import { userProgressRepository } from '../../../db_local/repositories';
  * Hook to manage the state and logic of a set of exercises.
  * 
  * @param initialExercises - The array of exercises to present.
+ * @param isExam - Whether this session is an exam (prevents repeating wrong answers).
  * @returns Object containing current exercise, state flags, and control methods.
  */
-export const useExercises = (initialExercises: Exercise[]) => {
+export const useExercises = (initialExercises: Exercise[], isExam: boolean = false) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [exercises, setExercises] = useState<Exercise[]>(initialExercises);
     const [isFinished, setIsFinished] = useState(false);
@@ -52,8 +53,10 @@ export const useExercises = (initialExercises: Exercise[]) => {
                 userProgressRepository.saveUserProgress(currentExercise.unlocksLessonId, 100).catch((err: any) => console.error('[useExercises] Error unlocking lesson:', err));
             }
         } else {
-            // Si te equivocas, el ejercicio se añade al final de la cola para repetirlo
-            setExercises(prev => [...prev, currentExercise]);
+            // Si te equivocas, el ejercicio se añade al final de la cola para repetirlo (a menos que sea un examen)
+            if (!isExam) {
+                setExercises(prev => [...prev, currentExercise]);
+            }
         }
 
         const correctAnswerText = currentExercise.type !== ExerciseType.PRONUNCIATION ? currentExercise.correctAnswer : '';

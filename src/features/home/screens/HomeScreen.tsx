@@ -6,7 +6,7 @@ import { TreeNodeScreen } from '../../nodes/screens/TreeNodeScreen';
 import { ModuleProgressScreen } from '../../nodes/screens/ModuleProgressScreen';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
-import { audioService } from '../../settings/services/audioService';
+import { audioService } from '../../settings/services/audio.service';
 import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { StreakCloudService } from '../../gamification/services/StreakCloud.service';
 import { useSettingsStore } from '../../../store/SettingsStore';

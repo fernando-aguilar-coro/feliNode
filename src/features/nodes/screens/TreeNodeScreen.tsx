@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { TreeCanvas } from '../components/TreeCanvas';
 import { PannableCanvasRef } from '../components/PannableCanvas';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { audioService } from '../../settings/services/audioService';
+import { audioService } from '../../settings/services/audio.service';
 import { StreakBadge } from '../../gamification/components/StreakBadge';
 import { CurrencyBadge } from '../../gamification/components/CurrencyBadge';
 import { useSettingsStore } from '../../../store/SettingsStore';

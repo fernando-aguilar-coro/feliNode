@@ -4,7 +4,7 @@ import { List, Switch, Portal, Dialog, RadioButton, Button } from 'react-native-
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useSettingsStore } from '../../../store/SettingsStore';
 import { ReactNativeTts } from '../../learning/helpers/tts/reactNativeTTS';
-import { audioService } from '../services/audioService';
+import { audioService } from '../services/audio.service';
 import {
     KOKORO_VOICE_AF_HEART, KOKORO_VOICE_AF_RIVER, KOKORO_VOICE_AF_SARAH,
     KOKORO_VOICE_AM_ADAM, KOKORO_VOICE_AM_MICHAEL, KOKORO_VOICE_AM_SANTA,

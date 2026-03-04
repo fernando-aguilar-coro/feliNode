@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useAppTheme } from '../theme/ThemeContext';
 import { AppText } from './AppText';
-import { audioService } from '../features/settings/services/audioService';
+import { audioService } from '../features/settings/services/audio.service';
 
 interface AppButtonProps extends TouchableOpacityProps {
     title: string;

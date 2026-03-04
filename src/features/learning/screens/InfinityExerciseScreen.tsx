@@ -9,7 +9,7 @@ import { InfinityService } from '../services/Infinity.service';
 import { infinityProgressRepository } from '../../../db_local/repositories';
 import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { Exercise } from '../types/exercise';
-import { audioService } from '../../settings/services/audioService';
+import { audioService } from '../../settings/services/audio.service';
 
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 

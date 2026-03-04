@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useStreak } from '../hooks/useStreak';
-import { audioService } from '../../settings/services/audioService';
+import { audioService } from '../../settings/services/audio.service';
 import { StreakCalendar } from '../components/StreakCalendar';
 export const StreakDetailsScreen = () => {
     const navigation = useNavigation();

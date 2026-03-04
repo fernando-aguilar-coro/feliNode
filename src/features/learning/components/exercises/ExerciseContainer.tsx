@@ -11,7 +11,7 @@ import { SelectPairsExercise } from './SelectPairsExercise';
 import { Card, AppButton, AppText, Spacer } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { AiExplainButton } from '../AiExplainButton';
-import { audioService } from '../../../settings/services/audioService';
+import { audioService } from '../../../settings/services/audio.service';
 
 interface Props {
     exercise: Exercise;

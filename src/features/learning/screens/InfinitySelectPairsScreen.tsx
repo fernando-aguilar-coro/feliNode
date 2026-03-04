@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { useInfinityPairs, InfinityPairItem } from '../hooks/useInfinityPairs';
-import { audioService } from '../../settings/services/audioService';
+import { audioService } from '../../settings/services/audio.service';
 
 type InfinitySelectPairsNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'InfinitySelectPairs'>;
 type InfinitySelectPairsRouteProp = RouteProp<HomeStackParamList, 'InfinitySelectPairs'>;

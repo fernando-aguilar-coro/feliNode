@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ModuleProgress, LessonProgress } from '../../services/ModuleProgress.service';
-import { audioService } from '../../../settings/services/audioService';
+import { audioService } from '../../../settings/services/audio.service';
 
 interface ModuleAccordionProps {
     module: ModuleProgress;

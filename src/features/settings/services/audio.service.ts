@@ -1,6 +1,7 @@
 import { Audio } from 'expo-av';
 import { useSettingsStore } from '../../../store/SettingsStore';
 import { AppState, AppStateStatus } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 class AudioService {
     private bgmSound: Audio.Sound | null = null;
@@ -88,10 +89,8 @@ class AudioService {
         }
 
         if (AppState.currentState !== 'active') {
-
             return;
         }
-
 
         try {
             if (this.bgmSound) {
@@ -104,16 +103,23 @@ class AudioService {
                 return;
             }
 
+            const netInfo = await NetInfo.fetch();
+            let audioSource: any;
+
+            if (netInfo.isConnected && netInfo.isInternetReachable !== false) {
+                audioSource = { uri: 'https://stream.laut.fm/lofi' };
+            } else {
+                audioSource = require('../../../../assets/audio/bg.mp3');
+            }
+
             const { sound } = await Audio.Sound.createAsync(
-                require('../../../../assets/audio/bg.mp3'),
+                audioSource,
                 { isLooping: true }
             );
             this.bgmSound = sound;
 
             if (AppState.currentState === 'active') {
                 await this.bgmSound.playAsync();
-            } else {
-
             }
         } catch (error: any) {
             console.warn('[AudioService] error', error);

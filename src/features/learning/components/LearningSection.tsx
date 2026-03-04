@@ -10,7 +10,7 @@ import { useAppTheme } from '../../../theme/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
-import { audioService } from '../../settings/services/audioService';
+import { audioService } from '../../settings/services/audio.service';
 
 interface LearningSectionProps {
     lessonId: string;
@@ -45,6 +45,8 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
         lesson
     } = useLessonSession(lessonId);
 
+    const isExam = lessonId?.includes('placement_test') || false;
+
     // Inner hook for exercises (only active when we have exercises)
     const {
         currentExercise,
@@ -55,7 +57,7 @@ export const LearningSection: React.FC<LearningSectionProps> = ({
         completedCount,
         initialTotal,
         overrideResult
-    } = useExercises(exercises);
+    } = useExercises(exercises, isExam);
 
     // Effect to bridge the "finished exercises" state to "completeLesson"
     useEffect(() => {

@@ -8,7 +8,7 @@ import { SettingsScreen } from '../../settings/screens/SettingsScreen';
 import { ShopScreen } from '../../gamification/screens/ShopScreen';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import { audioService } from '../../settings/services/audioService';
+import { audioService } from '../../settings/services/audio.service';
 
 export type HomeTabParamList = {
     HomeMain: undefined;
