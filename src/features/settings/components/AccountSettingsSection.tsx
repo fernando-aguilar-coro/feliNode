@@ -11,13 +11,6 @@ export const AccountSettingsSection = () => {
     return (
         <List.Section>
             <List.Subheader style={{ color: theme.colors.textSecondary }}>Cuenta</List.Subheader>
-            <List.Item
-                title="Usuario"
-                titleStyle={{ color: theme.colors.text }}
-                description="usuario@ejemplo.com"
-                descriptionStyle={{ color: theme.colors.textSecondary }}
-                left={props => <Avatar.Icon {...props} icon="account" size={40} style={{ backgroundColor: theme.colors.primary }} />}
-            />
             <View style={styles.buttonContainer}>
                 <Button
                     mode="outlined"

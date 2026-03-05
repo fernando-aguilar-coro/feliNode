@@ -7,6 +7,7 @@ class AudioService {
     private bgmSound: Audio.Sound | null = null;
     private static instance: AudioService;
     private wasPlayingBeforeBackground: boolean = false;
+    private shouldPlayBgm: boolean = false;
 
     private constructor() {
         AppState.addEventListener('change', this.handleAppStateChange);
@@ -36,7 +37,7 @@ class AudioService {
         return AudioService.instance;
     }
 
-    private playSfx = async (asset: any, description: string) => {
+    private playSfx = async (asset: any, description: string, volume: number = 1.0) => {
         const { sfxEnabled } = useSettingsStore.getState();
         if (!sfxEnabled) return;
 
@@ -44,11 +45,11 @@ class AudioService {
             return;
         }
 
-
-
-        // Uncomment once assets are available
         try {
-            const { sound } = await Audio.Sound.createAsync(asset);
+            const { sound } = await Audio.Sound.createAsync(
+                asset,
+                { volume }
+            );
             await sound.playAsync();
             sound.setOnPlaybackStatusUpdate((status) => {
                 if ('didJustFinish' in status && status.didJustFinish) {
@@ -61,7 +62,7 @@ class AudioService {
     };
 
     public playClickSound = () => {
-        this.playSfx(require('../../../../assets/audio/click.mp3'), 'click');
+        this.playSfx(require('../../../../assets/audio/click.mp3'), 'click', 0.5);
     };
 
     public playCorrectSound = () => {
@@ -81,22 +82,30 @@ class AudioService {
         this.playSfx(require('../../../../assets/audio/success.wav'), 'success');
     };
 
+    public playTimerSound = () => {
+        this.playSfx(require('../../../../assets/audio/timer.mp3'), 'timer');
+    };
+
     public playBGM = async () => {
         const { bgmEnabled } = useSettingsStore.getState();
         if (!bgmEnabled) {
+            this.shouldPlayBgm = false;
             this.stopBGM();
             return;
         }
 
         if (AppState.currentState !== 'active') {
+            this.shouldPlayBgm = false;
             return;
         }
+
+        this.shouldPlayBgm = true;
 
         try {
             if (this.bgmSound) {
                 const status = await this.bgmSound.getStatusAsync();
                 if ('isPlaying' in status && !status.isPlaying) {
-                    if (AppState.currentState === 'active') {
+                    if (this.shouldPlayBgm && AppState.currentState === 'active') {
                         await this.bgmSound.playAsync();
                     }
                 }
@@ -114,33 +123,45 @@ class AudioService {
 
             const { sound } = await Audio.Sound.createAsync(
                 audioSource,
-                { isLooping: true }
+                { isLooping: true, volume: 0.5 }
             );
-            this.bgmSound = sound;
 
-            if (AppState.currentState === 'active') {
-                await this.bgmSound.playAsync();
+            if (!this.shouldPlayBgm || AppState.currentState !== 'active') {
+                await sound.unloadAsync();
+                return;
             }
+
+            this.bgmSound = sound;
+            await this.bgmSound.playAsync();
+
         } catch (error: any) {
             console.warn('[AudioService] error', error);
+            this.shouldPlayBgm = false;
         }
     };
 
     public stopBGM = async () => {
-
-        try {
-            if (this.bgmSound) {
-                await this.bgmSound.stopAsync();
-                await this.bgmSound.unloadAsync();
-                this.bgmSound = null;
+        this.shouldPlayBgm = false;
+        if (this.bgmSound) {
+            const soundToStop = this.bgmSound;
+            this.bgmSound = null;
+            try {
+                // `stopAsync()` causes an error with live internet streams because it tries to seek to position 0.
+                // Using `pauseAsync()` followed by `unloadAsync()` is safer.
+                await soundToStop.pauseAsync();
+            } catch (error) {
+                console.warn('Failed to pause BGM during stop', error);
             }
-        } catch (error) {
-            console.error('Failed to stop BGM', error);
+            try {
+                await soundToStop.unloadAsync();
+            } catch (error) {
+                console.error('Failed to unload BGM', error);
+            }
         }
     };
 
     public pauseBGM = async () => {
-
+        this.shouldPlayBgm = false;
         try {
             if (this.bgmSound) {
                 const status = await this.bgmSound.getStatusAsync();

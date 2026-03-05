@@ -37,6 +37,7 @@ export const InfinityExerciseScreen = () => {
         overrideResult,
         addExercises,
         currentIndex,
+        completedCount,
         totalExercises,
     } = useExercises(initialExercises);
 
@@ -110,7 +111,7 @@ export const InfinityExerciseScreen = () => {
         setGeneratingMore(true);
         try {
             const topic = lessonId ? `Lesson: ${lessonId} ` : 'General English';
-            const nextBatch = await InfinityService.generateInfiniteExercises(topic, 5);
+            const nextBatch = await InfinityService.generateInfiniteExercises(topic, 5, completedCount);
             addExercises(nextBatch);
         } catch (error) {
             console.error('Failed to generate more exercises', error);
@@ -135,7 +136,7 @@ export const InfinityExerciseScreen = () => {
                     setGameOver(true);
                     audioService.playSuccessSound();
                     const targetId = lessonId || 'General English';
-                    infinityProgressRepository.saveInfinityScore(targetId, currentIndex).then(() => {
+                    infinityProgressRepository.saveInfinityScore(targetId, completedCount).then(() => {
 
                         syncInfinityStats(); // Sync after saving new score
                     });
@@ -183,7 +184,7 @@ export const InfinityExerciseScreen = () => {
             <Screen style={styles.centerContainer}>
                 <AppText style={styles.gameOverTitle}>Game Over</AppText>
                 <AppText style={styles.gameOverText}>
-                    ¡Te has quedado sin vidas! Has completado {currentIndex} ejercicios.
+                    ¡Te has quedado sin vidas! Has completado {completedCount} ejercicios correctamente.
                 </AppText>
                 <AppButton title="Intentar de nuevo" onPress={handleRestart} />
                 <Spacer height={theme.spacing.md} />

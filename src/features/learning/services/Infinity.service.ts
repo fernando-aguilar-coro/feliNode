@@ -32,17 +32,20 @@ export const InfinityService = {
      * Uses the user's preferred robust JSON schema.
      * @param topic - Optional topic or context for the exercises.
      * @param count - Number of exercises to generate (default: 5).
+     * @param currentScore - Current score of the user, used to dynamically scale difficulty.
      * @returns A promise that resolves to an array of Exercise objects.
      */
-    generateInfiniteExercises: async (topic: string = 'General English', count: number = 5): Promise<Exercise[]> => {
+    generateInfiniteExercises: async (topic: string = 'General English', count: number = 5, currentScore: number = 0): Promise<Exercise[]> => {
         // Updated prompt based on user's successful "COMPLETE LESSON" prompt, 
         // extracting only the exercises part for this service.
         const prompt = `Genera ${count} ejercicios de inglés sobre: "${topic}".
+        IMPORTANTE: El nivel de dificultad debe adaptarse al progreso del usuario (aciertos totales: ${currentScore}).
+        A mayor puntaje, usa vocabulario más avanzado, oraciones más largas, o gramática más compleja.
+
         Responde SOLO con JSON válido:
         { "exercises": [...] }
 
         Tipos y esquemas:
-        - multiple_choice: {question, content:{options:[{option_text,is_correct}]}} (min 3 opciones)
         - scrambled_sentence: {question, content:{correct_answer}}
         - fill_blank: {question, content:{phrase,correct_answer}}
         - translate: {content:{phrase,correct_answer}}

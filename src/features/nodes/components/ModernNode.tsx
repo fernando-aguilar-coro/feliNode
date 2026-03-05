@@ -20,20 +20,20 @@ export const ModernNode: React.FC<ModernNodeProps> = React.memo(({ node }) => {
 
     const { strokeColor, fillColor, strokeWidth } = useMemo(() => {
         let sc = colors.border;
-        let fc = colors.surface;
+        let fc = 'transparent';
         let sw = 2.5;
 
         if (node.status === 'completed') {
             sc = colors.success;
-            fc = colors.surface;
+            fc = 'transparent';
             sw = 2.5;
         } else if (node.status === 'available') {
-            sc = colors.info;
-            fc = colors.surface;
+            sc = "yellow";
+            fc = 'transparent';
             sw = 3;
         } else {
             sc = colors.border;
-            fc = colors.background;
+            fc = 'transparent';
             sw = 1.5;
         }
 

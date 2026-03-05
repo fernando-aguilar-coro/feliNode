@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { useInfinityPairs, InfinityPairItem } from '../hooks/useInfinityPairs';
 import { audioService } from '../../settings/services/audio.service';
+import { infinityProgressRepository } from '../../../db_local/repositories';
 
 type InfinitySelectPairsNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'InfinitySelectPairs'>;
 type InfinitySelectPairsRouteProp = RouteProp<HomeStackParamList, 'InfinitySelectPairs'>;
@@ -44,20 +45,29 @@ export const InfinitySelectPairsScreen = () => {
     });
 
     React.useEffect(() => {
-        if (score > 0) audioService.playCorrectSound();
-    }, [score]);
-
-    React.useEffect(() => {
-        if (lives < 7 && !isGameOver) audioService.playIncorrectSound();
-    }, [lives]);
+        if (errorIds) audioService.playIncorrectSound();
+    }, [errorIds]);
 
     React.useEffect(() => {
         if (roundNum > 1) audioService.playSuccessSound();
     }, [roundNum]);
 
     React.useEffect(() => {
-        if (isGameOver && score > 0) audioService.playSuccessSound();
-    }, [isGameOver]);
+        if (timeLeft === 10 && !isGameOver) {
+            audioService.playTimerSound();
+        }
+    }, [timeLeft, isGameOver]);
+
+    React.useEffect(() => {
+        if (isGameOver) {
+            if (score > 0) audioService.playSuccessSound();
+
+            const targetId = lessonId?.trim() ? `Pairs: ${lessonId.trim()}` : 'General Pairs';
+            infinityProgressRepository.saveInfinityScore(targetId, score).catch(e => {
+                console.error('[InfinityPairs] Error saving score:', e);
+            });
+        }
+    }, [isGameOver, score, lessonId]);
 
     const handleExit = () => {
         navigation.goBack();

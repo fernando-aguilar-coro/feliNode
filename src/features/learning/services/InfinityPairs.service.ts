@@ -9,11 +9,14 @@ export const InfinityPairsService = {
     /**
      * Fetches a batch of unique word/phrase pairs from Gemini.
      */
-    fetchPairs: async (lessonId: string | undefined, batchSize: number = 25): Promise<Pair[]> => {
+    fetchPairs: async (lessonId: string | undefined, batchSize: number = 25, currentScore: number = 0): Promise<Pair[]> => {
         const topic = lessonId ? `el tema '${lessonId}'` : "palabras y frases comunes en inglés general";
 
         const prompt = `
         Genera ${batchSize} pares de palabras y frases variadas para ${topic}.
+        IMPORTANTE: El nivel de dificultad debe adaptarse al progreso del usuario (aciertos totales: ${currentScore}).
+        A mayor puntaje, usa combinaciones más largas, frases idiomáticas complejas, o vocabulario más avanzado.
+
         Tu salida DEBE ser estrictamente un objeto JSON válido con un arreglo "pairs".
         Estructura:
         {

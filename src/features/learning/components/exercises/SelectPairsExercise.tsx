@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SelectPairsExercise as SelectPairsExerciseType } from '../../types/exercise';
 import { AppText } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
+import { audioService } from '../../../settings/services/audio.service';
 
 interface Props {
     exercise: SelectPairsExerciseType;
@@ -78,6 +79,7 @@ export const SelectPairsExercise = ({ exercise, onAnswer, userAnswer }: Props) =
                 setSelectedId(null);
             } else {
                 // No match
+                audioService.playIncorrectSound();
                 setErrorIds([selectedId, item.id]);
                 setTimeout(() => {
                     setErrorIds(null);

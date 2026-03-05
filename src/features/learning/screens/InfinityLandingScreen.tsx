@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { infinityProgressRepository } from '../../../db_local/repositories';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type InfinityLandingNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'InfinityExercise'>;
 
@@ -14,6 +15,7 @@ export const InfinityLandingScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<InfinityLandingNavigationProp>();
     const [maxScore, setMaxScore] = useState(0);
+    const [maxPairsScore, setMaxPairsScore] = useState(0);
     const [loading, setLoading] = useState(true);
     const [lessonTopic, setLessonTopic] = useState('');
 
@@ -21,8 +23,13 @@ export const InfinityLandingScreen = () => {
         setLoading(true);
         try {
             const targetId = topic.trim() ? `Lesson: ${topic.trim()}` : 'General English';
+            const pairsTargetId = topic.trim() ? `Pairs: ${topic.trim()}` : 'General Pairs';
+
             const score = await infinityProgressRepository.getInfinityScore(targetId);
+            const pairsScore = await infinityProgressRepository.getInfinityScore(pairsTargetId);
+
             setMaxScore(score);
+            setMaxPairsScore(pairsScore);
         } catch (error) {
             console.error('Failed to fetch max score', error);
         } finally {
@@ -53,90 +60,163 @@ export const InfinityLandingScreen = () => {
     };
 
     const styles = StyleSheet.create({
-        container: {
+        screen: {
             flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
+            backgroundColor: theme.colors.background,
+        },
+        safeArea: {
+            flex: 1,
+        },
+        scrollContainer: {
+            flexGrow: 1,
             padding: theme.spacing.lg,
+            alignItems: 'center',
+            justifyContent: 'center',
         },
         iconContainer: {
             marginBottom: theme.spacing.xl,
             alignItems: 'center',
+            backgroundColor: theme.colors.primary + '15',
+            padding: theme.spacing.xl,
+            borderRadius: 60,
         },
-        scoreContainer: {
-            alignItems: 'center',
-            marginBottom: theme.spacing.xl,
-            padding: theme.spacing.md,
-            backgroundColor: theme.colors.surface,
-            borderRadius: 8,
-            width: '100%',
-            maxWidth: 300,
-            elevation: 2,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-        },
-        scoreLabel: {
-            fontSize: 16,
-            color: theme.colors.textSecondary,
-            marginBottom: theme.spacing.xs,
-        },
-        scoreValue: {
-            fontSize: 36,
+        title: {
+            marginBottom: theme.spacing.sm,
             fontWeight: 'bold',
-            color: theme.colors.primary,
+            textAlign: 'center',
         },
         description: {
             textAlign: 'center',
             color: theme.colors.textSecondary,
             marginBottom: theme.spacing.xl,
             lineHeight: 24,
+            paddingHorizontal: theme.spacing.md,
+        },
+        inputContainer: {
+            width: '100%',
+            marginBottom: theme.spacing.xl,
+        },
+        cardsContainer: {
+            width: '100%',
+            gap: theme.spacing.md,
+        },
+        gameCard: {
+            backgroundColor: theme.colors.surface,
+            borderRadius: 16,
+            padding: theme.spacing.lg,
+            elevation: 2,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            width: '100%',
+        },
+        cardHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: theme.spacing.md,
+        },
+        scoreBadge: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.colors.warning + '20',
+            paddingHorizontal: theme.spacing.sm,
+            paddingVertical: theme.spacing.xs,
+            borderRadius: 16,
+            gap: 4,
+        },
+        scoreValueSmall: {
+            fontWeight: 'bold',
+            color: theme.colors.warning,
+            fontSize: 14,
+        },
+        cardTitle: {
+            fontWeight: 'bold',
+            marginBottom: theme.spacing.xs,
+        },
+        cardSubtitle: {
+            color: theme.colors.textSecondary,
+            marginBottom: theme.spacing.md,
+            fontSize: 14,
+        },
+        actionButton: {
+            width: '100%',
+            marginTop: theme.spacing.sm,
         }
     });
 
     return (
-        <Screen style={styles.container}>
-            <View style={styles.iconContainer}>
-                <Ionicons name="logo-octocat" size={120} color={theme.colors.primary} />
-            </View>
+        <Screen style={styles.screen}>
+            <SafeAreaView style={styles.safeArea}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={styles.iconContainer}>
+                        <Ionicons name="infinite" size={80} color={theme.colors.primary} />
+                    </View>
 
-            <AppText variant="xxl" style={{ marginBottom: theme.spacing.md }}>
-                Modo Infinito
-            </AppText>
+                    <AppText variant="xxl" style={styles.title}>
+                        Modo Infinito
+                    </AppText>
 
-            <AppText style={styles.description}>
-                ¡Practica sin límites! Resuelve ejercicios generados infinitamente y mejora tu racha.
-            </AppText>
+                    <AppText style={styles.description}>
+                        ¡Practica sin límites! Resuelve ejercicios generados infinitamente, mejora tu fluidez y mantén tu racha.
+                    </AppText>
 
-            <View style={{ width: '100%', maxWidth: 300, marginBottom: theme.spacing.md }}>
-                <AppTextInput
-                    label="Tema o Lección (Opcional)"
-                    placeholder="Ej. travel, food, how-much how-many..."
-                    value={lessonTopic}
-                    onChangeText={setLessonTopic}
-                />
-            </View>
+                    <View style={styles.inputContainer}>
+                        <AppTextInput
+                            label="Tema o Lección (Opcional)"
+                            placeholder="Ej. travel, food, present-simple..."
+                            value={lessonTopic}
+                            onChangeText={setLessonTopic}
+                        />
+                    </View>
 
-            <View style={styles.scoreContainer}>
-                <AppText style={styles.scoreLabel}>
-                    {lessonTopic.trim() ? `Récord (${lessonTopic})` : 'Récord General'}
-                </AppText>
-                <AppText style={styles.scoreValue}>{maxScore}</AppText>
-            </View>
+                    <View style={styles.cardsContainer}>
+                        <View style={styles.gameCard}>
+                            <View style={styles.cardHeader}>
+                                <Ionicons name="document-text" size={32} color={theme.colors.primary} />
+                                <View style={styles.scoreBadge}>
+                                    <Ionicons name="trophy" size={16} color={theme.colors.warning} />
+                                    <AppText style={styles.scoreValueSmall}>{maxScore}</AppText>
+                                </View>
+                            </View>
+                            <AppText variant="lg" style={styles.cardTitle}>Ejercicios Combinados</AppText>
+                            <AppText style={styles.cardSubtitle}>
+                                {lessonTopic.trim() ? `Récord en ${lessonTopic}` : 'Récord General'}
+                            </AppText>
+                            <AppButton
+                                title="Iniciar Ejercicios"
+                                onPress={handleStart}
+                                style={styles.actionButton}
+                            />
+                        </View>
 
-            <AppButton
-                title="Comenzar Reto"
-                onPress={handleStart}
-                style={{ width: '100%', maxWidth: 300, marginBottom: theme.spacing.md }}
-            />
-
-            <AppButton
-                title="Emparejar Palabras"
-                variant="secondary"
-                onPress={handleStartPairs}
-                style={{ width: '100%', maxWidth: 300 }}
-            />
+                        <View style={styles.gameCard}>
+                            <View style={styles.cardHeader}>
+                                <Ionicons name="layers" size={32} color={theme.colors.secondary} />
+                                <View style={styles.scoreBadge}>
+                                    <Ionicons name="trophy" size={16} color={theme.colors.warning} />
+                                    <AppText style={styles.scoreValueSmall}>{maxPairsScore}</AppText>
+                                </View>
+                            </View>
+                            <AppText variant="lg" style={styles.cardTitle}>Emparejar Palabras</AppText>
+                            <AppText style={styles.cardSubtitle}>
+                                {lessonTopic.trim() ? `Récord en ${lessonTopic}` : 'Récord General'}
+                            </AppText>
+                            <AppButton
+                                title="Iniciar Pares"
+                                variant="secondary"
+                                onPress={handleStartPairs}
+                                style={styles.actionButton}
+                            />
+                        </View>
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
         </Screen>
     );
 };

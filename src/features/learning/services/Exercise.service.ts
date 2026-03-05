@@ -33,8 +33,7 @@ export const ExerciseService = {
                 .filter((ex): ex is Exercise => ex !== null);
 
             // 3. Combine and shuffle
-            return [...mapped, ...generatedListening];
-            // return shuffleArray([...mapped, ...generatedListening]);
+            return shuffleArray([...mapped, ...generatedListening]);
         } catch (error) {
             console.error('[ExerciseService] Error fetching exercises:', error);
             return [];

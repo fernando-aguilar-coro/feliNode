@@ -79,7 +79,7 @@ export const useInfinityPairs = ({
         setIsFetching(true);
         if (isInitial) setIsInitialLoading(true);
 
-        const newPairs = await InfinityPairsService.fetchPairs(lessonId, batchSize);
+        const newPairs = await InfinityPairsService.fetchPairs(lessonId, batchSize, score);
 
         if (newPairs.length > 0) {
             setPairBuffer(prev => [...prev, ...newPairs]);
