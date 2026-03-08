@@ -21,65 +21,74 @@ Este documento combina la **didáctica educativa** del currículo mexicano con l
 **Meta**: Presentarse, describir el entorno y hablar en presente.
 
 1. **Unidad 1: Identidad y Entorno (A1)**
-    - 1.1 El verbo "to be" (am/is/are) - Afirmativo, negativo, preguntas [✅ Ya en DB]
-    - 1.2 Pronombres personales (I, you, he, she, it, we, they) [✅ Ya en DB]
-    - 1.3 Artículos: a/an y the [✅ Ya en DB]
-    - 1.4 Plurales regulares e irregulares [✅ Ya en DB]
-    - 1.5 Demonstrativos: This, that, these, those [✅ Ya en DB]
-    - 1.6 Posesivos: Adjetivos (my, your) y Pronombres (mine, yours) [✅ Ya en DB]
-    - 1.7 There is / There are (Existencia) [✅ Ya en DB]
-    - 1.8 Preposiciones de lugar (in, on, at, under, between) [✅ Ya en DB]
-    - *1.9 Adjetivos y Sustantivos (Extra)* [✅ Ya en DB]
-    - *1.10 Adjetivos Descriptivos y Numerales (Extra)* [✅ Ya en DB]
+    - 1.1 Saludos y Presentaciones [✅ Ya en DB]
+    - 1.2 Verbo To Be y Pronombres [✅ Ya en DB]
+    - 1.3 Artículos y Plurales [✅ Ya en DB]
+    - 1.4 Adjetivos Demostrativos [✅ Ya en DB]
+    - 1.5 Adjetivos Posesivos [✅ Ya en DB]
+    - 1.6 There is / There are [✅ Ya en DB]
+    - 1.7 Preposiciones de Lugar [✅ Ya en DB]
+    - 1.8 Adjetivos y Sustantivos [✅ Ya en DB]
+    - 1.9 Adjetivos Descriptivos [✅ Ya en DB]
+    - 1.10 Adjetivos Numerales [✅ Ya en DB]
 
 2. **Unidad 2: Vida Diaria y Rutinas (A1)**
-    - 2.1 Presente Simple: Afirmativo, negativo (don't/doesn't) y preguntas (do/does) [✅ Ya en DB]
-    - 2.2 Tercera persona singular (-s, -es, -ies)
-    - 2.3 Adverbios de frecuencia (always, usually, sometimes, never) [✅ Ya en DB]
-    - 2.4 Preposiciones de tiempo (at, on, in) [✅ Ya en DB]
-    - 2.5 WH-questions (what, where, who, when, why, how) [✅ Ya en DB]
-    - *2.6 Vocabulario: Trabajo y Cualidades (Extra)* [✅ Ya en DB]
+    - 2.1 Presente Simple: Afirmativo [✅ Ya en DB]
+    - 2.2 Presente Simple: Negativo [✅ Ya en DB]
+    - 2.3 Presente Simple: Preguntas [✅ Ya en DB]
+    - 2.4 Wh-Questions [✅ Ya en DB]
+    - 2.5 Pronombres Objeto [✅ Ya en DB]
+    - 2.6 Adverbios de Frecuencia [✅ Ya en DB]
+    - 2.7 Preposiciones de Tiempo [✅ Ya en DB]
+    - 2.8 Trabajo y Cualidades [✅ Ya en DB]
 
 3. **Unidad 3: Acciones en Progreso y Habilidades (A1-A2)**
-    - 3.1 Presente Continuo: Acciones ahora (working) [✅ Ya en DB]
-    - 3.2 Contraste: Presente Simple vs. Presente Continuo
-    - 3.3 Can / Can't (Habilidad y permiso)
-    - 3.4 Imperativos (Órdenes e instrucciones)
-    - 3.5 How much / How many (Cantidades) [✅ Ya en DB]
-    - 3.6 Some / Any / A lot of [✅ Ya en DB]
-    - *3.7 Verbos Estáticos - Stative Verbs (Extra)* [✅ Ya en DB]
+    - 3.1 Presente Continuo [✅ Ya en DB]
+    - 3.2 Verbos Estáticos [✅ Ya en DB]
+    - 3.3 Adjetivos Indefinidos [✅ Ya en DB]
+    - 3.4 Cuantificadores [✅ Ya en DB]
+    - 3.5 Sustantivos Incontables "Trampa" (Advice, Furniture, etc.) [✅ Ya en DB]
+    - 3.6 Cuantificadores Específicos: Each, Every, Both, etc. [✅ Ya en DB]
+    - 3.7 Can / Can't (Habilidad y permiso)[✅ Ya en DB]
+    - 3.8 Imperativos (Órdenes e instrucciones)[✅ Ya en DB]
 
 ### **Segundo Año (Nivel A2 - Pre-Intermedio)**
 **Meta**: Narrar historias, comparar el mundo y hacer planes.
 
 4. **Unidad 4: Narración y Pasado (A2)**
-    - 4.1 Verbo TO BE en pasado (was/were) [✅ Ya en DB]
-    - 4.2 Pasado Simple: Verbos regulares (-ed) e irregulares [✅ Ya en DB]
-    - 4.3 Pasado Simple: Negativo (didn't) e interrogativo (did) [✅ Ya en DB]
-    - 4.4 Pasado Continuo (was working) [✅ Ya en DB]
-    - 4.5 Contraste: Pasado Simple vs. Pasado Continuo (When/While)
-    - 4.6 There was / There were
+    - 4.1 Verbo To Be: Pasado [✅ Ya en DB]
+    - 4.2 There was / There were [✅ Ya en DB]
+    - 4.3 Verbos Regulares (Pasado Simple) [✅ Ya en DB]
+    - 4.4 Verbos Irregulares en Pasado Simple [✅ Ya en DB]
+    - 4.5 Pasado Simple [✅ Ya en DB]
+    - 4.6 El Pasado Continuo (Past Continuous) [✅ Ya en DB]
+    - 4.7 Conectores (and, but, because, so, or) [✅ Ya en DB]
 
 5. **Unidad 5: Comparaciones y Futuro (A2)**
-    - 5.1 Comparativos (bigger, more expensive) [✅ Ya en DB]
-    - 5.2 Superlativos (the biggest, the most expensive) [✅ Ya en DB]
-    - 5.3 As...as (Comparaciones de igualdad)
-    - 5.4 Futuro con GOING TO (Planes e intenciones) [✅ Ya en DB]
-    - 5.5 Futuro con WILL (Predicciones y decisiones espontáneas) [✅ Ya en DB]
+    - 5.1 Comparaciones de Igualdad: As... as (Tan... como) [✅ Ya en DB]
+    - 5.2 Comparativos y Superlativos en Inglés [✅ Ya en DB]
+    - 5.3 Futuro con GOING TO [✅ Ya en DB]
+    - 5.4 El Futuro Simple con "WILL" [✅ Ya en DB]
 
-6. **Unidad 6: Modales y Estructuras de Apoyo (A2)**
-    - 6.1 Should / Shouldn't (Consejos)
-    - 6.2 Must / Have to (Obligación y necesidad)
-    - 6.3 Could (Habilidad pasada / Peticiones)
-    - 6.4 Pronombres objeto (me, you, him, her) [✅ Ya en DB]
-    - 6.5 Conectores básicos: and, but, or, because, so [✅ Ya en DB]
-    - *6.6 Pronombres Reflexivos y Extras de Posesivos (Extra)* [✅ Ya en DB]
+6. **Unidad 6: Pronombres Avanzados y Modales (A2)**
+    - 6.1 Pronombres objeto [✅ Ya en DB]
+    - 6.2 Pronombres Posesivos [✅ Ya en DB]
+    - 6.3 Adjetivos posesivos vs Pronombres posesivos [✅ Ya en DB]
+    - 6.4 Pronombres Reflexivos [✅ Ya en DB]
+    - 6.5 Adjetivos Posesivos vs. Pronombres Reflexivos [✅ Ya en DB]
+    - 6.6 Modales de Permiso y Petición (Can, could, may, would) [✅ Ya en DB]
+    - 6.7 Must / Have to (Obligación y necesidad)
+    - 6.8 Consejos y Crítica (Should, ought to, had better)
+    - 6.9 Modales de Probabilidad y Deducción (May, might, could, must be, can't be)
+    - 6.10 Preposiciones de Movimiento (Into, onto, through, across, past)
+    - 6.11 Adjetivo + Preposición (Interested in, proud of, good at)
+    - 6.12 Verbo + Preposición (Listen to, depend on, wait for)
 
 ### **Tercer Año (Nivel A2+ a B1 - Umbral)**
 **Meta**: Conectar experiencias pasadas con el presente y condiciones básicas.
 
 7. **Unidad 7: Experiencias y Resultados (B1)**
-    - 7.1 Presente Perfecto: Introducción (have done) [✅ Ya en DB]
+    - 7.1 Presente Perfecto [✅ Ya en DB]
     - 7.2 Been vs. Gone
     - 7.3 Just, already, yet
     - 7.4 For y Since (Duración)
@@ -91,7 +100,8 @@ Este documento combina la **didáctica educativa** del currículo mexicano con l
     - 8.3 Voz Pasiva Básica (Presente y Pasado Simple)
     - 8.4 Relative Clauses básicos (who, which, that)
     - 8.5 Too y Enough
-    - 8.6 Phrasal Verbs básicos (get up, turn on, look for)
+    - 8.6 Phrasal Verbs: Separables vs. Inseparables
+    - 8.7 Phrasal Verbs de tres palabras (e.g., look forward to)
 
 ---
 
@@ -117,11 +127,14 @@ Este documento combina la **didáctica educativa** del currículo mexicano con l
     - 11.4 Reporting Verbs (suggest, advise, warn)
 
 12. **Unidad 12: Estilo y Cohesión (B2+)**
-    - 12.1 Gerundios e Infinitivos avanzados (verbo + objeto + inf)
-    - 12.2 Modal Verbs de deducción pasada (must have, might have, can't have)
-    - 12.3 Relative Clauses: Defining vs. Non-defining
-    - 12.4 Conectores de contraste y adición (however, moreover, notwithstanding)
-    - 12.5 Cleft Sentences e Inversión básica (What I need is..., Never have I...)
+    - 12.1 Verbos seguidos de -ing (enjoy, suggest)
+    - 12.2 Verbos seguidos de to + infinitive (decide, hope)
+    - 12.3 Verbos que cambian de significado (stop, remember, forget, try)
+    - 12.4 Gerundios e Infinitivos avanzados (verbo + objeto + inf)
+    - 12.5 Modal Verbs de deducción pasada (must have, might have, can't have)
+    - 12.6 Relative Clauses: Defining vs. Non-defining
+    - 12.7 Conectores de contraste y adición (however, moreover, notwithstanding)
+    - 12.8 Cleft Sentences e Inversión básica (What I need is..., Never have I...)
 
 ---
 

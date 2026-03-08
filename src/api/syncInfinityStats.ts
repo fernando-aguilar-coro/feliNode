@@ -1,17 +1,22 @@
 import { supabase } from './supabaseClient';
 import { infinityProgressRepository } from '../db_local/repositories';
+import { useUserStore } from '../store/UserStore';
 
 export const syncInfinityStats = async () => {
     try {
+        const { isGuest, guestId } = useUserStore.getState();
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         const user = session?.user;
 
-        if (sessionError || !user) {
+        let userId = user?.id;
 
+        if (isGuest && guestId) {
+            userId = guestId;
+        } else if (sessionError || !user) {
             return;
         }
 
-
+        if (!userId) return;
 
         // 1. Fetch Local Data
         const localProgress = await infinityProgressRepository.getAllInfinityProgress();
@@ -23,7 +28,7 @@ export const syncInfinityStats = async () => {
         const { data: remoteStats, error: remoteError } = await supabase
             .from('stats')
             .select('target_id, max_score, updated_at')
-            .eq('user_id', user.id);
+            .eq('user_id', userId);
 
         if (remoteError) {
             console.error('[SyncStats] Error fetching remote stats:', remoteError);
@@ -58,7 +63,7 @@ export const syncInfinityStats = async () => {
             // If verified max is greater than remote, or if the record doesn't exist remotely, update remote
             if (maxScore > remoteScore || isMissingRemote) {
                 toUpdateRemote.push({
-                    user_id: user.id,
+                    user_id: userId,
                     target_id: targetId,
                     max_score: maxScore,
                     updated_at: new Date().toISOString()

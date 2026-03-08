@@ -16,14 +16,15 @@ class TtsManagerService {
     private ttsModule: TextToSpeechModule;
     private isInitialized = false;
     private isSpeaking = false;
+    private isDownloading = false;
     private soundObject: Audio.Sound | null = null;
     private currentVoiceSource: any;
 
     constructor() {
         this.ttsModule = new TextToSpeechModule();
-        // Only auto-initialize if the user has previously downloaded it
+        // Only auto-initialize if the user has previously downloaded it or explicitly wanted it (resumes interrupted downloads)
         const state = useSettingsStore.getState();
-        if (state.isKokoroDownloaded) {
+        if (state.isKokoroDownloaded || state.wantsKokoro) {
             this.initialize();
         }
     }
@@ -32,9 +33,10 @@ class TtsManagerService {
      * Initializes the offline TTS engine.
      */
     public async initialize(onProgress?: (progress: number) => void) {
+        if (this.isDownloading) return;
+        this.isDownloading = true;
+
         try {
-
-
             const state = useSettingsStore.getState();
             const selectedVoice = state.englishVoice || KOKORO_VOICE_AF_HEART;
             this.currentVoiceSource = selectedVoice.voiceSource;
@@ -47,15 +49,16 @@ class TtsManagerService {
 
             await this.ttsModule.load(config, (progress) => {
                 if (onProgress) onProgress(progress);
-
             });
 
             this.isInitialized = true;
-
+            useSettingsStore.getState().setKokoroDownloaded(true);
 
         } catch (error) {
             console.error('TTS Manager: Initialization failed', error);
             this.isInitialized = false;
+        } finally {
+            this.isDownloading = false;
         }
     }
 

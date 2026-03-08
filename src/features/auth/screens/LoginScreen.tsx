@@ -15,6 +15,9 @@ export default function LoginScreen() {
 
     useEffect(() => {
         const checkGoogleSignIn = async () => {
+            if (useUserStore.getState().hasLoggedOut) {
+                return;
+            }
             try {
                 await useUserStore.getState().signInWithGoogle()
             } catch (error) {

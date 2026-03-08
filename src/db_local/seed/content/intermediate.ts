@@ -23,7 +23,7 @@ export const PLACEMENT_TEST_INTERMEDIATE: SeedLesson = {
         },
         {
             type: 'multiple_choice',
-            instruction: 'Selecciona la opción correcta en relación al Pasado Simple / Presente Perfecto.',
+            instruction: 'Selecciona la oración que está escrita correctamente.',
             content: {
                 options: [
                     { option_text: 'I have seen that movie yesterday.', is_correct: false },
@@ -37,7 +37,7 @@ export const PLACEMENT_TEST_INTERMEDIATE: SeedLesson = {
         },
         {
             type: 'fill_blank',
-            instruction: 'Completa la oración (Segundo Condicional).',
+            instruction: 'Completa la oración asumiendo una situación hipotética o imaginaria.',
             content: {
                 phrase: 'If I won the lottery, I ___ buy a big house.',
                 correct_answer: 'would',
@@ -47,7 +47,7 @@ export const PLACEMENT_TEST_INTERMEDIATE: SeedLesson = {
         },
         {
             type: 'translate',
-            instruction: 'Traduce a voz pasiva.',
+            instruction: 'Traduce la siguiente frase al inglés usando la voz pasiva.',
             content: {
                 phrase: 'Alguien robó mi bicicleta.',
                 correct_answer: 'My bike was stolen',
@@ -57,7 +57,7 @@ export const PLACEMENT_TEST_INTERMEDIATE: SeedLesson = {
         },
         {
             type: 'scrambled_sentence',
-            instruction: 'Ordena la oración en Reported Speech.',
+            instruction: 'Ordena las palabras para relatar lo que alguien más dijo previamente (Reported Speech).',
             content: {
                 correct_answer: 'She said that she was tired',
                 unlocks_lesson_id: 'TODO_reported_speech'

@@ -24,7 +24,8 @@ export const seedDatabase = async () => {
             return;
         }
 
-
+        // Seed from Supabase
+        const supabaseLessons = await getAllLessons();
 
         // Seed Placement Tests
         if (INITIAL_DATA.placement_tests && INITIAL_DATA.placement_tests.length > 0) {
@@ -39,11 +40,6 @@ export const seedDatabase = async () => {
                 await ensureLessons(dbInstance, newId, INITIAL_DATA.placement_tests);
             }
         }
-
-        // Seed from Supabase
-
-
-        const supabaseLessons = await getAllLessons();
 
         if (supabaseLessons.length > 0) {
 

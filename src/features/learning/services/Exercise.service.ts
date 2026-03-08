@@ -1,4 +1,4 @@
-import { Exercise, ExerciseType } from '../types/exercise';
+import { Exercise } from '../types/exercise';
 import { exerciseRepository } from '../../../db_local/repositories';
 import { mapDbExerciseToAppExercise } from '../helpers/exercises/exerciseMapper';
 import { generateListeningExercise } from '../helpers/exercises/exerciseGenerator';

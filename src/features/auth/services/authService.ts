@@ -26,6 +26,11 @@ export const authService = {
     },
 
     async signOut() {
+        try {
+            await GoogleSignin.signOut();
+        } catch (error) {
+            console.log('Google signOut error (might not be signed in with Google)', error);
+        }
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
     },

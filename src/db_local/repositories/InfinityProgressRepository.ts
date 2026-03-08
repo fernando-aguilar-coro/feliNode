@@ -68,4 +68,13 @@ export class InfinityProgressRepository extends BaseRepository {
             console.error('[DB] Error bulk saving infinity scores:', error);
         }
     }
+
+    async clearInfinityProgress() {
+        const db = await this.db;
+        try {
+            await db.runAsync('DELETE FROM infinity_progress');
+        } catch (error) {
+            console.error('[DB] Error clearing infinity progress:', error);
+        }
+    }
 }

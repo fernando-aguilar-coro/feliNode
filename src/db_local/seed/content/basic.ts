@@ -9,7 +9,7 @@ export const PLACEMENT_TEST_BASIC: SeedLesson = {
     exercises: [
         {
             type: 'multiple_choice',
-            instruction: 'Select the correct greeting.',
+            instruction: 'Selecciona la forma correcta de decir "Hola".',
             content: {
                 options: [
                     { option_text: 'Hello', is_correct: true },
@@ -24,7 +24,7 @@ export const PLACEMENT_TEST_BASIC: SeedLesson = {
         },
         {
             type: 'multiple_choice',
-            instruction: 'Selecciona el verbo correcto para completar la oración: He ___ a student.',
+            instruction: 'Selecciona el verbo correcto para completar la oración ("Él es un estudiante"): He ___ a student.',
             content: {
                 options: [
                     { option_text: 'am', is_correct: false },
@@ -38,7 +38,7 @@ export const PLACEMENT_TEST_BASIC: SeedLesson = {
         },
         {
             type: 'fill_blank',
-            instruction: 'Completa la oración con la preposición correcta.',
+            instruction: 'Completa la oración con la preposición correcta que significa "debajo de".',
             content: {
                 phrase: 'The cat is ___ the table.',
                 correct_answer: 'under',
@@ -67,7 +67,7 @@ export const PLACEMENT_TEST_BASIC: SeedLesson = {
         },
         {
             type: 'select_pairs',
-            instruction: 'Une los opuestos.',
+            instruction: 'Une los opuestos correctos dependiendo del significado.',
             content: {
                 pairs: [
                     { left: 'Big', right: 'Small' },

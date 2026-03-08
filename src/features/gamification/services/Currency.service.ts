@@ -1,5 +1,6 @@
 import { supabase } from '../../../api/supabaseClient';
 import { userCurrenciesRepository, streakRepository } from '../../../db_local/repositories';
+import { useUserStore } from '../../../store/UserStore';
 
 export class CurrencyService {
     static async getCurrencies() {
@@ -37,13 +38,19 @@ export class CurrencyService {
             });
             // Also we need to sync streak if there's a sync function, but typically streak is synced somewhere else?
             // Wait, we can just update the cloud directly for the streak or let the normal streak sync handle it.
-            // Let's update cloud directly for now just to be safe.
+            const { isGuest, guestId } = useUserStore.getState();
             const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
+            let userId = user?.id;
+
+            if (isGuest && guestId) {
+                userId = guestId;
+            }
+
+            if (userId) {
                 await supabase.from('user_streaks').update({
                     freezes_available: streakData.freezes_available + 1,
                     updated_at: new Date().toISOString()
-                }).eq('user_id', user.id);
+                }).eq('user_id', userId);
             }
             return true;
         }
@@ -52,19 +59,25 @@ export class CurrencyService {
 
     static async syncCurrencies() {
         try {
+            const { isGuest, guestId } = useUserStore.getState();
             const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-            if (userError || !user) {
+            let userId = user?.id;
 
+            if (isGuest && guestId) {
+                userId = guestId;
+            } else if (userError || !user) {
                 return;
             }
+
+            if (!userId) return;
 
             const localData = await userCurrenciesRepository.getCurrencies();
 
             const { data: remoteData, error: remoteError } = await supabase
                 .from('user_currencies')
                 .select('xp, michi_coins, updated_at')
-                .eq('user_id', user.id)
+                .eq('user_id', userId)
                 .maybeSingle();
 
             if (remoteError) {
@@ -75,7 +88,7 @@ export class CurrencyService {
             if (!remoteData) {
                 // Insert local into remote via upsert to be safe
                 const { error: upsertError } = await supabase.from('user_currencies').upsert({
-                    user_id: user.id,
+                    user_id: userId,
                     xp: localData.xp,
                     michi_coins: localData.michi_coins,
                     updated_at: new Date().toISOString()
@@ -86,13 +99,13 @@ export class CurrencyService {
                 }
             } else {
                 // To avoid losing spent coins or duplicating defaults on new device:
-                // If local is default (0 XP, 300 coins) and remote has more XP or different coins, trust remote.
+                // If local is default (0 XP, 0 coins) and remote has more XP or different coins, trust remote.
                 let mergedXp = localData.xp;
                 let mergedCoins = localData.michi_coins;
 
-                const isLocalDefault = localData.xp === 0 && localData.michi_coins === 300;
+                const isLocalDefault = localData.xp === 0 && localData.michi_coins === 0;
 
-                if (isLocalDefault && (remoteData.xp > 0 || remoteData.michi_coins !== 300)) {
+                if (isLocalDefault && (remoteData.xp > 0 || remoteData.michi_coins !== 0)) {
                     mergedXp = remoteData.xp;
                     mergedCoins = remoteData.michi_coins;
                 } else {
@@ -121,7 +134,7 @@ export class CurrencyService {
                         xp: mergedXp,
                         michi_coins: mergedCoins,
                         updated_at: new Date().toISOString()
-                    }).eq('user_id', user.id);
+                    }).eq('user_id', userId);
 
                     if (updateError) {
                         console.error('[CurrencySync] Error updating external currencies:', updateError);

@@ -57,7 +57,12 @@ export class UserProgressRepository extends BaseRepository {
                 const json = JSON.stringify(completed);
 
                 const now = new Date().toISOString();
-                await db.runAsync('UPDATE user_progress SET lessons_completed = ?, updated_at = ? WHERE id = ?', [json, now, profile?.id || 1]);
+
+                if (profile) {
+                    await db.runAsync('UPDATE user_progress SET lessons_completed = ?, updated_at = ? WHERE id = ?', [json, now, profile.id]);
+                } else {
+                    await db.runAsync('INSERT INTO user_progress (lessons_completed, updated_at) VALUES (?, ?)', [json, now]);
+                }
 
                 const dependents: any[] = await db.getAllAsync(
                     'SELECT lesson_id FROM lesson_dependencies WHERE prerequisite_id = ?',

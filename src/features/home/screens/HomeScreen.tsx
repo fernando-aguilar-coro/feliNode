@@ -9,15 +9,18 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { audioService } from '../../settings/services/audio.service';
 import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { StreakCloudService } from '../../gamification/services/StreakCloud.service';
+import { CurrencyService } from '../../gamification/services/Currency.service';
 import { useSettingsStore } from '../../../store/SettingsStore';
+import { useCurrencyStore } from '../../../store/CurrencyStore';
+import { KokoroDisclaimerModal } from '../components/KokoroDisclaimerModal';
 
 export const HomeScreen = () => {
     const netInfo = useNetInfo();
     const theme = useAppTheme();
     const homeViewMode = useSettingsStore(state => state.homeViewMode);
     const setHomeViewMode = useSettingsStore(state => state.setHomeViewMode);
-    const hasSyncedOnStart = useRef(false);
 
+    const hasSyncedOnStart = useRef(false);
     useEffect(() => {
         if (netInfo.isConnected && !hasSyncedOnStart.current) {
             hasSyncedOnStart.current = true;
@@ -26,9 +29,10 @@ export const HomeScreen = () => {
             // Sync asynchronously Without blocking
             Promise.all([
                 StreakCloudService.syncWithLocal(),
-                syncInfinityStats()
+                syncInfinityStats(),
+                CurrencyService.syncCurrencies()
             ]).then(() => {
-
+                useCurrencyStore.getState().loadCurrencies();
             }).catch(e => {
                 console.error('[HomeScreen] Error in initial sync:', e);
             });
@@ -88,7 +92,6 @@ export const HomeScreen = () => {
             fontWeight: 'bold',
             textAlign: 'center',
         },
-
     }), [theme]);
 
     return (
@@ -121,6 +124,8 @@ export const HomeScreen = () => {
                     <ModuleProgressScreen />
                 )}
             </View>
+
+            <KokoroDisclaimerModal />
         </SafeAreaView>
     );
 };

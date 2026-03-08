@@ -1,14 +1,20 @@
 import { supabase } from './supabaseClient'; // Asegúrate de importar tu instancia de cliente
+import { useUserStore } from '../store/UserStore';
 
 export const updateUser = async (completedLessons: string[]) => {
     try {
-        // 1. Obtenemos el usuario actual directamente de Supabase
+        const { isGuest, guestId } = useUserStore.getState();
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-        if (userError || !user) {
+        let userId = user?.id;
 
+        if (isGuest && guestId) {
+            userId = guestId;
+        } else if (userError || !user) {
             return;
         }
+
+        if (!userId) return;
 
         // 2. Actualizamos la tabla 'profiles' directamente
         // El RLS que configuramos se encargará de validar que solo edites TU fila
@@ -19,7 +25,7 @@ export const updateUser = async (completedLessons: string[]) => {
                 last_sync: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             })
-            .eq('id', user.id); // Filtro de seguridad por ID de usuario
+            .eq('id', userId); // Filtro de seguridad por ID de usuario
 
         if (syncError) {
             console.warn('[Sync] Failed to sync progress:', syncError.message);

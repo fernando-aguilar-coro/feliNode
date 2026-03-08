@@ -209,4 +209,13 @@ export class StreakRepository extends BaseRepository {
             throw error;
         }
     }
+
+    async clearStreak() {
+        const db = await this.db;
+        try {
+            await db.runAsync('DELETE FROM user_streaks');
+        } catch (error) {
+            console.error('[DB] Error clearing user streaks:', error);
+        }
+    }
 }

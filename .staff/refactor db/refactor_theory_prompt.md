@@ -1,7 +1,7 @@
 <!-- Prompt para Refactorización de Teoría de Lecciones -->
 ### Directrices Principales:
-1. **Eliminar el Relleno:** Omite las largas introducciones redundantes (ej. "En esta lección exhaustiva, exploraremos el fascinante mundo de..."). Ve directo al punto y a la explicación del concepto.
-2. **Ser Directo y Conciso:** Mantén las oraciones cortas. Usa listas con viñetas en lugar de largos párrafos explicativos para facilitar la lectura por escaneo.
+1. **Eliminar el Relleno:** Omite las largas introducciones redundantes (ej. "En esta lección exhaustiva, exploraremos el fascinante mundo de..."). Ve directo a la explicación del concepto.
+2. **Ser Directo y Conciso:** Usa listas con viñetas en lugar de largos párrafos explicativos para facilitar la lectura por escaneo.
 3. **Optimizar Tablas:** Usa tablas en formato markdown para resumir conceptos clave, conjugaciones o reglas(palabras clave, significados y ejemplos cortos), pero asegúrate de mantener el nivel de detalle y no quitar contenido valioso, al contrario, agrega valor y profundidad con tablas útiles.
 4. **Resaltado y Formato:** Usa negritas (`**texto**`) para términos en inglés importantes o fórmulas. Usa cursivas (`_texto_`) para ejemplos en inglés. Siempre incluye la traducción al español entre paréntesis después del ejemplo.
 5. **Conservar la Pronunciación:** NUNCA elimines las guías de pronunciación. Si una palabra nueva o concepto clave se presenta, siempre incluye su pronunciación aproximada en español entre barras oblicuas (ej. `/pronunciación/`).

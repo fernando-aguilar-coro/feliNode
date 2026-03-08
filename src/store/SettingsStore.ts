@@ -11,6 +11,7 @@ interface SettingsState {
     bgmEnabled: boolean;
     isKokoroDownloaded: boolean;
     hasDecidedKokoroDownload: boolean;
+    wantsKokoro: boolean;
     showStreak: boolean;
     hasDecidedPlacementTest: boolean;
     setEnglishVoice: (voice: VoiceConfig) => void;
@@ -19,6 +20,7 @@ interface SettingsState {
     setBgmEnabled: (enabled: boolean) => void;
     setKokoroDownloaded: (downloaded: boolean) => void;
     setHasDecidedKokoroDownload: (decided: boolean) => void;
+    setWantsKokoro: (wants: boolean) => void;
     setShowStreak: (show: boolean) => void;
     setHasDecidedPlacementTest: (decided: boolean) => void;
     homeViewMode: 'tree' | 'list';
@@ -34,6 +36,7 @@ export const useSettingsStore = create<SettingsState>()(
             bgmEnabled: true,
             isKokoroDownloaded: false,
             hasDecidedKokoroDownload: false,
+            wantsKokoro: false,
             showStreak: true,
             hasDecidedPlacementTest: false,
             setEnglishVoice: (voice) => set({ englishVoice: voice }),
@@ -42,6 +45,7 @@ export const useSettingsStore = create<SettingsState>()(
             setBgmEnabled: (enabled: boolean) => set({ bgmEnabled: enabled }),
             setKokoroDownloaded: (downloaded: boolean) => set({ isKokoroDownloaded: downloaded }),
             setHasDecidedKokoroDownload: (decided: boolean) => set({ hasDecidedKokoroDownload: decided }),
+            setWantsKokoro: (wants: boolean) => set({ wantsKokoro: wants }),
             setShowStreak: (show: boolean) => set({ showStreak: show }),
             setHasDecidedPlacementTest: (decided: boolean) => set({ hasDecidedPlacementTest: decided }),
             homeViewMode: 'tree',

@@ -9,7 +9,7 @@ export const PLACEMENT_TEST_ADVANCED: SeedLesson = {
     exercises: [
         {
             type: 'multiple_choice',
-            instruction: 'Select the correct conditional sentence.',
+            instruction: 'Selecciona la oración condicional que está escrita correctamente.',
             content: {
                 options: [
                     { option_text: 'If I were you, I would go.', is_correct: true },
@@ -23,7 +23,7 @@ export const PLACEMENT_TEST_ADVANCED: SeedLesson = {
         },
         {
             type: 'multiple_choice',
-            instruction: 'Selecciona la estructura correcta con Inversión.',
+            instruction: 'Selecciona la oración que utiliza la estructura correcta de énfasis (Inversión).',
             content: {
                 options: [
                     { option_text: 'Never I have seen such a beautiful sunset.', is_correct: false },
@@ -37,7 +37,7 @@ export const PLACEMENT_TEST_ADVANCED: SeedLesson = {
         },
         {
             type: 'fill_blank',
-            instruction: 'Completa la oración (Tercer Condicional / Mixed).',
+            instruction: 'Completa la oración condicional asumiendo una consecuencia en el presente de una acción pasada.',
             content: {
                 phrase: 'If she had studied harder, she ___ be in this situation now.',
                 correct_answer: 'would not',
@@ -47,7 +47,7 @@ export const PLACEMENT_TEST_ADVANCED: SeedLesson = {
         },
         {
             type: 'translate',
-            instruction: 'Traduce empleando participios (Participle Clauses).',
+            instruction: 'Traduce la siguiente frase al inglés.',
             content: {
                 phrase: 'Habiendo terminado su trabajo, se fue a casa.',
                 correct_answer: 'Having finished his work he went home',
@@ -57,7 +57,7 @@ export const PLACEMENT_TEST_ADVANCED: SeedLesson = {
         },
         {
             type: 'scrambled_sentence',
-            instruction: 'Ordena la oración formal con Subjuntivo.',
+            instruction: 'Ordena las palabras para formar la oración de manera formal.',
             content: {
                 correct_answer: 'It is crucial that he arrive on time',
                 unlocks_lesson_id: 'TODO_subjunctive'

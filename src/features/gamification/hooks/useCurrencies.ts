@@ -1,38 +1,16 @@
-import { useState, useCallback, useEffect } from 'react';
-import { CurrencyService } from '../services/Currency.service';
+import { useEffect } from 'react';
+import { useCurrencyStore } from '../../../store/CurrencyStore';
 
 export const useCurrencies = () => {
-    const [currencies, setCurrencies] = useState({ xp: 0, michi_coins: 300 });
-    const [loading, setLoading] = useState(true);
-
-    const loadCurrencies = useCallback(async () => {
-        try {
-            setLoading(true);
-            const data = await CurrencyService.getCurrencies();
-            setCurrencies(data);
-        } catch (error) {
-            console.error('[GAMIFICATION] Error loading currencies:', error);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const currencies = useCurrencyStore((state) => state.currencies);
+    const loading = useCurrencyStore((state) => state.loading);
+    const loadCurrencies = useCurrencyStore((state) => state.loadCurrencies);
+    const addRewards = useCurrencyStore((state) => state.addRewards);
+    const spendCoins = useCurrencyStore((state) => state.spendCoins);
 
     useEffect(() => {
         loadCurrencies();
     }, [loadCurrencies]);
-
-    const addRewards = async (xp: number, coins: number) => {
-        const newData = await CurrencyService.addRewards(xp, coins);
-        setCurrencies(newData);
-    };
-
-    const spendCoins = async (amount: number) => {
-        const success = await CurrencyService.spendCoins(amount);
-        if (success) {
-            setCurrencies(prev => ({ ...prev, michi_coins: prev.michi_coins - amount }));
-        }
-        return success;
-    };
 
     return { currencies, loading, loadCurrencies, addRewards, spendCoins };
 };

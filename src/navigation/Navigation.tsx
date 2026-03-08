@@ -6,6 +6,8 @@ import { ChoseInitialTest } from '../features/learning/screens/ChoseInitialTest'
 import { LoadingScreen } from '../components';
 import { syncUserProgress } from '../api/syncUserProgress';
 import { useNetInfo } from '@react-native-community/netinfo';
+import { seedDatabase } from '../db_local/seed/seed_db';
+
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
@@ -13,7 +15,6 @@ import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
 import { useUserStore } from '../store/UserStore';
 import { useSettingsStore } from '../store/SettingsStore';
 import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
-import { KokoroDisclaimerScreen } from '../features/learning/screens/KokoroDisclaimerScreen';
 
 const Stack = createNativeStackNavigator();
 const minCount = 1;
@@ -34,16 +35,24 @@ export const Navigation = () => {
 
     // Sync progress
     useEffect(() => {
+        if (!isAuthenticated) {
+            setHasSync(false);
+            setCompletedLessonsCount(0);
+            return;
+        }
+
         const syncData = async () => {
-            if (netInfo.isConnected && !isSyncing && isAuthenticated && !hasSync) {
+            if (netInfo.isConnected && !isSyncing && !hasSync) {
                 try {
                     setIsSyncing(true);
                     setHasSync(true);
                     await syncUserProgress();
+                    await seedDatabase();
                     const count = await getUserCompletedLessons();
                     setCompletedLessonsCount(count);
                 } catch (error) {
                     console.error('Error syncing progress in HomeScreen:', error);
+                    setHasSync(false); // Permite reintentar si falla
                 } finally {
                     setIsSyncing(false);
                     setIsLoadingLessons(false);
@@ -52,6 +61,15 @@ export const Navigation = () => {
         };
         syncData();
     }, [netInfo.isConnected, isAuthenticated, isSyncing, hasSync]);
+    if (!isAuthenticated) {
+        return (<Stack.Navigator id="login_stack" screenOptions={{ headerShown: false }}>
+            <Stack.Screen
+                name="Login"
+                component={LoginScreen}
+                options={{ title: 'Login' }}
+            />
+        </Stack.Navigator>)
+    }
 
     if (isSyncing || (isAuthenticated && isLoadingLessons)) {
         return <LoadingScreen message={isSyncing ? "Sincronizando progreso..." : "Cargando progreso..."} />;
@@ -65,42 +83,24 @@ export const Navigation = () => {
     }
     return (
         <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
-            {isAuthenticated ? (
-                <Stack.Group>
-                    {completedLessonsCount <= minCount && !hasDecidedPlacementTest ? (
-                        <>
-                            <Stack.Screen
-                                name="PlacementSelection"
-                                component={ChoseInitialTest}
-                                options={{ title: 'Select Level' }}
-                            />
-                            <Stack.Screen
-                                name="PlacementEvaluation"
-                                component={PlacementTestScreen}
-                                options={{ title: 'Placement Test' }}
-                            />
-                        </>
-                    ) : null}
-
-                    {!hasDecidedKokoroDownload && netInfo.isConnected ? (
+            <Stack.Group>
+                {completedLessonsCount <= minCount && !hasDecidedPlacementTest ? (
+                    <>
                         <Stack.Screen
-                            name="KokoroDisclaimer"
-                            component={KokoroDisclaimerScreen}
-                            options={{ headerShown: false }}
+                            name="PlacementSelection"
+                            component={ChoseInitialTest}
+                            options={{ title: 'Select Level' }}
                         />
-                    ) : (
-                        <Stack.Screen name="Home" component={HomeNavigation} />
-                    )}
-                </Stack.Group>
-            ) : (
-                <Stack.Group>
-                    <Stack.Screen
-                        name="Login"
-                        component={LoginScreen}
-                        options={{ title: 'Login' }}
-                    />
-                </Stack.Group>
-            )}
+                        <Stack.Screen
+                            name="PlacementEvaluation"
+                            component={PlacementTestScreen}
+                            options={{ title: 'Placement Test' }}
+                        />
+                    </>
+                ) : null}
+
+                <Stack.Screen name="Home" component={HomeNavigation} />
+            </Stack.Group>
         </Stack.Navigator>
     );
 }

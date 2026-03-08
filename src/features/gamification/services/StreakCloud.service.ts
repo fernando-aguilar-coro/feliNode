@@ -1,6 +1,7 @@
 import { supabase } from '../../../api/supabaseClient';
 import { streakRepository } from '../../../db_local/repositories';
 import { NotificationService } from './Notification.service';
+import { useUserStore } from '../../../store/UserStore';
 
 export interface StreakData {
     current_streak: number;
@@ -18,17 +19,24 @@ export const StreakCloudService = {
             // Schedule notification based on current active state
             await NotificationService.scheduleStreakReminder(localData.current_streak, localData.last_active_date);
 
+            const { isGuest, guestId } = useUserStore.getState();
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             const user = session?.user;
-            if (sessionError || !user) {
 
+            let userId = user?.id;
+
+            if (isGuest && guestId) {
+                userId = guestId;
+            } else if (sessionError || !user) {
                 return;
             }
+
+            if (!userId) return;
 
             const { error: syncError } = await supabase
                 .from('user_streaks')
                 .upsert({
-                    user_id: user.id,
+                    user_id: userId,
                     current_streak: localData.current_streak,
                     highest_streak: localData.highest_streak,
                     last_active_date: localData.last_active_date,
@@ -50,17 +58,24 @@ export const StreakCloudService = {
 
     syncDown: async (): Promise<StreakData | null> => {
         try {
+            const { isGuest, guestId } = useUserStore.getState();
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             const user = session?.user;
-            if (sessionError || !user) {
 
+            let userId = user?.id;
+
+            if (isGuest && guestId) {
+                userId = guestId;
+            } else if (sessionError || !user) {
                 return null;
             }
+
+            if (!userId) return null;
 
             const { data, error } = await supabase
                 .from('user_streaks')
                 .select('*')
-                .eq('user_id', user.id)
+                .eq('user_id', userId)
                 .single();
 
             if (error) {

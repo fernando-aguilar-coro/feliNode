@@ -2,28 +2,47 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../features/auth/services/authService';
-import { userProgressRepository } from '../db_local/repositories';
+import {
+    userProgressRepository,
+    infinityProgressRepository,
+    streakRepository,
+    userCurrenciesRepository
+} from '../db_local/repositories';
 import NetInfo from '@react-native-community/netinfo';
+import { useCurrencyStore } from './CurrencyStore';
+import { deleteUserAccountFromSupabase } from '../api/deleteUserAccount';
 
 interface UserState {
     isAuthenticated: boolean;
+    isGuest: boolean;
+    guestId: string | null;
+    hasLoggedOut: boolean;
     user: { name: string } | null;
     loading: boolean;
     checkSession: () => Promise<void>;
     sendOtp: (email: string) => Promise<void>;
     verifyOtp: (email: string, token: string) => Promise<void>;
     signInWithGoogle: () => Promise<void>;
+    loginAsGuest: () => void;
     logout: () => Promise<void>;
+    deleteAccount?: () => Promise<void>;
 }
 
 export const useUserStore = create<UserState>()(
     persist(
         (set, get) => ({
             isAuthenticated: false,
+            isGuest: false,
+            guestId: null,
+            hasLoggedOut: false,
             user: null,
             loading: false,
             isSyncing: false,
             checkSession: async () => {
+                if (get().hasLoggedOut) {
+                    return; // Prevent auto-login if explicitly logged out
+                }
+
                 const wasAuthenticated = get().isAuthenticated;
                 const state = await NetInfo.fetch();
 
@@ -85,6 +104,8 @@ export const useUserStore = create<UserState>()(
                     if (session) {
                         set({
                             isAuthenticated: true,
+                            isGuest: false,
+                            hasLoggedOut: false,
                             user: { name: session.user.email || 'User' },
                         });
                     }
@@ -104,6 +125,8 @@ export const useUserStore = create<UserState>()(
                         const { session } = response;
                         set({
                             isAuthenticated: true,
+                            isGuest: false,
+                            hasLoggedOut: false,
                             user: { name: session.user.email || 'User' },
                         });
                     }
@@ -115,21 +138,71 @@ export const useUserStore = create<UserState>()(
                 }
             },
 
+            loginAsGuest: () => {
+                const newGuestId = `guest-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                set({
+                    isAuthenticated: true,
+                    isGuest: true,
+                    guestId: newGuestId,
+                    hasLoggedOut: false,
+                    user: { name: 'Invitado' },
+                });
+            },
+
             logout: async () => {
-                set({ loading: true });
+                // Immediately update local state to reflect logout (UI snaps to login immediately)
+                set({
+                    loading: true,
+                    isAuthenticated: false,
+                    isGuest: false,
+                    guestId: null,
+                    hasLoggedOut: true,
+                    user: null,
+                });
                 try {
                     await authService.signOut();
                     // Clear local DB to prevent data leak to next user
                     await userProgressRepository.clearUserProgress();
-                    // State clear will happen below
+                    await infinityProgressRepository.clearInfinityProgress();
+                    await streakRepository.clearStreak();
+                    await userCurrenciesRepository.clearCurrencies();
+                    useCurrencyStore.setState({ currencies: { xp: 0, michi_coins: 0 } });
                 } catch (error) {
                     console.error('Logout error:', error);
                 } finally {
                     set({
                         loading: false,
+                    });
+                }
+            },
+
+            deleteAccount: async () => {
+                set({ loading: true });
+                try {
+                    await deleteUserAccountFromSupabase();
+
+                    set({
                         isAuthenticated: false,
+                        isGuest: false,
+                        guestId: null,
+                        hasLoggedOut: true,
                         user: null,
                     });
+
+                    // We catch authService.signOut errors because the account and session
+                    // might already be invalidated by deleteUserAccountFromSupabase
+                    await authService.signOut().catch(e => console.log('Google signOut error after delete account:', e));
+
+                    await userProgressRepository.clearUserProgress();
+                    await infinityProgressRepository.clearInfinityProgress();
+                    await streakRepository.clearStreak();
+                    await userCurrenciesRepository.clearCurrencies();
+                    useCurrencyStore.setState({ currencies: { xp: 0, michi_coins: 0 } });
+                } catch (error) {
+                    console.error('Delete account error:', error);
+                    throw error;
+                } finally {
+                    set({ loading: false });
                 }
             },
         }),
@@ -138,7 +211,10 @@ export const useUserStore = create<UserState>()(
             storage: createJSONStorage(() => AsyncStorage),
             partialize: (state) => ({
                 isAuthenticated: state.isAuthenticated,
+                isGuest: state.isGuest,
+                guestId: state.guestId,
                 user: state.user,
+                hasLoggedOut: state.hasLoggedOut,
             }),
         }
     )

@@ -1,14 +1,21 @@
 import { supabase } from './supabaseClient';
 import { userProgressRepository } from '../db_local/repositories';
+import { useUserStore } from '../store/UserStore';
 
 export const syncUserProgress = async () => {
     try {
+        const { isGuest, guestId } = useUserStore.getState();
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-        if (userError || !user) {
+        let userId = user?.id;
 
+        if (isGuest && guestId) {
+            userId = guestId;
+        } else if (userError || !user) {
             return;
         }
+
+        if (!userId) return;
 
         // 1. Fetch Local Data
         const localCompleted = await userProgressRepository.getCompletedLessons();;
@@ -17,7 +24,7 @@ export const syncUserProgress = async () => {
         const { data: remoteProfile, error: remoteError } = await supabase
             .from('profiles')
             .select('lesson_ids, updated_at')
-            .eq('id', user.id)
+            .eq('id', userId)
             .single();
 
         if (remoteError && remoteError.code !== 'PGRST116') { // Ignore 'not found' error if just created
@@ -59,7 +66,7 @@ export const syncUserProgress = async () => {
                     last_sync: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                 })
-                .eq('id', user.id);
+                .eq('id', userId);
 
             if (updateError) {
                 console.error('[Sync] Failed to update remote:', updateError);
