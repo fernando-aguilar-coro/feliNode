@@ -71,13 +71,13 @@ export const LessonModeSelectionScreen = () => {
                     variant="outline"
                 />
                 <AppButton
-                    title="Examen"
-                    onPress={() => handleSelectMode('practice')}
+                    title="Ejercicios Infinitos"
+                    onPress={() => handleSelectMode('infinity')}
                     variant="outline"
                 />
                 <AppButton
-                    title="Ejercicios Infinitos"
-                    onPress={() => handleSelectMode('infinity')}
+                    title="Examen"
+                    onPress={() => handleSelectMode('practice')}
                     variant="outline"
                 />
             </View>

@@ -1,31 +1,18 @@
-import { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { useState } from 'react';
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-paper';
 import { useUserStore } from '../../../store/UserStore';
-import { Screen, Spacer, AppText } from '../../../components';
+import { Screen, Spacer, AppText, AppButton } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { LoginHeader, LoginForm, SocialLogin } from '../components';
 
 export default function LoginScreen() {
     const theme = useAppTheme();
-    const { sendOtp, verifyOtp, loading } = useUserStore();
+    const { sendOtp, verifyOtp, loading, loginAsGuest } = useUserStore();
     const [email, setEmail] = useState('');
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
-    const [step, setStep] = useState<'email' | 'code'>('email');
-
-    useEffect(() => {
-        const checkGoogleSignIn = async () => {
-            if (useUserStore.getState().hasLoggedOut) {
-                return;
-            }
-            try {
-                await useUserStore.getState().signInWithGoogle()
-            } catch (error) {
-
-            }
-        };
-        checkGoogleSignIn();
-    }, []);
+    const [step, setStep] = useState<'initial' | 'email' | 'code'>('initial');
 
     const handleSendOtp = async () => {
         if (!email) {
@@ -64,35 +51,65 @@ export default function LoginScreen() {
                     contentContainerStyle={[styles.scrollContent, { paddingHorizontal: theme.spacing.lg }]}
                     showsVerticalScrollIndicator={false}
                 >
-                    <Spacer height={theme.spacing.xl * 2} />
 
                     <LoginHeader step={step} email={email} />
+                    <Spacer height={theme.spacing.xxl} />
 
                     <View style={[styles.card, { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text }]}>
-                        <LoginForm
-                            email={email}
-                            code={code}
-                            step={step}
-                            loading={loading}
-                            onEmailChange={setEmail}
-                            onCodeChange={setCode}
-                            onSubmit={step === 'email' ? handleSendOtp : handleVerifyOtp}
-                            onBack={() => {
-                                setStep('email');
-                                setCode('');
-                                setError('');
-                            }}
-                        />
+                        {step === 'initial' && (
+                            <View style={styles.initialContainer}>
+                                <AppButton
+                                    title="Modo Invitado"
+                                    onPress={loginAsGuest}
+                                    disabled={loading}
+                                    variant="outline"
+                                    style={styles.guestButton}
+                                >
+                                    Modo Invitado
+                                </AppButton>
+                                <Spacer height={theme.spacing.md} />
+                                <SocialLogin loading={loading} onError={setError} />
+                                <Spacer height={theme.spacing.xl} />
+                                <TouchableOpacity
+                                    onPress={() => { setStep('email'); setError(''); }}
+                                    style={styles.textButton}
+                                    disabled={loading}
+                                >
+                                    <AppText color={theme.colors.primary} weight="bold" variant="sm">
+                                        Iniciar sesión con Email
+                                    </AppText>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
+                        {(step === 'email' || step === 'code') && (
+                            <LoginForm
+                                email={email}
+                                code={code}
+                                step={step as 'email' | 'code'}
+                                loading={loading}
+                                onEmailChange={setEmail}
+                                onCodeChange={setCode}
+                                onSubmit={step === 'email' ? handleSendOtp : handleVerifyOtp}
+                                onBack={() => {
+                                    if (step === 'code') {
+                                        setStep('email');
+                                        setCode('');
+                                    } else {
+                                        setStep('initial');
+                                        setEmail('');
+                                        setCode('');
+                                    }
+                                    setError('');
+                                }}
+                            />
+                        )}
 
                         {error ? (
                             <AppText variant="sm" color={theme.colors.error} align="center" style={{ marginTop: 15 }}>
                                 {error}
                             </AppText>
                         ) : null}
-
-                        {step === 'email' && (
-                            <SocialLogin loading={loading} onError={setError} />
-                        )}
                     </View>
 
                     <Spacer height={theme.spacing.xl} />
@@ -108,12 +125,25 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     card: {
-        borderRadius: 20,
+        borderRadius: 24,
         padding: 24,
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 5,
+        shadowRadius: 16,
+        elevation: 10,
         width: '100%',
+    },
+    initialContainer: {
+        width: '100%',
+        alignItems: 'center',
+    },
+    guestButton: {
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+    },
+    textButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
     }
 });

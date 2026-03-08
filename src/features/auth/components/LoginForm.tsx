@@ -29,14 +29,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     return (
         <View style={styles.container}>
             {step === 'email' ? (
-                <AppTextInput
-                    label="Correo electrónico"
-                    placeholder="ejemplo@correo.com"
-                    value={email}
-                    onChangeText={onEmailChange}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                />
+                <View>
+                    <AppTextInput
+                        label="Correo electrónico"
+                        placeholder="ejemplo@correo.com"
+                        value={email}
+                        onChangeText={onEmailChange}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                    />
+                </View>
             ) : (
                 <View>
                     <AppTextInput
@@ -61,16 +63,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 style={styles.mainButton}
             />
 
-            {step === 'code' && (
-                <>
-                    <Spacer height={theme.spacing.md} />
-                    <AppButton
-                        title="Cambiar correo"
-                        onPress={onBack}
-                        disabled={loading}
-                    />
-                </>
-            )}
+            <Spacer height={theme.spacing.md} />
+            <AppButton
+                title={step === 'email' ? "Volver" : "Cambiar correo"}
+                onPress={onBack}
+                disabled={loading}
+                variant="outline"
+            />
         </View>
     );
 };

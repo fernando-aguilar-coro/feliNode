@@ -1,5 +1,6 @@
 import RNFS from 'react-native-fs';
 import { supabase } from '../../../api/supabaseClient';
+import { useUserStore } from '../../../store/UserStore';
 
 // Simplified Types
 interface AzureMetrics {
@@ -96,23 +97,30 @@ export const PronunciationService = {
         }
 
         try {
+            const { isGuest } = useUserStore.getState();
             // Get the current session token
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-            if (sessionError || !session?.access_token) {
+            if (!isGuest && (sessionError || !session?.access_token)) {
                 throw new Error('User not authenticated');
             }
 
-            const token = session.access_token;
+            const token = session?.access_token;
 
             const filePath = audioUri.startsWith('file://') ? audioUri.replace('file://', '') : audioUri;
             const base64Audio = await RNFS.readFile(filePath, 'base64');
+
+            const headers: any = {
+                'Content-Type': 'application/json',
+            };
+
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const response = await fetch(BASE_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers,
                 body: JSON.stringify({
                     text: referenceText,
                     audio: base64Audio,

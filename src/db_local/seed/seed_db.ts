@@ -18,14 +18,27 @@ export const seedDatabase = async () => {
     try {
         const dbInstance = await init();
 
-        const hasSeeded = await AsyncStorage.getItem('HAS_SEEDED_DB');
-        if (hasSeeded === 'true') {
+        // Check local lessons count
+        const result = await dbInstance.getAllAsync<{ count: number }>('SELECT COUNT(*) as count FROM lessons');
+        const localLessonsCount = result[0]?.count || 0;
 
+        const hasSeeded = await AsyncStorage.getItem('HAS_SEEDED_DB');
+        // Only skip if already marked as seeded AND we have at least 5 lessons in local DB
+        if (hasSeeded === 'true' && localLessonsCount >= 5) {
             return;
         }
 
         // Seed from Supabase
-        const supabaseLessons = await getAllLessons();
+        let supabaseLessons = await getAllLessons();
+
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+        while (supabaseLessons.length === 0 && localLessonsCount < 5 && retryCount < MAX_RETRIES) {
+            console.log(`[DB_SEED] No lessons fetched, retrying getAllLessons... (${retryCount + 1}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, 3000)); // wait 3 seconds
+            supabaseLessons = await getAllLessons();
+            retryCount++;
+        }
 
         // Seed Placement Tests
         if (INITIAL_DATA.placement_tests && INITIAL_DATA.placement_tests.length > 0) {
@@ -84,17 +97,23 @@ export const seedDatabase = async () => {
 
                 const { ensureDependencies } = await import('./seed_config');
                 await ensureDependencies(dbInstance, dependencies);
-            } else {
-
             }
 
+            // Successfully fetched and seeded from Supabase
+            await AsyncStorage.setItem('HAS_SEEDED_DB', 'true');
         } else {
-
+            // Supabase lessons array is empty (possibly due to network error)
+            // If we already have lessons locally, we can mark as seeded
+            if (localLessonsCount >= 5) {
+                await AsyncStorage.setItem('HAS_SEEDED_DB', 'true');
+            } else {
+                console.warn('[DB_SEED] No lessons fetched from Supabase and local DB has < 5 lessons. Will retry on next start.');
+                await AsyncStorage.removeItem('HAS_SEEDED_DB');
+            }
         }
 
-
-        await AsyncStorage.setItem('HAS_SEEDED_DB', 'true');
     } catch (error) {
         console.error('[DB_SEED] Error during database seeding:', error);
+        await AsyncStorage.removeItem('HAS_SEEDED_DB');
     }
 };

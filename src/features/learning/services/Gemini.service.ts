@@ -1,5 +1,6 @@
 import { supabase } from '../../../api/supabaseClient';
 import { API_BASE_URL } from '../../../config';
+import { useUserStore } from '../../../store/UserStore';
 
 export const GeminiService = {
     /**
@@ -9,19 +10,25 @@ export const GeminiService = {
      */
     generateResponse: async (prompt: string, options?: { raw?: boolean }): Promise<string> => {
         try {
+            const { isGuest } = useUserStore.getState();
             const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
 
-            if (!token) {
+            if (!token && !isGuest) {
                 throw new Error("No estás autenticado.");
+            }
+
+            const headers: any = {
+                'Content-Type': 'application/json',
+            };
+
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
 
             const response = await fetch(`${API_BASE_URL}/gemini_query`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers,
                 body: JSON.stringify({ text: prompt }),
             });
 

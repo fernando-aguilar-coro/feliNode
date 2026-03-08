@@ -1,6 +1,5 @@
 import { supabase } from '../../../api/supabaseClient';
 import { userCurrenciesRepository, streakRepository } from '../../../db_local/repositories';
-import { useUserStore } from '../../../store/UserStore';
 
 export class CurrencyService {
     static async getCurrencies() {
@@ -38,13 +37,14 @@ export class CurrencyService {
             });
             // Also we need to sync streak if there's a sync function, but typically streak is synced somewhere else?
             // Wait, we can just update the cloud directly for the streak or let the normal streak sync handle it.
-            const { isGuest, guestId } = useUserStore.getState();
+            const { useUserStore } = require('../../../store/UserStore');
+            const { isGuest } = useUserStore.getState();
+            if (isGuest) {
+                return true; // Pretend it succeeded locally for guest
+            }
+
             const { data: { user } } = await supabase.auth.getUser();
             let userId = user?.id;
-
-            if (isGuest && guestId) {
-                userId = guestId;
-            }
 
             if (userId) {
                 await supabase.from('user_streaks').update({
@@ -59,14 +59,17 @@ export class CurrencyService {
 
     static async syncCurrencies() {
         try {
-            const { isGuest, guestId } = useUserStore.getState();
+            const { useUserStore } = require('../../../store/UserStore');
+            const { isGuest } = useUserStore.getState();
             const { data: { user }, error: userError } = await supabase.auth.getUser();
 
             let userId = user?.id;
 
-            if (isGuest && guestId) {
-                userId = guestId;
-            } else if (userError || !user) {
+            if (isGuest) {
+                return;
+            }
+
+            if (userError || !user) {
                 return;
             }
 

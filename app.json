@@ -30,7 +30,7 @@
         "MODIFY_AUDIO_SETTINGS"
       ],
       "edgeToEdgeEnabled": true,
-      "package": "com.felinode.felinode",
+      "package": "com.felinode.app",
       "allowBackup": false
     },
     "web": {

@@ -1,17 +1,13 @@
 import { supabase } from './supabaseClient';
 import { userProgressRepository } from '../db_local/repositories';
-import { useUserStore } from '../store/UserStore';
 
 export const syncUserProgress = async () => {
     try {
-        const { isGuest, guestId } = useUserStore.getState();
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
         let userId = user?.id;
 
-        if (isGuest && guestId) {
-            userId = guestId;
-        } else if (userError || !user) {
+        if (userError || !user) {
             return;
         }
 

@@ -1,5 +1,4 @@
 import { supabase } from './supabaseClient';
-import { useUserStore } from '../store/UserStore';
 
 /**
  * Deletes the current user's account and all associated data.
@@ -7,6 +6,7 @@ import { useUserStore } from '../store/UserStore';
  */
 export const deleteUserAccountFromSupabase = async (): Promise<void> => {
     try {
+        const { useUserStore } = require('../store/UserStore');
         const { isGuest } = useUserStore.getState();
         if (isGuest) {
             return;

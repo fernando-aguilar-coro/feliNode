@@ -19,15 +19,17 @@ export const StreakCloudService = {
             // Schedule notification based on current active state
             await NotificationService.scheduleStreakReminder(localData.current_streak, localData.last_active_date);
 
-            const { isGuest, guestId } = useUserStore.getState();
+            const { isGuest } = useUserStore.getState();
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             const user = session?.user;
 
             let userId = user?.id;
 
-            if (isGuest && guestId) {
-                userId = guestId;
-            } else if (sessionError || !user) {
+            if (isGuest) {
+                return;
+            }
+
+            if (sessionError || !user) {
                 return;
             }
 
@@ -58,15 +60,17 @@ export const StreakCloudService = {
 
     syncDown: async (): Promise<StreakData | null> => {
         try {
-            const { isGuest, guestId } = useUserStore.getState();
+            const { isGuest } = useUserStore.getState();
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             const user = session?.user;
 
             let userId = user?.id;
 
-            if (isGuest && guestId) {
-                userId = guestId;
-            } else if (sessionError || !user) {
+            if (isGuest) {
+                return null;
+            }
+
+            if (sessionError || !user) {
                 return null;
             }
 

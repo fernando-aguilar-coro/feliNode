@@ -9,6 +9,8 @@ export const AccountSettingsSection = () => {
     const theme = useAppTheme();
     const logout = useUserStore((state) => state.logout);
     const deleteAccount = useUserStore((state) => state.deleteAccount);
+    const isGuest = useUserStore((state) => state.isGuest);
+    const signInWithGoogle = useUserStore((state) => state.signInWithGoogle);
 
     const [modalVisible, setModalVisible] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -34,23 +36,41 @@ export const AccountSettingsSection = () => {
         <List.Section>
             <List.Subheader style={{ color: theme.colors.textSecondary }}>Cuenta</List.Subheader>
             <View style={styles.buttonContainer}>
-                <Button
-                    mode="outlined"
-                    onPress={logout}
-                    textColor={theme.colors.error}
-                    style={{ borderColor: theme.colors.error, marginBottom: 12 }}
-                    icon="logout"
-                >
-                    Cerrar Sesión
-                </Button>
-                <Button
-                    mode="contained"
-                    onPress={() => setModalVisible(true)}
-                    buttonColor={theme.colors.error}
-                    icon="delete"
-                >
-                    Eliminar Cuenta
-                </Button>
+                {isGuest ? (
+                    <Button
+                        mode="contained"
+                        onPress={async () => {
+                            try {
+                                await signInWithGoogle();
+                            } catch (error) {
+                                console.error('Error linking Google account:', error);
+                            }
+                        }}
+                        icon="google"
+                    >
+                        Vincular Cuenta con Google
+                    </Button>
+                ) : (
+                    <>
+                        <Button
+                            mode="outlined"
+                            onPress={logout}
+                            textColor={theme.colors.error}
+                            style={{ borderColor: theme.colors.error, marginBottom: 12 }}
+                            icon="logout"
+                        >
+                            Cerrar Sesión
+                        </Button>
+                        <Button
+                            mode="contained"
+                            onPress={() => setModalVisible(true)}
+                            buttonColor={theme.colors.error}
+                            icon="delete"
+                        >
+                            Eliminar Cuenta
+                        </Button>
+                    </>
+                )}
             </View>
 
             <DeleteAccountModal

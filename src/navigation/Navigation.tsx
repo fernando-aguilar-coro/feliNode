@@ -22,7 +22,7 @@ const minCount = 1;
 
 export const Navigation = () => {
     const { isAuthenticated, checkSession } = useUserStore();
-    const { hasDecidedKokoroDownload, hasDecidedPlacementTest } = useSettingsStore();
+    const { hasDecidedPlacementTest } = useSettingsStore();
     const netInfo = useNetInfo();
     const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
     const [isLoadingLessons, setIsLoadingLessons] = useState(false);
@@ -72,7 +72,7 @@ export const Navigation = () => {
     }
 
     if (isSyncing || (isAuthenticated && isLoadingLessons)) {
-        return <LoadingScreen message={isSyncing ? "Sincronizando progreso..." : "Cargando progreso..."} />;
+        return <LoadingScreen message={isSyncing ? "Cargando lecciones..." : "Cargando progreso..."} />;
     }
     if (!netInfo.isConnected) {
         return (

@@ -15,7 +15,6 @@ import { deleteUserAccountFromSupabase } from '../api/deleteUserAccount';
 interface UserState {
     isAuthenticated: boolean;
     isGuest: boolean;
-    guestId: string | null;
     hasLoggedOut: boolean;
     user: { name: string } | null;
     loading: boolean;
@@ -33,7 +32,6 @@ export const useUserStore = create<UserState>()(
         (set, get) => ({
             isAuthenticated: false,
             isGuest: false,
-            guestId: null,
             hasLoggedOut: false,
             user: null,
             loading: false,
@@ -52,6 +50,10 @@ export const useUserStore = create<UserState>()(
 
                         return; // Keep existing state
                     }
+                }
+
+                if (get().isGuest) {
+                    return; // Guests don't have a Supabase session
                 }
 
                 try {
@@ -139,11 +141,9 @@ export const useUserStore = create<UserState>()(
             },
 
             loginAsGuest: () => {
-                const newGuestId = `guest-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
                 set({
                     isAuthenticated: true,
                     isGuest: true,
-                    guestId: newGuestId,
                     hasLoggedOut: false,
                     user: { name: 'Invitado' },
                 });
@@ -155,7 +155,6 @@ export const useUserStore = create<UserState>()(
                     loading: true,
                     isAuthenticated: false,
                     isGuest: false,
-                    guestId: null,
                     hasLoggedOut: true,
                     user: null,
                 });
@@ -184,7 +183,6 @@ export const useUserStore = create<UserState>()(
                     set({
                         isAuthenticated: false,
                         isGuest: false,
-                        guestId: null,
                         hasLoggedOut: true,
                         user: null,
                     });
@@ -212,7 +210,6 @@ export const useUserStore = create<UserState>()(
             partialize: (state) => ({
                 isAuthenticated: state.isAuthenticated,
                 isGuest: state.isGuest,
-                guestId: state.guestId,
                 user: state.user,
                 hasLoggedOut: state.hasLoggedOut,
             }),

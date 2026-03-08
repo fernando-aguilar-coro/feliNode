@@ -1,18 +1,14 @@
 import { supabase } from './supabaseClient';
 import { infinityProgressRepository } from '../db_local/repositories';
-import { useUserStore } from '../store/UserStore';
 
 export const syncInfinityStats = async () => {
     try {
-        const { isGuest, guestId } = useUserStore.getState();
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         const user = session?.user;
 
         let userId = user?.id;
 
-        if (isGuest && guestId) {
-            userId = guestId;
-        } else if (sessionError || !user) {
+        if (sessionError || !user) {
             return;
         }
 

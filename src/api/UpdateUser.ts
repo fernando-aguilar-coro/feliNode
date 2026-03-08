@@ -1,16 +1,12 @@
 import { supabase } from './supabaseClient'; // Asegúrate de importar tu instancia de cliente
-import { useUserStore } from '../store/UserStore';
 
 export const updateUser = async (completedLessons: string[]) => {
     try {
-        const { isGuest, guestId } = useUserStore.getState();
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
         let userId = user?.id;
 
-        if (isGuest && guestId) {
-            userId = guestId;
-        } else if (userError || !user) {
+        if (userError || !user) {
             return;
         }
 
@@ -31,8 +27,6 @@ export const updateUser = async (completedLessons: string[]) => {
             console.warn('[Sync] Failed to sync progress:', syncError.message);
             throw new Error(`Sync failed: ${syncError.message}`);
         }
-
-
 
     } catch (error) {
         console.error('[Sync] Error syncing progress:', error);
