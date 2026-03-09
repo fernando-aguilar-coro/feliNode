@@ -22,9 +22,24 @@ export const seedDatabase = async () => {
         const result = await dbInstance.getAllAsync<{ count: number }>('SELECT COUNT(*) as count FROM lessons');
         const localLessonsCount = result[0]?.count || 0;
 
-        const hasSeeded = await AsyncStorage.getItem('HAS_SEEDED_DB');
+        let hasSeeded = await AsyncStorage.getItem('HAS_SEEDED_DB');
+
+        // Check if lessons count in Supabase differs from local
+        const { checkLessonsUpdate } = await import('../../api/checkLessonsUpdate');
+        const needsUpdate = await checkLessonsUpdate();
+
+        if (needsUpdate) {
+            console.log('[DB_SEED] Lessons mismatch detected, forcing re-sync from Supabase');
+            hasSeeded = null;
+            await AsyncStorage.removeItem('HAS_SEEDED_DB');
+
+            // Clean up existing modules to avoid duplication (CASCADE will delete lessons + exercises)
+            // But ensureModule checks by title, and ensureLessons uses INSERT OR REPLACE.
+            // So we just need to ensure ensureLessons overwrites, which it already does with INSERT OR REPLACE.
+        }
+
         // Only skip if already marked as seeded AND we have at least 5 lessons in local DB
-        if (hasSeeded === 'true' && localLessonsCount >= 5) {
+        if (hasSeeded === 'true' && localLessonsCount >= 5 && !needsUpdate) {
             return;
         }
 

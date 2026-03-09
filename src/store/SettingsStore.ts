@@ -33,7 +33,7 @@ export const useSettingsStore = create<SettingsState>()(
             englishVoice: KOKORO_VOICE_AF_HEART as VoiceConfig, // Default Kokoro voice
             spanishVoiceId: null, // Default will be resolved by the system if null
             sfxEnabled: true,
-            bgmEnabled: true,
+            bgmEnabled: false,
             isKokoroDownloaded: false,
             hasDecidedKokoroDownload: false,
             wantsKokoro: false,
