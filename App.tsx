@@ -4,8 +4,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LoadingScreen } from './src/components/LoadingScreen';
 import { Navigation } from './src/navigation/Navigation';
 import { authService } from './src/features/auth/services/authService';
-import AppLovinMAX from 'react-native-applovin-max';
-
 import { AppThemeProvider, useThemeControl, NavLightTheme, NavDarkTheme } from './src/theme/ThemeContext';
 
 const AppContent = () => {
@@ -25,8 +23,6 @@ export const App = () => {
         async function init() {
             try {
                 authService.configureGoogleSignin(); // Configure Google Sign-In
-                // Initialize AppLovin MAX SDK early so mediated networks can cache ads
-                await AppLovinMAX.initialize('REEMPLAZA_CON_TU_SDK_KEY');
             } catch (e) {
                 console.error("Error crítico:", e);
             } finally {
