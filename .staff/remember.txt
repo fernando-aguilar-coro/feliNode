@@ -17,6 +17,8 @@ npx expo run:android
 #get key android
 cd android
 gradlew signingReport --debug 
+npx eas build --platform android --profile production
+npx eas update --branch production --message "Descripción del cambio"
 
 #run typescript
 npx tsc

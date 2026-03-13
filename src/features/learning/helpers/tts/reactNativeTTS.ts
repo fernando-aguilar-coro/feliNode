@@ -100,6 +100,7 @@ class ReactNativeTtsService {
             .replace(/[^\w\s.,?!áéíóúÁÉÍÓÚñÑ]/g, '  ')
             .trim();
         try {
+            await Tts.getInitStatus();
             Tts.stop();
             const state = useSettingsStore.getState();
             const selectedVoice = state.spanishVoiceId;
@@ -123,6 +124,7 @@ class ReactNativeTtsService {
      */
     public async speakLongText(text: string, language: string = 'es-ES') {
         try {
+            await Tts.getInitStatus();
             // Reset State
             Tts.stop();
             this.speechQueue = [];
@@ -200,6 +202,7 @@ class ReactNativeTtsService {
      */
     public async getAvailableVoices() {
         try {
+            await Tts.getInitStatus();
             const allVoices = await Tts.voices();
             // Filter only Spanish voices
             const esVoices = allVoices.filter(v => v.language.toLowerCase().startsWith('es') || v.language === 'spa');

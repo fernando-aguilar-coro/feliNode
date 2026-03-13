@@ -41,7 +41,7 @@ export const HomeScreen = () => {
 
     const toggleViewMode = () => {
         audioService.playClickSound();
-        setHomeViewMode(homeViewMode === 'tree' ? 'list' : 'tree');
+        setHomeViewMode(homeViewMode === 'list' ? 'tree' : 'list');
     };
 
     const styles = useMemo(() => StyleSheet.create({
@@ -107,21 +107,21 @@ export const HomeScreen = () => {
             <TouchableOpacity onPress={toggleViewMode} style={styles.banner} activeOpacity={0.8}>
                 <View style={styles.bannerContent}>
                     <MaterialIcons
-                        name={homeViewMode === 'tree' ? 'view-list' : 'account-tree'}
+                        name={homeViewMode === 'list' ? 'account-tree' : 'view-list'}
                         size={24}
                         color={theme.colors.white}
                     />
                     <Text style={styles.bannerText}>
-                        {homeViewMode === 'tree' ? 'Cambiar a Vista de Lista' : 'Cambiar a Mapa de Nodos'}
+                        {homeViewMode === 'list' ? 'Cambiar a Mapa de Nodos' : 'Cambiar a Vista de Lista'}
                     </Text>
                 </View>
             </TouchableOpacity>
 
             <View style={styles.content}>
-                {homeViewMode === 'tree' ? (
-                    <TreeNodeScreen />
-                ) : (
+                {homeViewMode === 'list' ? (
                     <ModuleProgressScreen />
+                ) : (
+                    <TreeNodeScreen />
                 )}
             </View>
 

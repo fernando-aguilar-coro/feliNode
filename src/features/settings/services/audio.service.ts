@@ -8,6 +8,7 @@ class AudioService {
     private static instance: AudioService;
     private wasPlayingBeforeBackground: boolean = false;
     private shouldPlayBgm: boolean = false;
+    private isBgmLoading: boolean = false;
 
     private constructor() {
         AppState.addEventListener('change', this.handleAppStateChange);
@@ -16,11 +17,10 @@ class AudioService {
     private handleAppStateChange = async (nextAppState: AppStateStatus) => {
         if (nextAppState.match(/inactive|background/)) {
             if (this.bgmSound) {
-                const status = await this.bgmSound.getStatusAsync();
-                this.wasPlayingBeforeBackground = 'isPlaying' in status && status.isPlaying;
-                if (this.wasPlayingBeforeBackground) {
-                    this.pauseBGM();
-                }
+                this.wasPlayingBeforeBackground = true;
+                this.pauseBGM();
+            } else {
+                this.wasPlayingBeforeBackground = false;
             }
         } else if (nextAppState === 'active') {
             if (this.wasPlayingBeforeBackground) {
@@ -88,37 +88,26 @@ class AudioService {
 
     public playBGM = async () => {
         const { bgmEnabled } = useSettingsStore.getState();
-        if (!bgmEnabled) {
+        if (!bgmEnabled || AppState.currentState !== 'active') {
             this.shouldPlayBgm = false;
             this.stopBGM();
             return;
         }
 
-        if (AppState.currentState !== 'active') {
-            this.shouldPlayBgm = false;
+        this.shouldPlayBgm = true;
+
+        if (this.bgmSound || this.isBgmLoading) {
             return;
         }
 
-        this.shouldPlayBgm = true;
+        this.isBgmLoading = true;
 
         try {
-            if (this.bgmSound) {
-                const status = await this.bgmSound.getStatusAsync();
-                if ('isPlaying' in status && !status.isPlaying) {
-                    if (this.shouldPlayBgm && AppState.currentState === 'active') {
-                        await this.bgmSound.playAsync();
-                    }
-                }
-                return;
-            }
-
             const netInfo = await NetInfo.fetch();
-            let audioSource: any;
+            let audioSource: any = require('../../../../assets/audio/bg.mp3');
 
             if (netInfo.isConnected && netInfo.isInternetReachable !== false) {
                 audioSource = { uri: 'https://stream.laut.fm/lofi' };
-            } else {
-                audioSource = require('../../../../assets/audio/bg.mp3');
             }
 
             const { sound } = await Audio.Sound.createAsync(
@@ -136,7 +125,9 @@ class AudioService {
 
         } catch (error: any) {
             console.warn('[AudioService] error', error);
-            this.shouldPlayBgm = false;
+            this.bgmSound = null;
+        } finally {
+            this.isBgmLoading = false;
         }
     };
 
@@ -146,32 +137,17 @@ class AudioService {
             const soundToStop = this.bgmSound;
             this.bgmSound = null;
             try {
-                // `stopAsync()` causes an error with live internet streams because it tries to seek to position 0.
-                // Using `pauseAsync()` followed by `unloadAsync()` is safer.
-                await soundToStop.pauseAsync();
-            } catch (error) {
-                console.warn('Failed to pause BGM during stop', error);
-            }
-            try {
                 await soundToStop.unloadAsync();
             } catch (error) {
-                console.error('Failed to unload BGM', error);
+                console.warn('Failed to unload BGM', error);
             }
         }
     };
 
     public pauseBGM = async () => {
-        this.shouldPlayBgm = false;
-        try {
-            if (this.bgmSound) {
-                const status = await this.bgmSound.getStatusAsync();
-                if ('isPlaying' in status && status.isPlaying) {
-                    await this.bgmSound.pauseAsync();
-                }
-            }
-        } catch (error) {
-            console.error('Failed to pause BGM', error);
-        }
+        // Implementamos la estrategia de "cortar por completo la conexión" 
+        // descargando el stream, lo cual soporta fluidamente audio online y offline.
+        await this.stopBGM();
     }
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Platform } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useCurrencies } from '../hooks/useCurrencies';
 import { useStreak } from '../hooks/useStreak';
@@ -7,6 +7,13 @@ import { CurrencyService } from '../services/Currency.service';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { AdView, AdFormat, AdInfo, AdLoadFailedInfo } from 'react-native-applovin-max';
+
+// ⚠️  Reemplaza estos IDs con los de tu cuenta AppLovin MAX Dashboard
+const BANNER_AD_UNIT_ID = Platform.select({
+    android: 'REEMPLAZA_CON_TU_ANDROID_BANNER_AD_UNIT_ID',
+    ios: 'REEMPLAZA_CON_TU_IOS_BANNER_AD_UNIT_ID',
+}) as string;
 
 export const ShopScreen = () => {
     const theme = useAppTheme();
@@ -100,7 +107,29 @@ export const ShopScreen = () => {
                         <Text style={styles.buyText}>70</Text>
                     </TouchableOpacity>
                 </View>
+
+                {/* Espaciado inferior para que el banner no tape contenido */}
+                <View style={styles.bannerSpacer} />
             </ScrollView>
+
+            {/* AppLovin MAX Banner Ad */}
+            <AdView
+                adUnitId={BANNER_AD_UNIT_ID}
+                adFormat={AdFormat.BANNER}
+                style={styles.banner}
+                onAdLoaded={(adInfo: AdInfo) => {
+                    console.log('[AppLovin] Banner loaded from:', adInfo.networkName);
+                }}
+                onAdLoadFailed={(errorInfo: AdLoadFailedInfo) => {
+                    console.warn('[AppLovin] Banner failed to load:', errorInfo.code, errorInfo.message);
+                }}
+                onAdClicked={(adInfo: AdInfo) => {
+                    console.log('[AppLovin] Banner clicked, network:', adInfo.networkName);
+                }}
+                onAdRevenuePaid={(adInfo: AdInfo) => {
+                    console.log('[AppLovin] Banner revenue paid:', adInfo.revenue);
+                }}
+            />
         </SafeAreaView>
     );
 };
@@ -188,4 +217,18 @@ const styles = StyleSheet.create({
         fontFamily: 'Nunito-Bold',
         fontSize: 16,
     },
+    // Banner AppLovin MAX - anclado al fondo de la pantalla
+    banner: {
+        backgroundColor: '#000000', // requerido por AppLovin MAX
+        position: 'absolute',
+        width: '100%',
+        height: 'auto',
+        bottom: Platform.select({ ios: 36, android: 0 }),
+    },
+    // Espacio al final del ScrollView para que el contenido
+    // no quede tapado por el banner (50dp es la altura estándar de un banner)
+    bannerSpacer: {
+        height: 60,
+    },
 });
+

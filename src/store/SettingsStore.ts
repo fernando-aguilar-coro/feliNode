@@ -48,7 +48,7 @@ export const useSettingsStore = create<SettingsState>()(
             setWantsKokoro: (wants: boolean) => set({ wantsKokoro: wants }),
             setShowStreak: (show: boolean) => set({ showStreak: show }),
             setHasDecidedPlacementTest: (decided: boolean) => set({ hasDecidedPlacementTest: decided }),
-            homeViewMode: 'tree',
+            homeViewMode: 'list',
             setHomeViewMode: (mode: 'tree' | 'list') => set({ homeViewMode: mode }),
         }),
         {

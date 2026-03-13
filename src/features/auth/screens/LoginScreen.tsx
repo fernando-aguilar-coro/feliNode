@@ -59,26 +59,21 @@ export default function LoginScreen() {
                         {step === 'initial' && (
                             <View style={styles.initialContainer}>
                                 <AppButton
+                                    title='Iniciar sesión con Email'
+                                    onPress={() => { setStep('email'); setError(''); }}
+                                    style={styles.guestButton}
+                                    disabled={loading}
+                                />
+                                <Spacer height={theme.spacing.md} />
+                                <SocialLogin loading={loading} onError={setError} />
+                                <Spacer height={theme.spacing.xl} />
+                                <AppButton
                                     title="Modo Invitado"
                                     onPress={loginAsGuest}
                                     disabled={loading}
                                     variant="outline"
                                     style={styles.guestButton}
-                                >
-                                    Modo Invitado
-                                </AppButton>
-                                <Spacer height={theme.spacing.md} />
-                                <SocialLogin loading={loading} onError={setError} />
-                                <Spacer height={theme.spacing.xl} />
-                                <TouchableOpacity
-                                    onPress={() => { setStep('email'); setError(''); }}
-                                    style={styles.textButton}
-                                    disabled={loading}
-                                >
-                                    <AppText color={theme.colors.primary} weight="bold" variant="sm">
-                                        Iniciar sesión con Email
-                                    </AppText>
-                                </TouchableOpacity>
+                                />
                             </View>
                         )}
 
@@ -123,6 +118,15 @@ const styles = StyleSheet.create({
     scrollContent: {
         flexGrow: 1,
         justifyContent: 'center',
+    },
+    googleButton: {
+        width: '100%',
+        height: 50,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        borderRadius: 25,
+        borderWidth: 1,
     },
     card: {
         borderRadius: 24,

@@ -14,6 +14,8 @@ export interface ModuleProgress {
     description: string;
     order_index: number;
     lessons: LessonProgress[];
+    completedLessonsCount: number;
+    totalLessonsCount: number;
 }
 
 export const getModuleProgressView = async (): Promise<ModuleProgress[]> => {
@@ -24,11 +26,14 @@ export const getModuleProgressView = async (): Promise<ModuleProgress[]> => {
 
     for (const mod of modules) {
         const lessons: any[] = await lessonRepository.getLessonsByModuleId(mod.id);
+        
+        let completedCount = 0;
 
         const mappedLessons: LessonProgress[] = lessons.map(l => {
             let status: 'available' | 'completed' = 'available';
             if (completedLessons.includes(l.id)) {
                 status = 'completed';
+                completedCount++;
             }
             return {
                 id: l.id,
@@ -44,7 +49,9 @@ export const getModuleProgressView = async (): Promise<ModuleProgress[]> => {
             title: mod.title,
             description: mod.description,
             order_index: mod.order_index,
-            lessons: mappedLessons
+            lessons: mappedLessons,
+            completedLessonsCount: completedCount,
+            totalLessonsCount: lessons.length
         });
     }
 

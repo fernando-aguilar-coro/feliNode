@@ -1,55 +1,13 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator, Text } from 'react-native';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { audioService } from '../../settings/services/audio.service';
-import { getModuleProgressView } from '../services/ModuleProgress.service';
 import { ModuleAccordion } from '../components/list/ModuleAccordion';
-import { useNodesStore } from '../../../store/NodesStore';
+import { OverallProgress } from '../components/progress/OverallProgress';
+import { useModuleProgress } from '../hooks/useModuleProgress';
 
 export const ModuleProgressScreen = () => {
     const theme = useAppTheme();
-    const isFocused = useIsFocused();
-
-    const modules = useNodesStore(state => state.modules);
-    const isLoading = useNodesStore(state => state.isModulesLoading);
-    const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set());
-
-    useEffect(() => {
-        if (isFocused) {
-            loadData();
-        }
-    }, [isFocused]);
-
-    const loadData = async () => {
-        if (useNodesStore.getState().modules.length === 0) {
-            useNodesStore.getState().setModulesLoading(true);
-        }
-        try {
-            const data = await getModuleProgressView();
-            useNodesStore.getState().setModules(data);
-            if (data.length > 0 && expandedModules.size === 0) {
-                // Expand the first module by default if none are expanded
-                setExpandedModules(new Set([data[0].id]));
-            }
-        } catch (error) {
-            console.error('Failed to load module progress', error);
-            useNodesStore.getState().setModulesLoading(false);
-        }
-    };
-
-    const toggleModule = useCallback((moduleId: number) => {
-        audioService.playClickSound();
-        setExpandedModules(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(moduleId)) {
-                newSet.delete(moduleId);
-            } else {
-                newSet.add(moduleId);
-            }
-            return newSet;
-        });
-    }, []);
+    const { modules, isLoading, expandedModules, toggleModule } = useModuleProgress();
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -63,9 +21,23 @@ export const ModuleProgressScreen = () => {
             backgroundColor: theme.colors.background,
         },
         listContent: {
-            padding: 16,
             paddingBottom: 40,
         },
+        headerContainer: {
+            paddingHorizontal: 20,
+            paddingTop: 20,
+            paddingBottom: 10,
+        },
+        headerTitle: {
+            fontSize: 28,
+            fontWeight: 'bold',
+            color: theme.colors.text,
+        },
+        headerSubtitle: {
+            fontSize: 16,
+            color: theme.colors.textSecondary,
+            marginTop: 4,
+        }
     }), [theme]);
 
     if (isLoading) {
@@ -76,10 +48,22 @@ export const ModuleProgressScreen = () => {
         );
     }
 
+    const renderHeader = () => (
+        <View>
+            <View style={styles.headerContainer}>
+                <Text style={styles.headerTitle}>Ruta de Aprendizaje</Text>
+                <Text style={styles.headerSubtitle}>Continúa donde te quedaste</Text>
+            </View>
+            {modules.length > 0 && <OverallProgress modules={modules} />}
+            <View style={{ height: 16 }} />
+        </View>
+    );
+
     return (
         <View style={styles.container}>
             <FlatList
                 data={modules}
+                extraData={expandedModules}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                     <ModuleAccordion
@@ -88,6 +72,7 @@ export const ModuleProgressScreen = () => {
                         onToggle={toggleModule}
                     />
                 )}
+                ListHeaderComponent={renderHeader}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
             />
