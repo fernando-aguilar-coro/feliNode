@@ -5,7 +5,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { PronunciationAssessmentScreen } from '../../learning/screens/PronunciationAssessmentScreen';
 import { InfinityLandingScreen } from '../../learning/screens/InfinityLandingScreen';
 import { SettingsScreen } from '../../settings/screens/SettingsScreen';
-import { ShopScreen } from '../../gamification/screens/ShopScreen';
+import { GamificationNavigator } from '../../gamification/navigation/GamificationNavigator';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { audioService } from '../../settings/services/audio.service';
@@ -14,7 +14,7 @@ export type HomeTabParamList = {
     HomeMain: undefined;
     InfinityLanding: undefined;
     Pronunciation: undefined;
-    Shop: undefined;
+    Speak: undefined;
     Settings: undefined;
 };
 
@@ -84,7 +84,7 @@ export const HomeTabNavigator = () => {
                 name="Pronunciation"
                 component={PronunciationAssessmentScreen}
                 options={{
-                    tabBarLabel: 'Práctica',
+                    tabBarLabel: 'voz',
                     tabBarIcon: ({ color }) => (
                         <Ionicons name="mic-outline" size={24} color={color} />
                     ),
@@ -95,12 +95,12 @@ export const HomeTabNavigator = () => {
                 }}
             />
             <Tab.Screen
-                name="Shop"
-                component={ShopScreen}
+                name="Speak"
+                component={GamificationNavigator}
                 options={{
-                    tabBarLabel: 'Tienda',
+                    tabBarLabel: 'habla',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="cart-outline" size={24} color={color} />
+                        <Ionicons name="chatbubble-outline" size={24} color={color} />
                     ),
                 }}
             />

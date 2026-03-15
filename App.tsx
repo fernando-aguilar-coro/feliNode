@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import mobileAds from 'react-native-google-mobile-ads';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LoadingScreen } from './src/components/LoadingScreen';
@@ -23,6 +24,7 @@ export const App = () => {
         async function init() {
             try {
                 authService.configureGoogleSignin(); // Configure Google Sign-In
+                await mobileAds().initialize(); // Initialize Google Mobile Ads
             } catch (e) {
                 console.error("Error crítico:", e);
             } finally {

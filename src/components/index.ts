@@ -5,3 +5,4 @@ export * from './Card';
 export * from './Screen';
 export * from './Spacer';
 export * from './LoadingScreen';
+export * from './AppAdd';

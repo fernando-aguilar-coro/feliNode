@@ -6,7 +6,6 @@ import { LessonModeSelectionScreen } from '../../learning/screens/LessonModeSele
 import { InfinityExerciseScreen } from '../../learning/screens/InfinityExerciseScreen';
 import { InfinitySelectPairsScreen } from "../../learning/screens/InfinitySelectPairsScreen";
 import { StreakDetailsScreen } from '../../gamification/screens/StreakDetailsScreen';
-import { ShopScreen } from '../../gamification/screens/ShopScreen';
 
 export type HomeStackParamList = {
     Main: undefined;
@@ -31,7 +30,6 @@ export const HomeNavigation = () => {
             <Stack.Screen name="InfinityExercise" component={InfinityExerciseScreen} />
             <Stack.Screen name="InfinitySelectPairs" component={InfinitySelectPairsScreen} />
             <Stack.Screen name="StreakDetails" component={StreakDetailsScreen} />
-            <Stack.Screen name="ShopScreen" component={ShopScreen} />
         </Stack.Navigator>
     );
 };

@@ -1,4 +1,4 @@
-import { GeminiService } from './Gemini.service';
+import { GeminiService } from '../../../api/Gemini.service';
 
 export interface Pair {
     left: string;

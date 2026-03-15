@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, ActivityIndicator, Alert, View } from 're
 import { AppText } from '../../../components';
 import { theme } from '../../../theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { GeminiService } from '../services/Gemini.service';
+import { GeminiService } from '../../../api/Gemini.service';
 import { ExplanationCard } from './ExplanationCard';
 
 interface AiResult {

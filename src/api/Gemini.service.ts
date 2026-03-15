@@ -1,6 +1,6 @@
-import { supabase } from '../../../api/supabaseClient';
-import { API_BASE_URL } from '../../../config';
-import { useUserStore } from '../../../store/UserStore';
+import { supabase } from './supabaseClient';
+import { API_BASE_URL } from '../config';
+import { useUserStore } from '../store/UserStore';
 
 export const GeminiService = {
     /**

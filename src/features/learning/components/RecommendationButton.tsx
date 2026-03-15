@@ -3,7 +3,7 @@ import { TouchableOpacity, ActivityIndicator, StyleSheet, Alert, View } from 're
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppText } from '../../../components';
 import { theme } from '../../../theme';
-import { GeminiService } from '../services/Gemini.service';
+import { GeminiService } from '../../../api/Gemini.service';
 
 interface RecommendationButtonProps {
     onRecommendationReceived: (phrase: string) => void;

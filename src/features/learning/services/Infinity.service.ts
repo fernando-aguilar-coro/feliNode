@@ -1,5 +1,5 @@
 import { Exercise } from '../types/exercise';
-import { GeminiService } from './Gemini.service';
+import { GeminiService } from '../../../api/Gemini.service';
 import { mapDbExerciseToAppExercise, DbExercise } from '../helpers/exercises/exerciseMapper';
 import { generateListeningExercise } from '../helpers/exercises/exerciseGenerator';
 

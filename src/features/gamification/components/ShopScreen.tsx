@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useCurrencies } from '../hooks/useCurrencies';
 import { useStreak } from '../hooks/useStreak';
@@ -9,6 +9,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../../theme/ThemeContext';
 
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ShopScreen
+// ─────────────────────────────────────────────────────────────────────────────
 export const ShopScreen = () => {
     const theme = useAppTheme();
     const { currencies, loading: currencyLoading, loadCurrencies } = useCurrencies();
@@ -67,6 +70,7 @@ export const ShopScreen = () => {
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+            {/* Balance Header */}
             <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
                 <View style={styles.balanceContainer}>
                     <FontAwesome5 name="star" size={24} color="#FFD700" solid />
@@ -81,6 +85,8 @@ export const ShopScreen = () => {
             <ScrollView contentContainerStyle={styles.container}>
                 <Text style={[styles.title, { color: theme.colors.text }]}>Shop</Text>
 
+
+                {/* ── Items ───────────────────────────────────────────────── */}
                 <View style={[styles.itemCard, { backgroundColor: theme.colors.surface }]}>
                     <View style={styles.itemIconContainer}>
                         <FontAwesome5 name="snowflake" size={32} color="#00BFFF" />
@@ -132,12 +138,16 @@ const styles = StyleSheet.create({
     },
     container: {
         padding: 16,
+        paddingBottom: 32,
     },
     title: {
         fontSize: 24,
         fontFamily: 'Nunito-Bold',
         marginBottom: 16,
     },
+
+
+    // ── Item Card ────────────────────────────────────────────────────────────
     itemCard: {
         flexDirection: 'row',
         borderRadius: 16,
@@ -188,6 +198,5 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontFamily: 'Nunito-Bold',
         fontSize: 16,
-    }
+    },
 });
-
