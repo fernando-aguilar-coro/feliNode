@@ -9,14 +9,14 @@ dist/
 web-build/
 expo-env.d.ts
 
-# Native
-.kotlin/
+# Native Specific (Global)
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.pem
 
 # Metro
 .metro-health-check*
@@ -28,7 +28,6 @@ yarn-error.*
 
 # macOS
 .DS_Store
-*.pem
 
 # local env files
 .env*.local
@@ -36,6 +35,25 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# generated native folders
+# ----------------------------------------------------------------      
+# ANDROID MANUAL WORKFLOW (Bare/Manual)
+# ----------------------------------------------------------------
+# Ignoramos solo los temporales, builds y rutas locales.
+# Git rastreará automáticamente tus archivos .kt, .java y .xml
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/GeneratedPluginRegistrant.java
+android/.idea/
+android/*.iml
+android/.kotlin/
+
+# Secrets (Seguridad: No subir llaves de firmado personal)
+android/*.keystore
+android/key.properties
+
+# ----------------------------------------------------------------
+# GENERATED NATIVE FOLDERS (Managed)
+# ----------------------------------------------------------------
 /ios
-/android
