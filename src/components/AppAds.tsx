@@ -51,7 +51,7 @@ interface AppAddProps extends BannerExtras {
  * @example
  *   <AppAdd type="banner" size={BannerAdSize.LARGE_BANNER} />
  */
-export const AppAdd: React.FC<AppAddProps> = ({
+export const AppAds: React.FC<AppAddProps> = ({
   type,
   size = BannerAdSize.LARGE_BANNER,
   containerStyle,

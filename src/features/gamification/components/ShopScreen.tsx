@@ -7,7 +7,7 @@ import { CurrencyService } from '../services/Currency.service';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../../theme/ThemeContext';
-
+import { AppAds } from '../../../components';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ShopScreen
@@ -107,6 +107,7 @@ export const ShopScreen = () => {
                         <Text style={styles.buyText}>70</Text>
                     </TouchableOpacity>
                 </View>
+                <AppAds type="banner" containerStyle={{ marginBottom: 20 }} />
             </ScrollView>
         </SafeAreaView>
     );
