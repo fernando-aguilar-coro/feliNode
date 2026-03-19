@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
-import { AppText, Spacer, AppButton } from '../../../../components';
+import { AppText, Spacer, AppButton, TranslateButton } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { Microphone } from '../Microphone';
 import { AudioPlayer } from '../AudioPlayer';
@@ -8,8 +8,6 @@ import { PronunciationService, PronunciationResult } from '../../services/Pronun
 import { PronunciationExercise as PronunciationExerciseType } from '../../types/exercise';
 import { PronunciationFeedbackAzure } from './PronunciationFeedbackAzure';
 import { PronunciationFeedbackGemini } from './PronunciationFeedbackGemini';
-
-
 
 interface Props {
     exercise: PronunciationExerciseType;
@@ -73,7 +71,6 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
             padding: theme.spacing.md,
         },
         question: {
-            marginBottom: theme.spacing.md,
             color: theme.colors.textSecondary,
             textAlign: 'center',
         },
@@ -99,7 +96,12 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <AppText variant="lg" style={styles.question}>Lee esta frase:</AppText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: theme.spacing.md }}>
+                <AppText variant="lg" style={[styles.question, { marginRight: theme.spacing.xs }]}>
+                    Lee esta frase:
+                </AppText>
+                <TranslateButton textToTranslate={exercise.phrase} size={22} />
+            </View>
 
             {result && (
                 <View style={styles.scoreContainer}>

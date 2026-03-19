@@ -7,18 +7,17 @@ import { AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { TtsService } from '../services/Tts.service';
 import { getMarkdownStyles } from '../styles/md.style';
+import { TranslationFab } from './TranslationFab';
 
 const renderRules = {
     table: (node: any, children: any, styles: any) => (
-        // contentContainerStyle es clave para que el padding no corte el contenido
         <ScrollView
             key={node.key}
             horizontal
             showsHorizontalScrollIndicator={true}
             style={{ marginVertical: 10 }}
-            contentContainerStyle={{ flexGrow: 1 }} // Permite que crezca si el contenido es poco
+            contentContainerStyle={{ flexGrow: 1 }} 
         >
-            {/* Pasamos los estilos de la tabla aquí */}
             <View style={styles.table}>{children}</View>
         </ScrollView>
     ),
@@ -33,17 +32,22 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
     const theme = useAppTheme();
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
+    const [displayContent, setDisplayContent] = useState(content);
+    const [isTranslated, setIsTranslated] = useState(false);
 
     const mdStyles = useMemo(() => getMarkdownStyles(theme), [theme]);
 
     useEffect(() => {
-        // Listeners for TTS state
+        setDisplayContent(content);
+        setIsTranslated(false);
+    }, [content]);
+
+    useEffect(() => {
         const startListener = Tts.addListener('tts-start', () => {
             setIsPlaying(true);
             setIsPaused(false);
         });
 
-        // Listen for custom event from TtsService for when queue is actually done/stopped
         const queueFinishListener = DeviceEventEmitter.addListener('tts-queue-finish', () => {
             setIsPlaying(false);
             setIsPaused(false);
@@ -56,11 +60,11 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
         };
     }, []);
 
-    // ... (handlers skipped for brevity if identical, but I must rewrite entire block or use chunks. Let's rewrite handlers to be safe or just the full component)
     const handlePlay = () => {
         setIsPlaying(true);
         setIsPaused(false);
-        TtsService.speakLongText(content, 'es-ES');
+        // Si está traducido al inglés, narra en en-US, de lo contrario en es-ES
+        TtsService.speakLongText(displayContent, isTranslated ? 'en-US' : 'es-ES');
     };
 
     const handleStop = () => {
@@ -112,56 +116,65 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
     }), [theme]);
 
     return (
-        <ScrollView
-            style={styles.container}
-            contentContainerStyle={styles.contentContainer}
-            showsVerticalScrollIndicator={false}
-        >
-            <View style={styles.header}>
-                <AppText variant="xxl" weight="bold" style={styles.title}>
-                    Teoría
-                </AppText>
-                <View style={styles.controls}>
-                    <TouchableOpacity onPress={handlePlay} style={styles.controlButton}>
-                        <MaterialCommunityIcons name="volume-high" size={38} color={theme.colors.primary} />
-                    </TouchableOpacity>
+        <View style={styles.container}>
+            <ScrollView
+                contentContainerStyle={styles.contentContainer}
+                showsVerticalScrollIndicator={false}
+            >
+                <View style={styles.header}>
+                    <AppText variant="xxl" weight="bold" style={styles.title}>
+                        {isTranslated ? "Theory" : "Teoría"}
+                    </AppText>
+                    <View style={styles.controls}>
+                        <TouchableOpacity onPress={handlePlay} style={styles.controlButton}>
+                            <MaterialCommunityIcons name="volume-high" size={38} color={theme.colors.primary} />
+                        </TouchableOpacity>
 
-                    {isPlaying && (
-                        <>
-                            <TouchableOpacity onPress={handleTogglePause} style={styles.controlButton}>
-                                <MaterialCommunityIcons
-                                    name={isPaused ? "play-circle-outline" : "pause-circle-outline"}
-                                    size={38}
-                                    color={isPaused ? theme.colors.success : theme.colors.warning}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={handleStop} style={styles.controlButton}>
-                                <MaterialCommunityIcons name="stop-circle" size={38} color={theme.colors.error} />
-                            </TouchableOpacity>
-                        </>
-                    )}
-                    <AppButton
-                        title="Saltar"
-                        onPress={onContinue}
-                        variant="ghost"
-                        style={styles.skipButton}
-                        textColor={theme.colors.primary}
-                    />
+                        {isPlaying && (
+                            <>
+                                <TouchableOpacity onPress={handleTogglePause} style={styles.controlButton}>
+                                    <MaterialCommunityIcons
+                                        name={isPaused ? "play-circle-outline" : "pause-circle-outline"}
+                                        size={38}
+                                        color={isPaused ? theme.colors.success : theme.colors.warning}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleStop} style={styles.controlButton}>
+                                    <MaterialCommunityIcons name="stop-circle" size={38} color={theme.colors.error} />
+                                </TouchableOpacity>
+                            </>
+                        )}
+                        <AppButton
+                            title={isTranslated ? "Skip" : "Saltar"}
+                            onPress={onContinue}
+                            variant="ghost"
+                            style={styles.skipButton}
+                            textColor={theme.colors.primary}
+                        />
+                    </View>
                 </View>
-            </View>
-            <Spacer height={theme.spacing.lg} />
+                <Spacer height={theme.spacing.lg} />
 
-            <Markdown style={mdStyles} rules={renderRules}>
-                {content}
-            </Markdown>
+                <Markdown style={mdStyles} rules={renderRules}>
+                    {displayContent}
+                </Markdown>
 
-            <Spacer height={theme.spacing.xl} />
-            <AppButton
-                title="Ir al examen"
-                onPress={onContinue}
-                variant="primary"
+                <Spacer height={theme.spacing.xl} />
+                <AppButton
+                    title={isTranslated ? "Go to exam" : "Ir al examen"}
+                    onPress={onContinue}
+                    variant="primary"
+                />
+                <Spacer height={theme.spacing.xxl} />
+            </ScrollView>
+
+            <TranslationFab 
+                originalText={content}
+                onTranslatedText={(text, translated) => {
+                    setDisplayContent(text);
+                    setIsTranslated(translated);
+                }}
             />
-            <Spacer height={theme.spacing.xxl} />
-        </ScrollView>
+        </View>
     );
 };
