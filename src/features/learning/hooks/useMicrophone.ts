@@ -1,156 +1,200 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Audio } from 'expo-av';
+import {
+    ExpoSpeechRecognitionModule,
+    useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 import AudioRecord from 'react-native-audio-record';
 
-// Constant for max recording time (30 seconds)
 const MAX_RECORDING_TIME_SECONDS = 30;
 
+/**
+ * Single-instance speech recognition hook.
+ *
+ * Uses expo-speech-recognition exclusively — no AudioRecord running in parallel.
+ * The audio file is obtained via recordingOptions.persist = true and delivered
+ * through the 'audioend' event, which calls onRecordingComplete.
+ */
 export const useMicrophone = (
     onRecordingComplete?: (uri: string | null) => void,
-    onRecordingStart?: () => void
+    onRecordingStart?: () => void,
 ) => {
     const [permissionStatus, setPermissionStatus] = useState<string | null>(null);
+    const [isRecordingSupported, setIsRecordingSupported] = useState<boolean>(true);
     const [isRecording, setIsRecording] = useState(false);
+    const [transcript, setTranscript] = useState('');
 
-    // Timer ref to clear timeout on stop
     const autoStopTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Store callbacks in refs to avoid stale closures
+    // Keep callbacks in refs to avoid stale closures
     const onRecordingCompleteRef = useRef(onRecordingComplete);
     const onRecordingStartRef = useRef(onRecordingStart);
-
     useEffect(() => {
         onRecordingCompleteRef.current = onRecordingComplete;
         onRecordingStartRef.current = onRecordingStart;
     }, [onRecordingComplete, onRecordingStart]);
 
-    // Initial permissions check and AudioRecord initialization
+    // Keep isRecording fresh in a ref for use inside event handlers
+    const isRecordingRef = useRef(false);
+    useEffect(() => {
+        isRecordingRef.current = isRecording;
+    }, [isRecording]);
+
+    // ── Request permissions on mount ──────────────────────────────────────
+
     useEffect(() => {
         (async () => {
             try {
                 const { status } = await Audio.requestPermissionsAsync();
-
                 setPermissionStatus(status);
+                
+                const supported = ExpoSpeechRecognitionModule.supportsRecording();
+                setIsRecordingSupported(supported);
 
-                if (status === 'granted') {
+                if (!supported && status === 'granted') {
                     AudioRecord.init({
                         sampleRate: 16000,
                         channels: 1,
                         bitsPerSample: 16,
-                        audioSource: 6, // 6 = VoiceRecognition
-                        wavFile: 'audio.wav'
+                        audioSource: 6, // VoiceRecognition
+                        wavFile: 'audio.wav',
                     });
                 }
             } catch (err) {
-                console.error("Failed to request permissions or init recorder:", err);
+                console.error('[useMicrophone] Permission error:', err);
             }
         })();
     }, []);
 
-    const stopRecording = useCallback(async () => {
+    // ── Speech Recognition events ─────────────────────────────────────────
 
+    useSpeechRecognitionEvent('start', () => {
+        setTranscript('');
+    });
 
-        // Clear auto-stop timer if it exists
+    useSpeechRecognitionEvent('result', (event) => {
+        if (event.results?.length) {
+            setTranscript(event.results[0]?.transcript ?? '');
+        }
+    });
+
+    useSpeechRecognitionEvent('error', (event) => {
+        console.warn('[useMicrophone] SR error:', event);
+    });
+
+    // 'audioend' fires when the audio capture finishes; uri is the persisted file.
+    useSpeechRecognitionEvent('audioend', (event) => {
+        setIsRecording(false);
+        clearAutoStop();
+        const uri: string | null = (event as any).uri ?? null;
+        onRecordingCompleteRef.current?.(uri);
+    });
+
+    // 'end' fires after 'audioend'; nothing extra needed here.
+    useSpeechRecognitionEvent('end', () => { /* handled via audioend */ });
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+
+    const clearAutoStop = useCallback(() => {
         if (autoStopTimerRef.current) {
             clearTimeout(autoStopTimerRef.current);
             autoStopTimerRef.current = null;
         }
-
-        try {
-            // Stop recording and get the file path
-            let uri = await AudioRecord.stop();
-
-
-            if (!uri.startsWith('file://')) {
-                uri = 'file://' + uri;
-            }
-
-            setIsRecording(false);
-
-            // Reset audio mode
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: false,
-                playsInSilentModeIOS: false,
-            });
-
-            if (onRecordingCompleteRef.current) {
-                onRecordingCompleteRef.current(uri);
-            }
-            return uri;
-        } catch (err) {
-            console.error("Failed to stop recording", err);
-            setIsRecording(false);
-            if (onRecordingCompleteRef.current) {
-                onRecordingCompleteRef.current(null);
-            }
-            return null;
-        }
     }, []);
 
+    // ── Stop ──────────────────────────────────────────────────────────────
+    const stopRecording = useCallback(async () => {
+        clearAutoStop();
+        if (isRecordingSupported) {
+            try {
+                ExpoSpeechRecognitionModule.stop(); // triggers 'audioend' → onRecordingComplete
+            } catch (_) { /* already stopped */ }
+        } else {
+            setIsRecording(false);
+            try {
+                let uri = await AudioRecord.stop();
+                if (!uri.startsWith('file://')) {
+                    uri = 'file://' + uri;
+                }
+                onRecordingCompleteRef.current?.(uri);
+            } catch (err) {
+                console.error('[useMicrophone] AudioRecord stop error:', err);
+                onRecordingCompleteRef.current?.(null);
+            }
+        }
+    }, [clearAutoStop, isRecordingSupported]);
+
+    // ── Start ─────────────────────────────────────────────────────────────
+
     const startRecording = useCallback(async () => {
+        if (isRecordingRef.current) {
+            console.warn('[useMicrophone] Already recording');
+            return;
+        }
 
-
+        // Ensure mic permission
         if (permissionStatus !== 'granted') {
             const { status } = await Audio.requestPermissionsAsync();
             setPermissionStatus(status);
             if (status !== 'granted') return;
-
-            // Re-init if permission was just granted
-            AudioRecord.init({
-                sampleRate: 16000,
-                channels: 1,
-                bitsPerSample: 16,
-                audioSource: 6,
-                wavFile: 'audio.wav'
-            });
         }
 
-        if (isRecording) {
-            console.warn("Already recording");
+        const srPerm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+        if (!srPerm.granted) {
+            console.warn('[useMicrophone] SR permission not granted');
             return;
         }
 
         try {
-            // Configure audio mode for recording
+            setTranscript('');
+            setIsRecording(true);
+            onRecordingStartRef.current?.();
+
+            // Configure audio mode for iOS recording
             await Audio.setAudioModeAsync({
                 allowsRecordingIOS: true,
                 playsInSilentModeIOS: true,
             });
 
-            AudioRecord.start();
-            setIsRecording(true);
+            if (isRecordingSupported) {
+                ExpoSpeechRecognitionModule.start({
+                    lang: 'en-US',
+                    interimResults: true,
+                    continuous: false,          // auto-stops on silence → triggers 'end'/'audioend'
+                    recordingOptions: {
+                        persist: true,          // saves the audio file; uri arrives in 'audioend'
+                        outputFileName: `pronunciation_${Date.now()}.wav`,
+                    },
+                });
+            } else {
+                AudioRecord.start();
+            }
 
-
-            if (onRecordingStartRef.current) onRecordingStartRef.current();
-
-            // Auto-stop timer
+            // Safety timeout
             autoStopTimerRef.current = setTimeout(() => {
-
                 stopRecording();
             }, MAX_RECORDING_TIME_SECONDS * 1000);
 
         } catch (err) {
-            console.error("Failed to start recording", err);
+            console.error('[useMicrophone] Failed to start:', err);
             setIsRecording(false);
         }
-    }, [permissionStatus, stopRecording, isRecording]);
+    }, [permissionStatus, stopRecording, isRecordingSupported]);
 
-    // Cleanup on unmount
+    // ── Cleanup ───────────────────────────────────────────────────────────
+
     useEffect(() => {
         return () => {
-            // Cleanup logic if needed. 
-            // AudioRecord doesn't have a generic cleanup other than stop,
-            // but we can ensure the timer is cleared.
-            if (autoStopTimerRef.current) {
-                clearTimeout(autoStopTimerRef.current);
+            clearAutoStop();
+            if (isRecordingRef.current) {
+                if (isRecordingSupported) {
+                    try { ExpoSpeechRecognitionModule.stop(); } catch (_) { }
+                } else {
+                    try { AudioRecord.stop(); } catch (_) { }
+                }
             }
         };
-    }, []);
+    }, [clearAutoStop, isRecordingSupported]);
 
-    return {
-        isRecording,
-        startRecording,
-        stopRecording,
-        permissionStatus
-    };
+    return { isRecording, transcript, startRecording, stopRecording, permissionStatus };
 };

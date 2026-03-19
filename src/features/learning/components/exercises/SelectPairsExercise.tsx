@@ -4,6 +4,8 @@ import { SelectPairsExercise as SelectPairsExerciseType } from '../../types/exer
 import { AppText } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { audioService } from '../../../settings/services/audio.service';
+import { TtsService } from '../../services/Tts.service';
+import { franc } from 'franc';
 
 interface Props {
     exercise: SelectPairsExerciseType;
@@ -54,6 +56,11 @@ export const SelectPairsExercise = ({ exercise, onAnswer, userAnswer }: Props) =
     const handlePress = (item: Item) => {
         if (matchedIds.has(item.pairId)) return; // already matched
         if (errorIds) return; // wait for error clear
+
+        // Speak item text with Native TTS
+        const language = franc(item.text);
+        const lang = (language === 'spa' || language === 'ita') ? 'es-ES' : 'en-US';
+        TtsService.speak(item.text, { forceNative: true, language: lang });
 
         if (selectedId === null) {
             setSelectedId(item.id);

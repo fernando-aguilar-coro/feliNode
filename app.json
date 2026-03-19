@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "felinode",
+    "name": "miau-lingo",
     "slug": "felinode",
     "version": "1.0.0",
     "orientation": "default",
@@ -28,8 +28,7 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "com.google.android.gms.permission.AD_ID"
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "edgeToEdgeEnabled": true,
       "package": "com.felinode.app",
@@ -37,11 +36,6 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "fe4e1cd6-70e5-4d20-8d2c-56aac93f74f9"
-      }
     },
     "plugins": [
       "@react-native-google-signin/google-signin",
@@ -52,21 +46,17 @@
           "androidAppId": "ca-app-pub-4304821010375937~9224269073",
           "iosAppId": "ca-app-pub-4304821010375937~9224269073"
         }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35,
-            "buildToolsVersion": "35.0.0"
-          }
-        }
       ]
     ],
-    "runtimeVersion": "1.0.1",
+    "runtimeVersion": "1.0.2",
     "updates": {
       "url": "https://u.expo.dev/fe4e1cd6-70e5-4d20-8d2c-56aac93f74f9"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a27cb8a9-e752-476a-9340-37198af71860"
+      }
+    },
+    "owner": "fer1367"
   }
 }

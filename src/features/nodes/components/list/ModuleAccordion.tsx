@@ -20,6 +20,7 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
     const progress = module.totalLessonsCount === 0 ? 0 : module.completedLessonsCount / module.totalLessonsCount;
     const progressPercentage = Math.round(progress * 100);
     const isModuleComplete = progress === 1;
+    const isSpecialModule = module.order_index === 999;
 
     const styles = useMemo(() => StyleSheet.create({
         moduleContainer: {
@@ -33,12 +34,12 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
             shadowOpacity: 0.1,
             shadowRadius: 8,
             elevation: 4,
-            borderWidth: 1,
-            borderColor: isModuleComplete ? theme.colors.success + '40' : theme.colors.border,
+            borderWidth: isSpecialModule ? 1.5 : 1,
+            borderColor: isSpecialModule ? '#FFA000' + '60' : (isModuleComplete ? theme.colors.success + '40' : theme.colors.border),
         },
         moduleHeader: {
             padding: 16,
-            backgroundColor: isModuleComplete ? theme.colors.success + '10' : theme.colors.surface,
+            backgroundColor: isSpecialModule ? '#FFA000' + '08' : (isModuleComplete ? theme.colors.success + '10' : theme.colors.surface),
         },
         moduleHeaderTop: {
             flexDirection: 'row',
@@ -56,7 +57,7 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
             width: 40,
             height: 40,
             borderRadius: 20,
-            backgroundColor: isModuleComplete ? theme.colors.success + '20' : theme.colors.primary + '20',
+            backgroundColor: isSpecialModule ? '#FFA000' + '15' : (isModuleComplete ? theme.colors.success + '20' : theme.colors.primary + '20'),
             justifyContent: 'center',
             alignItems: 'center',
         },
@@ -64,7 +65,21 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
             fontSize: 18,
             fontWeight: 'bold',
             color: theme.colors.text,
-            flex: 1,
+            flexShrink: 1,
+        },
+        specialBadge: {
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 12,
+            backgroundColor: '#FFA000',
+            marginLeft: 8,
+        },
+        specialBadgeText: {
+            color: '#FFFFFF',
+            fontSize: 11,
+            fontWeight: '900',
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
         },
         progressContainer: {
             marginTop: 4,
@@ -78,7 +93,7 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
         progressText: {
             fontSize: 14,
             fontWeight: '600',
-            color: isModuleComplete ? theme.colors.success : theme.colors.textSecondary,
+            color: isSpecialModule ? '#D48806' : (isModuleComplete ? theme.colors.success : theme.colors.textSecondary),
         },
         progressBar: {
             height: 8,
@@ -86,7 +101,7 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
         },
         lessonListContainer: {
             backgroundColor: theme.colors.surface,
-            paddingBottom: 8,
+            paddingBottom: 4,
         },
         lessonItem: {
             flexDirection: 'row',
@@ -103,6 +118,10 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
         lessonItemAvailable: {
             backgroundColor: theme.colors.background,
         },
+        lessonItemSpecial: {
+            borderWidth: 1,
+            borderColor: '#FFA00020',
+        },
         lessonIconContainer: {
             width: 48,
             height: 48,
@@ -118,6 +137,11 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
             backgroundColor: theme.colors.primary + '15',
             borderWidth: 2,
             borderColor: theme.colors.primary,
+        },
+        iconSpecial: {
+            backgroundColor: '#FFA000' + '15',
+            borderWidth: 2,
+            borderColor: '#FFA000',
         },
         lessonTextContainer: {
             flex: 1,
@@ -139,7 +163,7 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
             color: theme.colors.textSecondary,
             marginTop: 2,
         },
-    }), [theme, isModuleComplete]);
+    }), [theme, isModuleComplete, isSpecialModule]);
 
     const handleLessonPress = (lesson: LessonProgress) => {
         audioService.playClickSound();
@@ -154,19 +178,20 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
                 key={lesson.id}
                 style={[
                     styles.lessonItem,
-                    isCompleted ? styles.lessonItemCompleted : styles.lessonItemAvailable
+                    isCompleted ? styles.lessonItemCompleted : styles.lessonItemAvailable,
+                    (!isCompleted && isSpecialModule) && styles.lessonItemSpecial
                 ]}
                 onPress={() => handleLessonPress(lesson)}
                 activeOpacity={0.7}
             >
                 <View style={[
                     styles.lessonIconContainer,
-                    isCompleted ? styles.iconCompleted : styles.iconAvailable
+                    isCompleted ? styles.iconCompleted : (isSpecialModule ? styles.iconSpecial : styles.iconAvailable)
                 ]}>
                     <MaterialCommunityIcons
-                        name={isCompleted ? 'check-decagram' : 'book-open-page-variant'}
+                        name={isCompleted ? 'check-decagram' : (isSpecialModule ? 'clipboard-text-play-outline' : 'book-open-page-variant')}
                         size={24}
-                        color={isCompleted ? theme.colors.white : theme.colors.primary}
+                        color={isCompleted ? theme.colors.white : (isSpecialModule ? '#FFA000' : theme.colors.primary)}
                     />
                 </View>
                 <View style={styles.lessonTextContainer}>
@@ -194,14 +219,21 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
                     <View style={styles.titleContainer}>
                         <View style={styles.iconContainer}>
                             <MaterialCommunityIcons 
-                                name={isModuleComplete ? 'star-circle' : 'rhombus-split'} 
+                                name={isSpecialModule ? 'trophy' : (isModuleComplete ? 'star-circle' : 'rhombus-split')} 
                                 size={24} 
-                                color={isModuleComplete ? theme.colors.success : theme.colors.primary} 
+                                color={isSpecialModule ? '#FFA000' : (isModuleComplete ? theme.colors.success : theme.colors.primary)} 
                             />
                         </View>
-                        <Text style={styles.moduleTitle}>
-                            Módulo {module.order_index}: {module.title}
-                        </Text>
+                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <Text style={styles.moduleTitle}>
+                                {isSpecialModule ? module.title : `Módulo ${module.order_index}: ${module.title}`}
+                            </Text>
+                            {isSpecialModule && (
+                                <View style={styles.specialBadge}>
+                                    <Text style={styles.specialBadgeText}>Examen</Text>
+                                </View>
+                            )}
+                        </View>
                     </View>
                     <MaterialIcons
                         name={isExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
@@ -221,7 +253,7 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
                     </View>
                     <ProgressBar 
                         progress={progress} 
-                        color={isModuleComplete ? theme.colors.success : theme.colors.primary} 
+                        color={isSpecialModule ? '#FFA000' : (isModuleComplete ? theme.colors.success : theme.colors.primary)} 
                         style={[styles.progressBar, { backgroundColor: theme.colors.border }]} 
                     />
                 </View>

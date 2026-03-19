@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView } from 'react-native';
-import { List, Switch, Portal, Dialog, RadioButton, Button } from 'react-native-paper';
+import { ScrollView, View } from 'react-native';
+import { List, Switch, Portal, Dialog, RadioButton, Button, IconButton } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useSettingsStore } from '../../../store/SettingsStore';
 import { ReactNativeTts } from '../../learning/helpers/tts/reactNativeTTS';
@@ -10,6 +10,7 @@ import {
     KOKORO_VOICE_AM_ADAM, KOKORO_VOICE_AM_MICHAEL, KOKORO_VOICE_AM_SANTA,
     KOKORO_VOICE_BF_EMMA, KOKORO_VOICE_BM_DANIEL
 } from 'react-native-executorch';
+import { TtsManager } from '../../learning/helpers/tts/ttsKokoro';
 
 const kokoroVoices = [
     { label: 'Heart (US, Female)', value: KOKORO_VOICE_AF_HEART },
@@ -28,13 +29,39 @@ export const AudioSettingsSection = () => {
         sfxEnabled, setSfxEnabled,
         bgmEnabled, setBgmEnabled,
         englishVoice, setEnglishVoice,
-        spanishVoiceId, setSpanishVoiceId
+        spanishVoiceId, setSpanishVoiceId,
+        isKokoroDownloaded,
+        setHasDecidedKokoroDownload,
+        setWantsKokoro
     } = useSettingsStore();
 
     const [esVoices, setEsVoices] = useState<{ id: string, name: string, language: string }[]>([]);
 
     const [esModalVisible, setEsModalVisible] = useState(false);
     const [enModalVisible, setEnModalVisible] = useState(false);
+
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const handleDownloadKokoro = async () => {
+        setIsDownloading(true);
+        try {
+            await TtsManager.initialize();
+            setHasDecidedKokoroDownload(true);
+            setWantsKokoro(true);
+        } catch (error) {
+            console.error('Failed to download Kokoro model', error);
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    const handleDeleteKokoro = async () => {
+        try {
+            await TtsManager.deleteModel();
+        } catch (error) {
+            console.error('Failed to delete Kokoro model', error);
+        }
+    };
 
     useEffect(() => {
         const loadVoices = async () => {
@@ -77,6 +104,50 @@ export const AudioSettingsSection = () => {
                 onPress={() => setEnModalVisible(true)}
             />
 
+            {!isKokoroDownloaded ? (
+                <List.Item
+                    title="Modelo de voz Kokoro (Inglés)"
+                    titleStyle={{ color: theme.colors.text }}
+                    description={isDownloading ? `Descargando: ...` : "Requiere descarga para voz offline"}
+                    descriptionStyle={{ color: theme.colors.textSecondary }}
+                    left={props => <List.Icon {...props} icon="download" color={theme.colors.text} />}
+                    right={() => (
+                        <Button
+                            loading={isDownloading}
+                            disabled={isDownloading}
+                            onPress={handleDownloadKokoro}
+                            textColor={theme.colors.primary}
+                        >
+                            Descargar
+                        </Button>
+                    )}
+                />
+            ) : (
+                <List.Item
+                    title="Modelo de voz Kokoro (Inglés)"
+                    titleStyle={{ color: theme.colors.text }}
+                    description="Instalado"
+                    descriptionStyle={{ color: 'green' }}
+                    left={props => <List.Icon {...props} icon="check-circle" color="green" />}
+                    right={() => (
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Button
+                                onPress={handleDownloadKokoro}
+                                textColor={theme.colors.primary}
+                            >
+                                Actualizar
+                            </Button>
+                            <IconButton
+                                icon="delete-outline"
+                                iconColor="red"
+                                size={20}
+                                onPress={handleDeleteKokoro}
+                            />
+                        </View>
+                    )}
+                />
+            )}
+
             <List.Item
                 title="Efectos de sonido"
                 titleStyle={{ color: theme.colors.text }}
@@ -91,7 +162,6 @@ export const AudioSettingsSection = () => {
                 right={() => <Switch value={bgmEnabled} onValueChange={(val) => {
                     setBgmEnabled(val);
                     if (val) {
-                        useSettingsStore.setState({ bgmEnabled: val }); // immediately update just in case
                         audioService.playBGM();
                     } else {
                         audioService.stopBGM();

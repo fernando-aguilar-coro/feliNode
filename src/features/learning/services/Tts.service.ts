@@ -13,18 +13,23 @@ class TtsServiceHandler {
      * @param text Text to speak
      * @param options Options for TTS (rate, language)
      */
-    public async speak(text: string, options?: { rate?: number, language?: string }) {
+    public async speak(text: string, options?: { rate?: number, language?: string, forceNative?: boolean }) {
         const rate = options?.rate || 1.0;
         // Use RN TTS if:
         // 1. Language is Spanish
         // 2. Kokoro TTS is NOT ready yet
-        const useSystemTts = options?.language === 'es-ES' || !TtsManager.isReady;
+        // 3. Explicitly forced to use native
+        const useSystemTts = options?.language === 'es-ES' || !TtsManager.isReady || options?.forceNative;
 
         if (useSystemTts) {
             await ReactNativeTts.speak(text, options?.language);
         } else {
             await TtsManager.speak(text, { rate });
         }
+    }
+
+    public get isKokoroSpeaking(): boolean {
+        return TtsManager.isCurrentlySpeaking;
     }
 
     public async stop() {

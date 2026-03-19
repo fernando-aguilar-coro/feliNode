@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FillInTheBlankExercise as FillInTheBlankExerciseType } from '../../types/exercise';
-import { AppText, AppTextInput } from '../../../../components';
+import { AppText, AppTextInput, TranslateButton } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { TtsService } from '../../services/Tts.service';
 
@@ -41,16 +41,23 @@ export const FillInTheBlankExercise = ({ exercise, onAnswer, userAnswer }: Props
             <AppText variant="lg" weight="medium" style={styles.question}>
                 {exercise.question}
             </AppText>
-            <TouchableOpacity onPress={() => TtsService.speak(exercise.sentence)} style={styles.sentenceContainer}>
-                <MaterialCommunityIcons name="volume-high" size={24} color={theme.colors.primary} style={{ marginRight: 8 }} />
-                <AppText variant="md" style={styles.sentence}>
-                    {exercise.sentence}
-                </AppText>
-            </TouchableOpacity>
+            
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: theme.spacing.md }}>
+                <TouchableOpacity 
+                    onPress={() => TtsService.speak(exercise.sentence)} 
+                    style={[styles.sentenceContainer, { flex: 1, marginBottom: 0 }]}
+                >
+                    <MaterialCommunityIcons name="volume-high" size={24} color={theme.colors.primary} style={{ marginRight: 8 }} />
+                    <AppText variant="md" style={styles.sentence}>
+                        {exercise.sentence}
+                    </AppText>
+                </TouchableOpacity>
+                <TranslateButton textToTranslate={exercise.sentence} />
+            </View>
+
             <AppTextInput
                 value={userAnswer}
                 onChangeText={onAnswer}
-                /* Sugerencia para el campo de entrada */
                 placeholder="Escribe la palabra que falta..."
                 autoCapitalize="none"
             />

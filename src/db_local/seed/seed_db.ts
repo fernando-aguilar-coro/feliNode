@@ -59,7 +59,7 @@ export const seedDatabase = async () => {
         if (INITIAL_DATA.placement_tests && INITIAL_DATA.placement_tests.length > 0) {
             const fallbackModule: SeedModule = {
                 title: 'Examenes',
-                order_index: 0,
+                order_index: 999,
                 lessons: [],
                 dependencies: []
             };

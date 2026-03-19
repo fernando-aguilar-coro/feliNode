@@ -4,7 +4,8 @@ import {
     TextToSpeechModule,
     TextToSpeechConfig,
     KOKORO_SMALL,
-    KOKORO_VOICE_AF_HEART
+    KOKORO_VOICE_AF_HEART,
+    ResourceFetcher
 } from 'react-native-executorch';
 import { splitTextSmartly } from './textSplitter';
 import { useSettingsStore } from '../../../../store/SettingsStore';
@@ -22,7 +23,14 @@ class TtsManagerService {
 
     constructor() {
         this.ttsModule = new TextToSpeechModule();
-        // Only auto-initialize if the user has previously downloaded it or explicitly wanted it (resumes interrupted downloads)
+        
+        // Auto-initialize when store is rehydrated or state changes
+        useSettingsStore.subscribe((state) => {
+            if (state.isKokoroDownloaded && !this.isInitialized && !this.isDownloading) {
+                this.initialize();
+            }
+        });
+
         const state = useSettingsStore.getState();
         if (state.isKokoroDownloaded || state.wantsKokoro) {
             this.initialize();
@@ -62,8 +70,39 @@ class TtsManagerService {
         }
     }
 
+    /**
+     * Deletes the offline TTS model from disk and unloads it from memory/RAM.
+     */
+    public async deleteModel() {
+        try {
+            // 1. Unload from memory if loaded
+            if (this.isInitialized) {
+                this.ttsModule.delete();
+                this.isInitialized = false;
+            }
+
+            // 2. Delete large `.pte` files from disk
+            if (KOKORO_SMALL?.durationPredictorSource && KOKORO_SMALL?.synthesizerSource) {
+                await ResourceFetcher.deleteResources(
+                    KOKORO_SMALL.durationPredictorSource,
+                    KOKORO_SMALL.synthesizerSource
+                );
+            }
+
+            // 3. Update state
+            useSettingsStore.getState().setKokoroDownloaded(false);
+
+        } catch (error) {
+            console.error('TTS Manager: Failed to delete model', error);
+        }
+    }
+
     public get isReady(): boolean {
         return this.isInitialized;
+    }
+
+    public get isCurrentlySpeaking(): boolean {
+        return this.isSpeaking;
     }
 
     /**
@@ -91,19 +130,21 @@ class TtsManagerService {
         }
 
         try {
-            this.stop(); // Stop potential previous playback
+            await this.stop(); // Stop potential previous playback
             this.isSpeaking = true;
 
             const speed = options?.rate || 1.0;
+            // Clean the text to avoid special characters that cause C++ Error 2 (InvalidArgument)
+            const cleanText = text.replace(/[_/]/g, ' ')
+                .replace(/[^\w\s.,?!áéíóúÁÉÍÓÚñÑ+-]/g, '  ')
+                .trim();
+
             // Use smart splitter with dynamic size based on speed to prevent buffer overflow (Error 18)
-            // Slower speeds generate more audio per character, needing smaller chunks.
             const maxChunkSize = Math.max(30, Math.floor(200 * speed));
-            const chunks = splitTextSmartly(text, maxChunkSize);
+            const chunks = splitTextSmartly(cleanText, maxChunkSize);
 
             let allPcmData: Float32Array[] = [];
             let totalLength = 0;
-
-
 
             for (const chunk of chunks) {
                 const cleanChunk = chunk.trim();
@@ -116,9 +157,15 @@ class TtsManagerService {
                     totalLength += pcmFloat32.length;
                 } catch (error: any) {
                     if (error?.message?.includes("The model's forward function did not succeed")) {
-
+                        // Benign error, can ignore
                     } else {
-                        console.error('TTS Manager: Speak failed.', error);
+                        console.error('TTS Manager: Speak chunk forward failed.', error);
+                        // Fatal memory/model state error, dismantle to force recovery next time
+                        this.isInitialized = false;
+                        try {
+                            this.ttsModule.delete();
+                        } catch (e) { }
+                        break; // Stop current loop processing
                     }
                 }
             }
@@ -135,8 +182,6 @@ class TtsManagerService {
                 combinedPcm.set(pcm, offset);
                 offset += pcm.length;
             }
-
-
 
             // Play the generated audio
             await this.playPcmData(combinedPcm);
@@ -204,13 +249,23 @@ class TtsManagerService {
             // 3. Play with Expo AV
             const { sound } = await Audio.Sound.createAsync({ uri: `file://${wavPath}` });
             this.soundObject = sound;
-            await sound.playAsync();
-
-            // Wait for finish (optional, depending on requirement)
-            // sound.setOnPlaybackStatusUpdate(...)
+            
+            await new Promise<void>((resolve, reject) => {
+                sound.setOnPlaybackStatusUpdate((status) => {
+                    if (status.isLoaded) {
+                        if (status.didJustFinish) {
+                            this.isSpeaking = false;
+                            this.soundObject = null;
+                            sound.unloadAsync().then(() => resolve()).catch(reject);
+                        }
+                    }
+                });
+                sound.playAsync().catch(reject);
+            });
 
         } catch (error) {
             console.error('TTS Manager: Audio playback failed', error);
+            this.isSpeaking = false;
             throw error;
         }
     }

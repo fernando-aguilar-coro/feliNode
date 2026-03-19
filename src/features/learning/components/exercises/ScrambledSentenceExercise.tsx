@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Platform, UIManager } from 'react-native';
 import { ScrambledSentenceExercise as ScrambledSentenceExerciseType } from '../../types/exercise';
-import { AppText } from '../../../../components';
+import { AppText, TranslateButton } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { TtsService } from '../../services/Tts.service';
 import { WordBank } from '../../helpers/drag-native/WordBank';
@@ -33,7 +33,7 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
 
     const handleSelect = (index: number) => {
         setSelectedIndices(current => [...current, index]);
-        TtsService.speak(exercise.segments[index]);
+        TtsService.speak(exercise.segments[index], { forceNative: true });
     };
 
     const handleRemove = (listIndex: number) => {
@@ -41,7 +41,7 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
         const newIndices = [...selectedIndices];
         newIndices.splice(listIndex, 1);
         setSelectedIndices(newIndices);
-        TtsService.speak(word);
+        TtsService.speak(word, { forceNative: true });
     };
 
     const handleReorder = (fromIndex: number, toIndex: number) => {
@@ -76,9 +76,14 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
                 {exercise.question}
             </AppText>
 
-            <AppText variant="sm" style={styles.instruction}>
-                Toca las palabras para formar la oración correcta:
-            </AppText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.md }}>
+                <AppText variant="sm" style={[styles.instruction, { marginBottom: 0 }]}>
+                    Toca las palabras para formar la oración:
+                </AppText>
+                {userAnswer.trim().length > 0 && (
+                    <TranslateButton textToTranslate={userAnswer.trim()} size={20} />
+                )}
+            </View>
 
             <AnswerArea
                 selectedWords={selectedWords}

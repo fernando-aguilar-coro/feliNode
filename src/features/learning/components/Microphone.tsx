@@ -2,38 +2,59 @@ import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMicrophone } from '../hooks/useMicrophone';
+import { LiveSpeechFeedback } from './LiveSpeechFeedback';
 
 interface MicrophoneProps {
     onRecordingComplete?: (uri: string | null) => void;
     onRecordingStart?: () => void;
+    /** Show the live transcript bubble below the button. Defaults to false. */
+    showLiveFeedback?: boolean;
 }
 
-export const Microphone: React.FC<MicrophoneProps> = ({ onRecordingComplete, onRecordingStart }) => {
-    const { isRecording, startRecording, stopRecording } = useMicrophone(onRecordingComplete, onRecordingStart);
+export const Microphone: React.FC<MicrophoneProps> = ({
+    onRecordingComplete,
+    onRecordingStart,
+    showLiveFeedback = false,
+}) => {
+    const { isRecording, transcript, startRecording, stopRecording } =
+        useMicrophone(onRecordingComplete, onRecordingStart);
 
-    const handlePress = () => isRecording ? stopRecording() : startRecording();
+    const handlePress = () => {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    };
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity
-                onPress={handlePress}
-                style={[styles.button, isRecording && styles.recordingButton]}
-                activeOpacity={0.7}
-            >
-                <MaterialCommunityIcons
-                    name={isRecording ? "stop" : "microphone"}
-                    size={44}
-                    color={isRecording ? "#FF5252" : "#FFFFFF"}
-                />
-            </TouchableOpacity>
-            <Text style={[styles.text, isRecording && styles.recordingText]}>
-                {isRecording ? "Grabando..." : "Toca para hablar"}
-            </Text>
+        <View style={styles.wrapper}>
+            <View style={styles.container}>
+                <TouchableOpacity
+                    onPress={handlePress}
+                    style={[styles.button, isRecording && styles.recordingButton]}
+                    activeOpacity={0.7}
+                >
+                    <MaterialCommunityIcons
+                        name={isRecording ? 'stop' : 'microphone'}
+                        size={44}
+                        color={isRecording ? '#FF5252' : '#FFFFFF'}
+                    />
+                </TouchableOpacity>
+                <Text style={[styles.text, isRecording && styles.recordingText]}>
+                    {isRecording ? 'Grabando...' : 'Toca para hablar'}
+                </Text>
+            </View>
+
+            {showLiveFeedback && (
+                <LiveSpeechFeedback isRecording={isRecording} transcript={transcript} />
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    wrapper: { alignItems: 'center', width: '100%' },
     container: { alignItems: 'center', justifyContent: 'center', marginVertical: 20 },
     button: {
         backgroundColor: '#6C63FF', width: 80, height: 80, borderRadius: 40,
@@ -43,5 +64,5 @@ const styles = StyleSheet.create({
     },
     recordingButton: { backgroundColor: '#FFE5E5', borderWidth: 2, borderColor: '#FF5252' },
     text: { marginTop: 12, fontSize: 14, fontWeight: '600', color: '#666' },
-    recordingText: { color: '#FF5252' }
+    recordingText: { color: '#FF5252' },
 });

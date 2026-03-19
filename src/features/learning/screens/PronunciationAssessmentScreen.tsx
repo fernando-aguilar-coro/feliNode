@@ -11,7 +11,6 @@ import { userProgressRepository, lessonRepository } from '../../../db_local/repo
 
 export const PronunciationAssessmentScreen = () => {
     const theme = useAppTheme();
-    const navigation = useNavigation();
     const [phrase, setPhrase] = useState('');
     const [isExercising, setIsExercising] = useState(false);
     const [currentLessonTitle, setCurrentLessonTitle] = useState<string>("Práctica General");

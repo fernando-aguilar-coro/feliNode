@@ -9,6 +9,7 @@ import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { useInfinityPairs, InfinityPairItem } from '../hooks/useInfinityPairs';
 import { audioService } from '../../settings/services/audio.service';
 import { infinityProgressRepository } from '../../../db_local/repositories';
+import { TtsService } from '../../learning/services/Tts.service';
 
 type InfinitySelectPairsNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'InfinitySelectPairs'>;
 type InfinitySelectPairsRouteProp = RouteProp<HomeStackParamList, 'InfinitySelectPairs'>;
@@ -73,6 +74,14 @@ export const InfinitySelectPairsScreen = () => {
         navigation.goBack();
     };
 
+    const handleItemPress = (item: InfinityPairItem) => {
+        if (item.col === 'left') {
+            // Solo hablar las palabras en inglés (izquierda) con TTS Nativo
+            TtsService.speak(item.text, { forceNative: true, language: 'en-US' });
+        }
+        handlePress(item);
+    };
+
     if (isInitialLoading) {
         return (
             <Screen style={styles.loadingContainer}>
@@ -134,7 +143,7 @@ export const InfinitySelectPairsScreen = () => {
                     styles.item,
                     { backgroundColor, borderColor, opacity }
                 ]}
-                onPress={() => handlePress(item)}
+                onPress={() => handleItemPress(item)}
                 disabled={isMatched}
             >
                 <AppText style={{ color: theme.colors.text, textAlign: 'center' }}>

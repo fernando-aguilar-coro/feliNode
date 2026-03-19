@@ -23,7 +23,7 @@ export interface MultipleChoiceExercise extends BaseExercise {
 
 export interface FillInTheBlankExercise extends BaseExercise {
     type: ExerciseType.FILL_IN_THE_BLANK;
-    sentence: string; // The sentence with a placeholder, e.g., "The cat is ___ the table"
+    sentence: string;
     correctAnswer: string;
 }
 

@@ -8,7 +8,7 @@ import { PronunciationService, PronunciationResult } from '../../services/Pronun
 import { PronunciationExercise as PronunciationExerciseType } from '../../types/exercise';
 import { PronunciationFeedbackAzure } from './PronunciationFeedbackAzure';
 import { PronunciationFeedbackGemini } from './PronunciationFeedbackGemini';
-import { LiveSpeechFeedback } from '../LiveSpeechFeedback';
+
 
 
 interface Props {
@@ -133,10 +133,9 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
                 <Microphone
                     onRecordingStart={handleRecordingStart}
                     onRecordingComplete={handleRecordingComplete}
+                    showLiveFeedback={true}
                 />
             ) : null}
-
-            <LiveSpeechFeedback isRecording={status === 'recording'} />
 
             {status === 'result' && (
                 <View style={styles.reviewContainer}>
