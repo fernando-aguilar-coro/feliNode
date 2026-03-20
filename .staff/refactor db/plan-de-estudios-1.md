@@ -77,7 +77,7 @@ Este documento combina la **didáctica educativa** del currículo mexicano con l
     - 6.4 Pronombres Reflexivos [✅ Ya en DB]
     - 6.5 Adjetivos Posesivos vs. Pronombres Reflexivos [✅ Ya en DB]
     - 6.6 Modales de Permiso y Petición (Can, could, may, would) [✅ Ya en DB]
-    - 6.7 Must / Have to (Obligación y necesidad)
+    - 6.7 Must / Have to (Obligación y necesidad)[✅ Ya en DB]
     - 6.8 Consejos y Crítica (Should, ought to, had better)
     - 6.9 Modales de Probabilidad y Deducción (May, might, could, must be, can't be)
     - 6.10 Preposiciones de Movimiento (Into, onto, through, across, past)
@@ -88,11 +88,11 @@ Este documento combina la **didáctica educativa** del currículo mexicano con l
 **Meta**: Conectar experiencias pasadas con el presente y condiciones básicas.
 
 7. **Unidad 7: Experiencias y Resultados (B1)**
-    - 7.1 Presente Perfecto [✅ Ya en DB]
-    - 7.2 Been vs. Gone
-    - 7.3 Just, already, yet
-    - 7.4 For y Since (Duración)
-    - 7.5 Contraste: Presente Perfecto vs. Pasado Simple
+    - 7.1 Been vs. Gone
+    - 7.2 Just, already, yet
+    - 7.3 For y Since (Duración)
+    - 7.4 Contraste: Presente Perfecto vs. Pasado Simple
+    - 7.5 Presente Perfecto [✅ Ya en DB]
 
 8. **Unidad 8: Estructuras Avanzadas de Secundaria (B1)**
     - 8.1 First Conditional (If + present, will + infinitive)

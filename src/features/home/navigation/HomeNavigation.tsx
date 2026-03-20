@@ -6,6 +6,9 @@ import { LessonModeSelectionScreen } from '../../learning/screens/LessonModeSele
 import { InfinityExerciseScreen } from '../../learning/screens/InfinityExerciseScreen';
 import { InfinitySelectPairsScreen } from "../../learning/screens/InfinitySelectPairsScreen";
 import { StreakDetailsScreen } from '../../gamification/screens/StreakDetailsScreen';
+import { ShopScreen } from '../../gamification/screens/ShopScreen';
+import { ShopFloatingButton } from '../../gamification/components/ShopFloatingButton';
+import { View } from 'react-native';
 
 export type HomeStackParamList = {
     Main: undefined;
@@ -23,13 +26,17 @@ const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 export const HomeNavigation = () => {
     return (
-        <Stack.Navigator id="home_stack" screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Main" component={HomeTabNavigator} />
-            <Stack.Screen name="Lesson" component={LessonModeSelectionScreen} />
-            <Stack.Screen name="LessonSession" component={LessonScreen} />
-            <Stack.Screen name="InfinityExercise" component={InfinityExerciseScreen} />
-            <Stack.Screen name="InfinitySelectPairs" component={InfinitySelectPairsScreen} />
-            <Stack.Screen name="StreakDetails" component={StreakDetailsScreen} />
-        </Stack.Navigator>
+        <View style={{ flex: 1 }}>
+            <Stack.Navigator id="home_stack" screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Main" component={HomeTabNavigator} />
+                <Stack.Screen name="Lesson" component={LessonModeSelectionScreen} />
+                <Stack.Screen name="LessonSession" component={LessonScreen} />
+                <Stack.Screen name="InfinityExercise" component={InfinityExerciseScreen} />
+                <Stack.Screen name="InfinitySelectPairs" component={InfinitySelectPairsScreen} />
+                <Stack.Screen name="StreakDetails" component={StreakDetailsScreen} />
+                <Stack.Screen name="ShopScreen" component={ShopScreen} />
+            </Stack.Navigator>
+            <ShopFloatingButton />
+        </View>
     );
 };

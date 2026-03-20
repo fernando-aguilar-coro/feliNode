@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, InteractionManager } from 'react-native';
+import React, { useMemo, useEffect, useRef } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TreeNodeScreen } from '../../nodes/screens/TreeNodeScreen';
 import { ModuleProgressScreen } from '../../nodes/screens/ModuleProgressScreen';

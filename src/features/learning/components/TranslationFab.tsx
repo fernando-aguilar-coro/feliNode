@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { FAB } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { translateText } from '../../../services/Translation.service';
+import { translateMd } from '../../../services/Translation.service';
 import { TranslateLanguage } from '@react-native-ml-kit/translate-text';
 
 interface TranslationFabProps {
@@ -43,11 +43,11 @@ export const TranslationFab: React.FC<TranslationFabProps> = ({ originalText, on
       return;
     }
 
-    // Realizar la traducción usando ML Kit (Español -> Inglés)
+    // Realizar la traducción usando ML Kit (Español -> Inglés) preservando el Markdown
     setLoading(true);
     try {
-      // Configuramos para traducir de español a inglés
-      const result = await translateText(originalText, TranslateLanguage.ENGLISH, TranslateLanguage.SPANISH);
+      // Configuramos para traducir de español a inglés usando translateMd
+      const result = await translateMd(originalText, TranslateLanguage.ENGLISH, TranslateLanguage.SPANISH);
       setTranslatedTextCache(result);
       setIsTranslated(true);
       onTranslatedText(result, true);

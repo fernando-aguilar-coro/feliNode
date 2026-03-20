@@ -1,7 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SpeakScreen } from '../screens/SpeakScreen';
-import { ShopScreen } from '../components/ShopScreen';
+import { ShopScreen } from '../screens/ShopScreen';
 
 export type GamificationStackParamList = {
     SpeakMain: undefined;

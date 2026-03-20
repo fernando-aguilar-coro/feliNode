@@ -28,9 +28,14 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "edgeToEdgeEnabled": true,
+      "versionCode": 14,
       "package": "com.felinode.app",
       "allowBackup": false
     },
@@ -50,7 +55,7 @@
     ],
     "runtimeVersion": "1.0.14",
     "updates": {
-      "url": "https://u.expo.dev/fe4e1cd6-70e5-4d20-8d2c-56aac93f74f9"
+      "url": "https://u.expo.dev/a27cb8a9-e752-476a-9340-37198af71860"
     },
     "extra": {
       "eas": {

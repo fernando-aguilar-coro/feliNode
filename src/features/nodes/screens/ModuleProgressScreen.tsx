@@ -1,13 +1,25 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Text } from 'react-native';
+import React, { useMemo, useCallback } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { ModuleAccordion } from '../components/list/ModuleAccordion';
 import { OverallProgress } from '../components/progress/OverallProgress';
 import { useModuleProgress } from '../hooks/useModuleProgress';
+import { StreakBadge } from '../../gamification/components/StreakBadge';
+import { CurrencyBadge } from '../../gamification/components/CurrencyBadge';
+import { useSettingsStore } from '../../../store/SettingsStore';
+import { useNavigation } from '@react-navigation/native';
+import { audioService } from '../../settings/services/audio.service';
 
 export const ModuleProgressScreen = () => {
     const theme = useAppTheme();
+    const navigation = useNavigation<any>();
+    const showStreak = useSettingsStore(state => state.showStreak);
     const { modules, isLoading, expandedModules, toggleModule } = useModuleProgress();
+
+    const navigateToStreakDetails = useCallback(() => {
+        audioService.playClickSound();
+        navigation.navigate('StreakDetails');
+    }, [navigation]);
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -37,8 +49,35 @@ export const ModuleProgressScreen = () => {
             fontSize: 16,
             color: theme.colors.textSecondary,
             marginTop: 4,
+        },
+        topBannerContainer: {
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            opacity: 0.8,
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            marginTop: 12,
+            marginBottom: 4,
+            gap: 8,
         }
     }), [theme]);
+
+    const renderHeader = useMemo(() => (
+        <View>
+            <View style={[styles.topBannerContainer, { opacity: 0.8 }]}>
+                {showStreak && (
+                    <TouchableOpacity
+                        onPress={navigateToStreakDetails}
+                        activeOpacity={0.8}
+                    >
+                        <StreakBadge />
+                    </TouchableOpacity>
+                )}
+                <CurrencyBadge />
+            </View>
+            {modules.length > 0 && <OverallProgress modules={modules} />}
+        </View>
+    ), [modules, showStreak, styles.topBannerContainer, navigateToStreakDetails]);
 
     if (isLoading) {
         return (
@@ -48,16 +87,6 @@ export const ModuleProgressScreen = () => {
         );
     }
 
-    const renderHeader = () => (
-        <View>
-            <View style={styles.headerContainer}>
-                <Text style={styles.headerTitle}>Ruta de Aprendizaje</Text>
-                <Text style={styles.headerSubtitle}>Continúa donde te quedaste</Text>
-            </View>
-            {modules.length > 0 && <OverallProgress modules={modules} />}
-            <View style={{ height: 16 }} />
-        </View>
-    );
 
     return (
         <View style={styles.container}>

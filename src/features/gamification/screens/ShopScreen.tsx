@@ -92,10 +92,10 @@ export const ShopScreen = () => {
                         <FontAwesome5 name="snowflake" size={32} color="#00BFFF" />
                     </View>
                     <View style={styles.itemDetails}>
-                        <Text style={[styles.itemName, { color: theme.colors.text }]}>Streak Protector</Text>
+                        <Text style={[styles.itemName, { color: theme.colors.text }]}>Protector de racha</Text>
                         <Text style={[styles.itemDescription, { color: theme.colors.textSecondary || '#666' }]}>
-                            Protects your streak if you miss a day.
-                            (You have {streak.freezes_available} / 2)
+                            Protector de racha.
+                            (Tienes {streak.freezes_available} / 2)
                         </Text>
                     </View>
                     <TouchableOpacity

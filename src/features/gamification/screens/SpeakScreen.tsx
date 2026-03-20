@@ -78,16 +78,6 @@ export const SpeakScreen = () => {
 
     return (
         <SafeAreaView style={[styles.root, { backgroundColor: theme.colors.background }]}>
-            {/* ── Top banner ── */}
-            <TouchableOpacity
-                style={[styles.banner, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
-                onPress={() => navigation.navigate('Shop')}
-                activeOpacity={0.8}
-            >
-                <FontAwesome5 name="store" size={14} color="#FFBA08" />
-                <Text style={[styles.bannerText, { color: theme.colors.text }]}>Visita la Tienda</Text>
-                <Ionicons name="chevron-forward" size={14} color={theme.colors.textSecondary} />
-            </TouchableOpacity>
 
             {/* ── Main Canvas ── */}
             <View style={styles.canvasContainer}>
@@ -184,28 +174,6 @@ export const SpeakScreen = () => {
 
 const styles = StyleSheet.create({
     root: { flex: 1 },
-    banner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        marginTop: 12,
-        marginHorizontal: 16,
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        borderWidth: 1,
-        elevation: 1,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-    },
-    bannerText: {
-        fontFamily: 'Nunito-Bold',
-        fontSize: 14,
-        flex: 1,
-        textAlign: 'center',
-    },
 
     canvasContainer: {
         flex: 1,
