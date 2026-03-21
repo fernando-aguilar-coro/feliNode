@@ -5,6 +5,19 @@ const scrambleString = (text: string): string[] => {
     return text.replace(/[\.\¡!¿]/g, '').split(' ').filter((w: string) => w.trim() !== '').sort(() => Math.random() - 0.5);
 };
 
+const listeningInstructions = [
+    'Escucha y ordena las palabras',
+    '¿Qué escuchas? ¡Ordénalo!',
+    'Escucha con atención y acomoda las piezas',
+    'Ordena la oración según el audio',
+    'Escucha y acomoda los fragmentos',
+    'Ordena la oración correcta que escuchas'
+];
+
+const getRandomListeningInstruction = () => {
+    return listeningInstructions[Math.floor(Math.random() * listeningInstructions.length)];
+};
+
 /**
  * Logic to generate a listening exercise based on another exercise type.
  */
@@ -14,7 +27,7 @@ export const generateListeningExercise = (ex: Exercise): Exercise | null => {
             return {
                 id: `${ex.id}-listening`,
                 type: ExerciseType.LISTENING,
-                question: 'Escucha y ordena las palabras',
+                question: getRandomListeningInstruction(),
                 phrase: (ex as PronunciationExercise).phrase,
                 correctAnswer: (ex as PronunciationExercise).phrase,
                 segments: scrambleString((ex as PronunciationExercise).phrase),
@@ -23,7 +36,7 @@ export const generateListeningExercise = (ex: Exercise): Exercise | null => {
             return {
                 id: `${ex.id}-listening`, // Unique ID
                 type: ExerciseType.LISTENING,
-                question: 'Escucha y ordena la oración correcta',
+                question: getRandomListeningInstruction(),
                 phrase: (ex as ScrambledSentenceExercise).correctAnswer,
                 correctAnswer: (ex as ScrambledSentenceExercise).correctAnswer,
                 segments: scrambleString((ex as ScrambledSentenceExercise).correctAnswer),
@@ -43,7 +56,7 @@ export const generateListeningExercise = (ex: Exercise): Exercise | null => {
             return {
                 id: `${ex.id}-listening`,
                 type: ExerciseType.LISTENING,
-                question: 'Ordena la traducción de lo que escuchas',
+                question: getRandomListeningInstruction(),
                 phrase: translateEx.phrase, // Speak the target language
                 correctAnswer: translateEx.correctAnswer, // Expect matching text
                 segments: scrambleString(translateEx.correctAnswer),
@@ -57,7 +70,7 @@ export const generateListeningExercise = (ex: Exercise): Exercise | null => {
             return {
                 id: `${ex.id}-listening`,
                 type: ExerciseType.LISTENING,
-                question: 'Escucha y ordena la oración completa',
+                question: getRandomListeningInstruction(),
                 phrase: fullSentence,
                 correctAnswer: fullSentence,
                 segments: scrambleString(fullSentence),

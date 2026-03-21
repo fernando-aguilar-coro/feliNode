@@ -21,6 +21,9 @@ class TtsManagerService {
     private soundObject: Audio.Sound | null = null;
     private currentVoiceSource: any;
 
+    private generationMutex: Promise<void> = Promise.resolve();
+    private currentSpeakId = 0;
+
     constructor() {
         this.ttsModule = new TextToSpeechModule();
         
@@ -118,7 +121,6 @@ class TtsManagerService {
         }
 
         if (this.currentVoiceSource !== selectedVoice.voiceSource) {
-
             this.isInitialized = false;
             await this.initialize();
         }
@@ -129,24 +131,46 @@ class TtsManagerService {
             if (!this.isInitialized) return;
         }
 
+        await this.stop(); // Stop potential previous playback and cancel pending tasks
+
+        this.currentSpeakId++;
+        const mySpeakId = this.currentSpeakId;
+
+        let releaseGenerationMutex: () => void = () => {};
+        const nextMutex = new Promise<void>(resolve => { releaseGenerationMutex = resolve; });
+        const prevMutex = this.generationMutex;
+        this.generationMutex = nextMutex;
+
         try {
-            await this.stop(); // Stop potential previous playback
             this.isSpeaking = true;
 
             const speed = options?.rate || 1.0;
-            // Clean the text to avoid special characters that cause C++ Error 2 (InvalidArgument)
-            const cleanText = text.replace(/[_/]/g, ' ')
-                .replace(/[^\w\s.,?!áéíóúÁÉÍÓÚñÑ+-]/g, '  ')
+            // Clean the text to avoid special characters that cause C++ Error 1 & 2 (Phonemizer/InvalidArgument)
+            const cleanText = text
+                .replace(/[\u2018\u2019´`]/g, "'") // Normalize quotes
+                .replace(/[\u201C\u201D]/g, ' ') // Remove double smart quotes
+                .replace(/[\u2013\u2014]/g, '-') // Normalize dashes
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Strip Spanish accents for English TTS
+                .replace(/[^\w\s.,?!'\-]/g, ' ') // Strictly allow only basic English ascii + punctuation
+                .replace(/\s+/g, ' ') // Collapse spaces
                 .trim();
 
             // Use smart splitter with dynamic size based on speed to prevent buffer overflow (Error 18)
             const maxChunkSize = Math.max(30, Math.floor(200 * speed));
             const chunks = splitTextSmartly(cleanText, maxChunkSize);
 
+            await prevMutex;
+
+            if (this.currentSpeakId !== mySpeakId) {
+                return;
+            }
+
             let allPcmData: Float32Array[] = [];
             let totalLength = 0;
 
             for (const chunk of chunks) {
+                if (this.currentSpeakId !== mySpeakId) break;
+
                 const cleanChunk = chunk.trim();
                 // Skip empty chunks or chunks without letters/numbers (which cause Error 2: InvalidArgument)
                 if (cleanChunk.length === 0 || !/[\p{L}\p{N}]/u.test(cleanChunk)) continue;
@@ -170,6 +194,10 @@ class TtsManagerService {
                 }
             }
 
+            releaseGenerationMutex();
+
+            if (this.currentSpeakId !== mySpeakId) return;
+
             if (totalLength === 0) {
                 console.warn("TTS Manager: No audio generated.");
                 return;
@@ -184,19 +212,22 @@ class TtsManagerService {
             }
 
             // Play the generated audio
-            await this.playPcmData(combinedPcm);
+            await this.playPcmData(combinedPcm, mySpeakId);
 
         } catch (error) {
             console.error('TTS Manager: General Speak failed.', error);
         } finally {
-            this.isSpeaking = false;
+            releaseGenerationMutex();
+            if (this.currentSpeakId === mySpeakId) {
+                this.isSpeaking = false;
+            }
         }
     }
 
     /**
      * Converts Float32 PCM to WAV and plays it using Expo AV.
      */
-    private async playPcmData(pcmData: Float32Array) {
+    private async playPcmData(pcmData: Float32Array, mySpeakId: number) {
         try {
             // 1. Convert Float32 (-1.0 to 1.0) to Int16 (-32768 to 32767)
             const sampleRate = 24000; // Kokoro usually uses 24khz, verify for your specific model
@@ -246,26 +277,43 @@ class TtsManagerService {
                 playThroughEarpieceAndroid: false,
             });
 
-            // 3. Play with Expo AV
             const { sound } = await Audio.Sound.createAsync({ uri: `file://${wavPath}` });
             this.soundObject = sound;
             
             await new Promise<void>((resolve, reject) => {
+                const checkStatus = setInterval(() => {
+                    if (this.currentSpeakId !== mySpeakId) {
+                        clearInterval(checkStatus);
+                        resolve();
+                    }
+                }, 100);
+
                 sound.setOnPlaybackStatusUpdate((status) => {
                     if (status.isLoaded) {
                         if (status.didJustFinish) {
-                            this.isSpeaking = false;
+                            clearInterval(checkStatus);
+                            if (this.currentSpeakId === mySpeakId) {
+                                this.isSpeaking = false;
+                            }
                             this.soundObject = null;
                             sound.unloadAsync().then(() => resolve()).catch(reject);
                         }
+                    } else if ("error" in status && status.error) {
+                        clearInterval(checkStatus);
+                        reject(new Error(status.error));
                     }
                 });
-                sound.playAsync().catch(reject);
+                sound.playAsync().catch(err => {
+                    clearInterval(checkStatus);
+                    reject(err);
+                });
             });
 
         } catch (error) {
             console.error('TTS Manager: Audio playback failed', error);
-            this.isSpeaking = false;
+            if (this.currentSpeakId === mySpeakId) {
+                this.isSpeaking = false;
+            }
             throw error;
         }
     }
@@ -290,6 +338,7 @@ class TtsManagerService {
     }
 
     public async stop() {
+        this.currentSpeakId++; // Cancel pending tasks
         if (this.soundObject) {
             try {
                 await this.soundObject.stopAsync();

@@ -10,22 +10,22 @@ import {
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import type { GamificationStackParamList } from '../navigation/GamificationNavigator';
-import { useSpeakChat } from '../hooks/useSpeakChat';
+import { useSpeakStore } from '../../../store/useSpeakStore';
+import { useSpeakSpeech } from '../hooks/useSpeakSpeech';
 import { SpeakCatCanvas } from '../components/SpeakCatCanvas';
 import { SpeakInputBar } from '../components/SpeakInputBar';
+import { SpeakSuggestions } from '../components/SpeakSuggestions';
 import { SpeakChatBubble } from '../components/SpeakChatBubble';
 import { audioService } from '../../settings/services/audio.service';
 
 
 export const SpeakScreen = () => {
     const theme = useAppTheme();
-    const navigation = useNavigation<NativeStackNavigationProp<GamificationStackParamList>>();
-    const { messages, inputText, setInputText, isLoading, sendMessage, isCallActive, toggleCallMode, clearChat, error } = useSpeakChat();
+    const { messages, isLoading, isCallActive, clearChat, error } = useSpeakStore();
+    const { toggleCallMode, sendMessage } = useSpeakSpeech();
     const scrollRef = useRef<ScrollView>(null);
 
     // ── BGM Control ──────────────────────────────────────────────────────────
@@ -105,7 +105,7 @@ export const SpeakScreen = () => {
                                 <View style={[styles.bubbleWrapper, styles.aiWrapper]}>
                                     <View style={[styles.bubble, { backgroundColor: theme.colors.surface, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: theme.colors.border }]}>
                                         <Text style={[styles.bubbleText, { color: theme.colors.text, opacity: 0.6 }]}>
-                                            Escribiendo<Animated.Text>…</Animated.Text>
+                                            Hablando espera ...<Animated.Text>…</Animated.Text>
                                         </Text>
                                     </View>
                                 </View>
@@ -117,6 +117,8 @@ export const SpeakScreen = () => {
                             </Text>
                         )}
                     </View>
+
+                    <SpeakSuggestions onSend={sendMessage} />
 
                     {/* Glowing Mic Button for Call Mode */}
                     <View style={styles.micWrapper}>
@@ -159,12 +161,7 @@ export const SpeakScreen = () => {
 
                     {/* Input bar */}
                     <View style={[styles.inputWrapper, { backgroundColor: theme.colors.background }]}>
-                        <SpeakInputBar
-                            value={inputText}
-                            onChangeText={setInputText}
-                            onSend={sendMessage}
-                            disabled={isLoading}
-                        />
+                        <SpeakInputBar onSend={sendMessage} />
                     </View>
                 </Animated.View>
             </View>
@@ -190,10 +187,9 @@ const styles = StyleSheet.create({
     },
 
     chatOverlay: {
-        maxHeight: 220, // slightly larger for visibility
+        flex: 1,
         paddingHorizontal: 12,
         marginBottom: 8,
-        opacity: 0.5,
     },
     chatContent: {
         flexGrow: 1,

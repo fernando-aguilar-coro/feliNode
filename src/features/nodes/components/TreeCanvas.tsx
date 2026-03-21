@@ -25,8 +25,7 @@ const NodeOverlay = React.memo(({ node, onPress }: { node: TreeNode, onPress: ()
 
     let tc = colors.textSecondary;
     if (node.status === 'completed') tc = colors.text;
-    else if (node.status === 'available') tc = colors.text;
-    else tc = colors.textLight;
+    else tc = colors.text;
 
     return (
         <TouchableOpacity
@@ -48,7 +47,7 @@ const NodeOverlay = React.memo(({ node, onPress }: { node: TreeNode, onPress: ()
                 style={{
                     color: tc,
                     fontSize: 14,
-                    fontWeight: node.status !== 'locked' ? 'bold' : 'normal',
+                    fontWeight: 'bold',
                     textAlign: 'center',
                     width: '100%',
                     textShadowColor: colors.background,
@@ -65,6 +64,7 @@ const NodeOverlay = React.memo(({ node, onPress }: { node: TreeNode, onPress: ()
 export const TreeCanvas = React.forwardRef<PannableCanvasRef, TreeCanvasProps>(({ width, height, onNodePress }, ref) => {
     const links = useNodesStore(state => state.links);
     const nodes = useNodesStore(state => state.nodes);
+    const theme = useAppTheme();
 
     return (
         <PannableCanvas ref={ref} width={width} height={height}>
@@ -74,7 +74,7 @@ export const TreeCanvas = React.forwardRef<PannableCanvasRef, TreeCanvasProps>((
                         <BezierLink key={`link-${index}`} link={link} />
                     ))}
                     {nodes.map((node) => (
-                        <ModernNode key={node.id} node={node} />
+                        <ModernNode key={node.id} node={node} theme={theme} />
                     ))}
                 </Canvas>
                 <View style={StyleSheet.absoluteFill} pointerEvents="box-none">

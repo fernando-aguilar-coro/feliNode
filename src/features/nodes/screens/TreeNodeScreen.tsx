@@ -22,11 +22,7 @@ export const TreeNodeScreen = () => {
 
     const handleNodePress = useCallback((node: TreeNode) => {
         audioService.playClickSound();
-        if (node.status !== 'locked') {
-            navigation.navigate('Lesson', { lessonId: node.id });
-        } else {
-
-        }
+        navigation.navigate('Lesson', { lessonId: node.id });
     }, [navigation]);
 
     const handleResetView = () => {

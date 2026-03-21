@@ -26,9 +26,7 @@ export class LessonRepository extends BaseRepository {
         const isCompleted = await this.userProgressRepo.isLessonCompleted(lessonId);
         if (isCompleted) return 'completed';
 
-        const db = await this.db;
-        const res: any = await db.getFirstAsync('SELECT status FROM lessons WHERE id = ?', [lessonId]);
-        return res?.status || 'locked';
+        return 'available';
     }
 
     async getLessonNodes(): Promise<LessonNode[]> {
@@ -54,14 +52,7 @@ export class LessonRepository extends BaseRepository {
             if (completedLessons.includes(row.id)) {
                 status = 'completed';
             } else {
-                if (parents.length > 0) {
-                    const allParentsCompleted = parents.every(p => completedLessons.includes(p));
-                    if (allParentsCompleted) {
-                        status = 'available';
-                    } else {
-                        status = 'locked';
-                    }
-                }
+                status = 'available';
             }
 
             return {

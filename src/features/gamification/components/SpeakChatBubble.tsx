@@ -52,6 +52,7 @@ export const SpeakChatBubble = ({ message, theme }: SpeakChatBubbleProps) => {
             <TouchableOpacity
                 style={[
                     styles.bubble,
+                    { opacity: 0.85 },
                     isUser
                         ? { backgroundColor: theme.colors.primary, borderBottomRightRadius: 4 }
                         : { backgroundColor: theme.colors.surface, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: theme.colors.border }

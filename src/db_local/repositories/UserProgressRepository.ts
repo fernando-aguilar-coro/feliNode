@@ -64,28 +64,8 @@ export class UserProgressRepository extends BaseRepository {
                     await db.runAsync('INSERT INTO user_progress (lessons_completed, updated_at) VALUES (?, ?)', [json, now]);
                 }
 
-                const dependents: any[] = await db.getAllAsync(
-                    'SELECT lesson_id FROM lesson_dependencies WHERE prerequisite_id = ?',
-                    [lessonId]
-                );
-
-                for (const dep of dependents) {
-                    const targetLessonId = dep.lesson_id;
-
-                    const prerequisites: any[] = await db.getAllAsync(
-                        'SELECT prerequisite_id FROM lesson_dependencies WHERE lesson_id = ?',
-                        [targetLessonId]
-                    );
-
-                    const allMet = prerequisites.every(p => completed.includes(p.prerequisite_id));
-
-                    if (allMet) {
-                        await db.runAsync(
-                            'UPDATE lessons SET status = ? WHERE id = ? AND status = ?',
-                            ['available', targetLessonId, 'locked']
-                        );
-                    }
-                }
+                // Code to update dependents from 'locked' to 'available' has been removed
+                // since lessons are no longer 'locked'.
             }
             try {
                 await this.streakRepo.updateStreak();

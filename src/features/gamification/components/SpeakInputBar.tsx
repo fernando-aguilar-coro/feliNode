@@ -2,17 +2,20 @@ import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useSpeakStore } from '../../../store/useSpeakStore';
 
-interface SpeakInputBarProps {
-    value: string;
-    onChangeText: (t: string) => void;
+interface Props {
     onSend: () => void;
-    disabled?: boolean;
 }
 
-export function SpeakInputBar({ value, onChangeText, onSend, disabled }: SpeakInputBarProps) {
+export function SpeakInputBar({ onSend }: Props) {
     const theme = useAppTheme();
+    const value = useSpeakStore(state => state.inputText);
+    const onChangeText = useSpeakStore(state => state.setInputText);
+    const disabled = useSpeakStore(state => state.isLoading);
+
     const canSend = (value || '').trim().length > 0 && !disabled;
+    const handleSend = () => onSend();
 
     return (
         <View style={[styles.row, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
@@ -22,7 +25,7 @@ export function SpeakInputBar({ value, onChangeText, onSend, disabled }: SpeakIn
                 placeholderTextColor="#666"
                 value={value}
                 onChangeText={onChangeText}
-                onSubmitEditing={onSend}
+                onSubmitEditing={handleSend}
                 returnKeyType="send"
                 editable={!disabled}
                 multiline
@@ -30,7 +33,7 @@ export function SpeakInputBar({ value, onChangeText, onSend, disabled }: SpeakIn
             />
             <TouchableOpacity
                 style={[styles.btn, { opacity: canSend ? 1 : 0.4 }]}
-                onPress={onSend}
+                onPress={handleSend}
                 disabled={!canSend}
                 activeOpacity={0.8}
             >

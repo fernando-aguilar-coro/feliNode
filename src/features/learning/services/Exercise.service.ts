@@ -27,13 +27,30 @@ export const ExerciseService = {
                 .map((ex: any) => mapDbExerciseToAppExercise(ex))
                 .filter((ex): ex is Exercise => ex !== null);
 
-            // 2. Auto-generate listening exercises
-            const generatedListening = mapped
-                .map(generateListeningExercise)
-                .filter((ex): ex is Exercise => ex !== null);
+            // 2. Auto-generate listening exercises for half of them and replace the original
+            const finalExercises: Exercise[] = [];
 
-            // 3. Combine and shuffle
-            return shuffleArray([...mapped, ...generatedListening]);
+            const shuffledMapped = shuffleArray(mapped);
+            let numConverted = 0;
+            const targetConversions = Math.floor(shuffledMapped.length / 2);
+
+            for (const ex of shuffledMapped) {
+                if (numConverted < targetConversions) {
+                    const listeningEx = generateListeningExercise(ex);
+                    if (listeningEx) {
+                        finalExercises.push(listeningEx);
+                        numConverted++;
+                    } else {
+                        // Keep original if listening cannot be generated
+                        finalExercises.push(ex);
+                    }
+                } else {
+                    finalExercises.push(ex);
+                }
+            }
+
+            // 3. Shuffle final result
+            return shuffleArray(finalExercises);
         } catch (error) {
             console.error('[ExerciseService] Error fetching exercises:', error);
             return [];

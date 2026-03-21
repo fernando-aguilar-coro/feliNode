@@ -18,7 +18,7 @@ export const ShopScreen = () => {
     const { currencies, loading: currencyLoading, loadCurrencies } = useCurrencies();
     const { streak, loading: streakLoading, fetchStreak } = useStreak();
     const [buying, setBuying] = useState(false);
-    
+
     // Modal states
     const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
     const [purchasedItemName, setPurchasedItemName] = useState('');
@@ -69,8 +69,8 @@ export const ShopScreen = () => {
 
     const handleBuyDummyItem = (itemName: string, cost: number) => {
         if (currencies.michi_coins < cost) {
-             setPurchaseError(`Necesitas ${cost} Michi-Coins para comprar este artículo.`);
-             return;
+            setPurchaseError(`Necesitas ${cost} Michi-Coins para comprar este artículo.`);
+            return;
         }
         Alert.alert(
             "Confirmar Compra",
@@ -110,8 +110,6 @@ export const ShopScreen = () => {
             </View>
 
             <ScrollView contentContainerStyle={styles.container}>
-                <Animated.Text entering={FadeIn} style={[styles.title, { color: theme.colors.text }]}>La Tienda</Animated.Text>
-
                 {/* ── Error Text ──────────────────────────────────────────── */}
                 {purchaseError ? (
                     <Animated.Text entering={FadeIn} style={styles.errorText}>
@@ -192,7 +190,7 @@ export const ShopScreen = () => {
                 </Animated.View>
 
                 <Animated.View entering={FadeIn.delay(500)}>
-                     <AppAds type="banner" containerStyle={{ marginTop: 20, marginBottom: 20 }} />
+                    <AppAds type="banner" containerStyle={{ marginTop: 20, marginBottom: 20 }} />
                 </Animated.View>
             </ScrollView>
 
@@ -208,9 +206,9 @@ export const ShopScreen = () => {
                         <FontAwesome5 name="check-circle" size={60} color="#32CD32" style={{ marginBottom: 16 }} />
                         <Text style={[styles.modalTitle, { color: theme.colors.text }]}>¡Compra Exitosa!</Text>
                         <Text style={[styles.modalDesc, { color: theme.colors.text }]}>Has adquirido: {purchasedItemName}</Text>
-                        
-                        <Pressable 
-                            style={styles.modalButton} 
+
+                        <Pressable
+                            style={styles.modalButton}
                             onPress={() => {
                                 setPurchaseModalVisible(false);
                                 setPurchaseError('');

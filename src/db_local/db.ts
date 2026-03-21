@@ -30,7 +30,7 @@ export const initDatabase = async () => {
             title TEXT NOT NULL,
             description TEXT,
             theory TEXT, -- Markdown content
-            status TEXT DEFAULT 'locked',
+            status TEXT DEFAULT 'available',
             order_index INTEGER,
             FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
           );

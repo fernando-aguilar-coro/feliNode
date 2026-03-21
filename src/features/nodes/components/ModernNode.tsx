@@ -6,10 +6,12 @@ import { CatPawShape } from './CatPawShape';
 
 interface ModernNodeProps {
     node: TreeNode;
+    theme?: any;
 }
 
-export const ModernNode: React.FC<ModernNodeProps> = React.memo(({ node }) => {
-    const theme = useAppTheme();
+export const ModernNode: React.FC<ModernNodeProps> = React.memo(({ node, theme: propTheme }) => {
+    const contextTheme = useAppTheme();
+    const theme = propTheme || contextTheme;
     const colors = theme?.colors || {
         border: '#ccc',
         surface: '#fff',
@@ -27,18 +29,15 @@ export const ModernNode: React.FC<ModernNodeProps> = React.memo(({ node }) => {
             sc = colors.success;
             fc = 'transparent';
             sw = 2.5;
-        } else if (node.status === 'available') {
-            sc = "yellow";
+        } else {
+            // Gris oscuro en modo oscuro, gris claro en modo claro
+            sc = theme?.dark ? "#e8ffe8ff" : "#5c655cff";
             fc = 'transparent';
             sw = 3;
-        } else {
-            sc = colors.border;
-            fc = 'transparent';
-            sw = 1.5;
         }
 
         return { strokeColor: sc, fillColor: fc, strokeWidth: sw };
-    }, [node.status, colors]);
+    }, [node.status, colors, theme?.dark]);
 
     const { rotationOffset, scaleMultiplier } = useMemo(() => {
         let hash = 2166136261;
@@ -65,16 +64,14 @@ export const ModernNode: React.FC<ModernNodeProps> = React.memo(({ node }) => {
 
     return (
         <Group transform={nodeTransform}>
-            {node.status !== 'locked' ? (
-                <CatPawShape
-                    fillColor="transparent"
-                    strokeColor={strokeColor}
-                    strokeWidth={1.5}
-                    scale={1.2 * scaleMultiplier}
-                    opacity={0.3}
-                    rotation={rotationOffset}
-                />
-            ) : null}
+            <CatPawShape
+                fillColor="transparent"
+                strokeColor={strokeColor}
+                strokeWidth={1.5}
+                scale={1.2 * scaleMultiplier}
+                opacity={0.3}
+                rotation={rotationOffset}
+            />
             <CatPawShape
                 fillColor={fillColor}
                 strokeColor={strokeColor}
