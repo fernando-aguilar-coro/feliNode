@@ -90,7 +90,7 @@ export const KokoroDisclaimerModal = () => {
                 <Card style={styles.card}>
                     <Card.Content>
                         <Text style={styles.description}>
-                            FeliNode puede usar un modelo de voz avanzado (Kokoro TTS) para ofrecer una pronunciación más natural en inglés, sin necesidad de internet.
+                            nekoEnglish puede usar un modelo de voz avanzado (Kokoro TTS) para ofrecer una pronunciación más natural en inglés, sin necesidad de internet.
                         </Text>
                         <Text style={styles.subtitle}>
                             Requiere descargar un modelo de voz (aprox. 300MB) por única vez.

@@ -105,7 +105,7 @@ export const SpeakScreen = () => {
                                 <View style={[styles.bubbleWrapper, styles.aiWrapper]}>
                                     <View style={[styles.bubble, { backgroundColor: theme.colors.surface, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: theme.colors.border }]}>
                                         <Text style={[styles.bubbleText, { color: theme.colors.text, opacity: 0.6 }]}>
-                                            Hablando espera ...<Animated.Text>…</Animated.Text>
+                                            Pensando<Animated.Text>…</Animated.Text>
                                         </Text>
                                     </View>
                                 </View>

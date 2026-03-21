@@ -111,6 +111,7 @@ export const useSpeakSpeech = () => {
 
     const toggleCallMode = useCallback(async () => {
         if (!isCallActive) {
+            TtsService.stop(); // Callamos a Feli inmediatamente si el usuario enciende el micrófono manual
             setInputText('');
             resetBuffer();
             const started = await startListening();

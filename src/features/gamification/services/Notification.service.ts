@@ -1,4 +1,4 @@
-import notifee, { TriggerType, TimestampTrigger } from '@notifee/react-native';
+import notifee, { TriggerType, TimestampTrigger, IntervalTrigger, TimeUnit } from '@notifee/react-native';
 
 export const NotificationService = {
     scheduleStreakReminder: async (currentStreak: number, lastActiveDate: string | null) => {
@@ -14,7 +14,7 @@ export const NotificationService = {
             });
 
             // 3. Cancel any existing streak reminders scheduled previously
-            await notifee.cancelTriggerNotifications(['streak-reminder-18', 'streak-reminder-23']);
+            await notifee.cancelTriggerNotifications(['streak-reminder-18', 'streak-reminder-23', 'practice-reminder-4h']);
 
             if (currentStreak === 0 || !lastActiveDate) {
                 return; // Nothing to protect, so no need for a reminder
@@ -42,6 +42,31 @@ export const NotificationService = {
                 // They haven't played today, so they need to play by tonight.
             }
 
+            // Message banks
+            const messages18 = [
+                { title: '¡Es hora de practicar! 📚', body: `Tienes una racha de ${currentStreak} días. ¡Haz una lección ahora para que no afecte a tus protectores!` },
+                { title: '¡Tu racha está en riesgo! 🚨', body: `Protege tu racha de ${currentStreak} días dedicando unos minutos al inglés.` },
+                { title: 'El tiempo vuela ⏰', body: `Conserva tu racha de ${currentStreak} días practicando ahora.` },
+                { title: '¡No te rindas! 💪', body: `Asegura tu racha de ${currentStreak} días con una lección corta.` },
+            ];
+
+            const messages23 = [
+                { title: '¡No pierdas tu racha! 🔥', body: 'Solo queda una hora para medianoche. ¡Completa una lección ahora mismo!' },
+                { title: 'Última oportunidad ⏳', body: 'Tu racha está a punto de reiniciarse. ¡Practica ya!' },
+                { title: '¡Actúa rápido! ⚡', body: 'Queda muy poco para que termine el día. ¡Salva tu racha!' },
+                { title: '¡Es ahora o nunca! 🏃', body: 'No dejes que el reloj te gane sin practicar hoy.' },
+            ];
+
+            const messages4h = [
+                { title: '¡Hora de un repaso rápido! 🚀', body: 'Unos minutos de inglés hacen la diferencia.' },
+                { title: 'Mantén tu mente fresca 🧠', body: '¿Qué te parece practicar un poco de inglés ahora?' },
+                { title: 'Pequeños pasos, grandes logros 🌟', body: 'Es un buen momento para una lección corta.' },
+                { title: '¡El inglés te espera! 🇬🇧', body: 'Sigue mejorando tus habilidades en este momento.' },
+                { title: '¿Tienes un rato libre? ☕', body: 'Aprovecha para aprender algo nuevo en inglés.' },
+            ];
+
+            const getRandomMsg = (arr: { title: string, body: string }[]) => arr[Math.floor(Math.random() * arr.length)];
+
             // 5. Schedule 18:00 Notification if it's in the future
             if (now.getTime() < targetDate18.getTime()) {
                 const trigger18: TimestampTrigger = {
@@ -49,11 +74,13 @@ export const NotificationService = {
                     timestamp: targetDate18.getTime(),
                 };
 
+                const msg18 = getRandomMsg(messages18);
+
                 await notifee.createTriggerNotification(
                     {
                         id: 'streak-reminder-18',
-                        title: '¡Es hora de practicar! 📚',
-                        body: `Tienes una racha de ${currentStreak} días. ¡Haz una lección ahora para que no afecte a tus protectores!`,
+                        title: msg18.title,
+                        body: msg18.body,
                         android: {
                             channelId,
                             smallIcon: 'ic_launcher', // Usa el ícono de la app
@@ -77,11 +104,13 @@ export const NotificationService = {
                     timestamp: targetDate23.getTime(),
                 };
 
+                const msg23 = getRandomMsg(messages23);
+
                 await notifee.createTriggerNotification(
                     {
                         id: 'streak-reminder-23',
-                        title: '¡No pierdas tu racha! 🔥',
-                        body: 'Solo queda una hora para medianoche. ¡Completa una lección ahora mismo!',
+                        title: msg23.title,
+                        body: msg23.body,
                         android: {
                             channelId,
                             smallIcon: 'ic_launcher', // Usa el ícono de la app
@@ -97,6 +126,32 @@ export const NotificationService = {
                 );
 
             }
+
+            // 7. Schedule 4-hour repeating reminder
+            const trigger4h: IntervalTrigger = {
+                type: TriggerType.INTERVAL,
+                interval: 4,
+                timeUnit: TimeUnit.HOURS,
+            };
+
+            const msg4h = getRandomMsg(messages4h);
+
+            await notifee.createTriggerNotification(
+                {
+                    id: 'practice-reminder-4h',
+                    title: msg4h.title,
+                    body: msg4h.body,
+                    android: {
+                        channelId,
+                        smallIcon: 'ic_launcher',
+                        pressAction: {
+                            id: 'default',
+                        },
+                    },
+                },
+                trigger4h,
+            );
+
         } catch (error) {
             console.error('[NotificationService] Error scheduling notification:', error);
         }

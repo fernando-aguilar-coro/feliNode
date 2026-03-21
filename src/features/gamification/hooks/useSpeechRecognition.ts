@@ -72,7 +72,7 @@ export const useSpeechRecognition = (options: UseSpeechRecognitionOptions) => {
     }, []);
 
     useSpeechRecognitionEvent('result', (event) => {
-        // Stop AI speaking if user interrupts
+        // Stop fallback AI speaking if user suddenly interrupts (for Native System TTS)
         TtsService.stop();
 
         const fullText = event.results?.[0]?.transcript ?? '';

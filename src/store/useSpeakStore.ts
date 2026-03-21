@@ -121,6 +121,11 @@ export const useSpeakStore = create<SpeakStoreState>()(
                     error: null,
                 }));
 
+                // Silenciar el micrófono de inmediato (durante la carga y la respuesta visual/hablada)
+                if (get().isCallActive && audioCallbacks?.stopListening) {
+                    audioCallbacks.stopListening();
+                }
+
                 try {
                     const { reply, suggestions: newSuggestions } = await SpeakChatService.sendMessage(get().messages, text);
 
@@ -138,10 +143,6 @@ export const useSpeakStore = create<SpeakStoreState>()(
                         isLoading: false,
                     }));
 
-                    if (get().isCallActive && audioCallbacks?.stopListening) {
-                        audioCallbacks.stopListening();
-                    }
-
                     await TtsService.speak(reply, { language: 'en-US' });
                     
                     if (get().isCallActive && audioCallbacks?.resetBuffer && audioCallbacks?.startListening) {
@@ -151,6 +152,12 @@ export const useSpeakStore = create<SpeakStoreState>()(
                 } catch (err) {
                     console.error('[SpeakStore.sendMessage] Error:', err);
                     set({ error: 'No se pudo obtener respuesta. Inténtalo de nuevo.', isLoading: false });
+
+                    // Si falló el API, reacivar el micrófono si seguíamos en modo llamada
+                    if (get().isCallActive && audioCallbacks?.resetBuffer && audioCallbacks?.startListening) {
+                        audioCallbacks.resetBuffer();
+                        audioCallbacks.startListening();
+                    }
                 }
             }
         }),

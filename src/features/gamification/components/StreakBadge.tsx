@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     },
     text: {
         marginLeft: 6,
-        fontFamily: 'Nunito-Bold', // Assuming Nuito-Bold is standard for FeliNode based on other files
+        fontFamily: 'Nunito-Bold',
         fontSize: 14,
     },
     activeText: {
