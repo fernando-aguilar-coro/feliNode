@@ -2,10 +2,8 @@ import React, { useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { HomeScreen } from '../screens/HomeScreen';
-import { PronunciationAssessmentScreen } from '../../learning/screens/PronunciationAssessmentScreen';
-import { InfinityLandingScreen } from '../../learning/screens/InfinityLandingScreen';
+import { PracticeLandingScreen } from '../../learning/screens/PracticeLandingScreen';
 import { SettingsScreen } from '../../settings/screens/SettingsScreen';
-import { GamificationNavigator } from '../../gamification/navigation/GamificationNavigator';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { audioService } from '../../settings/services/audio.service';
@@ -13,8 +11,6 @@ import { audioService } from '../../settings/services/audio.service';
 export type HomeTabParamList = {
     HomeMain: undefined;
     InfinityLanding: undefined;
-    Pronunciation: undefined;
-    Speak: undefined;
     Settings: undefined;
 };
 
@@ -64,43 +60,19 @@ export const HomeTabNavigator = () => {
                 name="HomeMain"
                 component={HomeScreen}
                 options={{
-                    tabBarLabel: 'Inicio',
+                    tabBarLabel: 'Aprende',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="home-outline" size={24} color={color} />
+                        <Ionicons name="compass-outline" size={24} color={color} />
                     ),
                 }}
             />
             <Tab.Screen
                 name="InfinityLanding"
-                component={InfinityLandingScreen}
+                component={PracticeLandingScreen}
                 options={{
-                    tabBarLabel: 'Infinito',
+                    tabBarLabel: 'Practica',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="infinite-outline" size={24} color={color} />
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="Pronunciation"
-                component={PronunciationAssessmentScreen}
-                options={{
-                    tabBarLabel: 'voz',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="mic-outline" size={24} color={color} />
-                    ),
-                }}
-                listeners={{
-                    focus: () => audioService.pauseBGM(),
-                    blur: () => audioService.playBGM(),
-                }}
-            />
-            <Tab.Screen
-                name="Speak"
-                component={GamificationNavigator}
-                options={{
-                    tabBarLabel: 'habla',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="chatbubble-outline" size={24} color={color} />
+                        <Ionicons name="sparkles-outline" size={24} color={color} />
                     ),
                 }}
             />
@@ -108,7 +80,7 @@ export const HomeTabNavigator = () => {
                 name="Settings"
                 component={SettingsScreen}
                 options={{
-                    tabBarLabel: 'Ajustes',
+                    tabBarLabel: 'Settings',
                     tabBarIcon: ({ color }) => (
                         <Ionicons name="settings-outline" size={24} color={color} />
                     ),

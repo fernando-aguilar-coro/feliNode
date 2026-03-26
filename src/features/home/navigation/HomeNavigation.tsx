@@ -5,9 +5,11 @@ import { LessonScreen } from '../../learning/screens/LessonScreen';
 import { LessonModeSelectionScreen } from '../../learning/screens/LessonModeSelectionScreen';
 import { InfinityExerciseScreen } from '../../learning/screens/InfinityExerciseScreen';
 import { InfinitySelectPairsScreen } from "../../learning/screens/InfinitySelectPairsScreen";
+import { PronunciationAssessmentScreen } from '../../learning/screens/PronunciationAssessmentScreen';
 import { StreakDetailsScreen } from '../../gamification/screens/StreakDetailsScreen';
 import { ShopScreen } from '../../gamification/screens/ShopScreen';
 import { ShopFloatingButton } from '../../gamification/components/ShopFloatingButton';
+import { SpeakScreen } from '../../gamification/screens/SpeakScreen';
 import { View } from 'react-native';
 
 export type HomeStackParamList = {
@@ -20,6 +22,7 @@ export type HomeStackParamList = {
     Settings: undefined;
     StreakDetails: undefined;
     ShopScreen: undefined;
+    Speak: undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -35,6 +38,8 @@ export const HomeNavigation = () => {
                 <Stack.Screen name="InfinitySelectPairs" component={InfinitySelectPairsScreen} />
                 <Stack.Screen name="StreakDetails" component={StreakDetailsScreen} />
                 <Stack.Screen name="ShopScreen" component={ShopScreen} />
+                <Stack.Screen name="PronunciationAssessment" component={PronunciationAssessmentScreen} />
+                <Stack.Screen name="Speak" component={SpeakScreen} />
             </Stack.Navigator>
             <ShopFloatingButton />
         </View>

@@ -5,6 +5,7 @@ export interface NodeData {
     description?: string;
     status: 'available' | 'completed';
     parents: string[];
+    order_index?: number;
 }
 
 export interface Point {

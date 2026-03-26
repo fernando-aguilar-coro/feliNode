@@ -7,6 +7,7 @@ export interface LessonNode {
     description: string;
     status: string;
     parents: string[]; // List of parent IDs
+    order_index: number;
 }
 
 export class LessonRepository extends BaseRepository {
@@ -32,7 +33,7 @@ export class LessonRepository extends BaseRepository {
     async getLessonNodes(): Promise<LessonNode[]> {
         const db = await this.db;
 
-        const lessons: any[] = await db.getAllAsync("SELECT id, title, description, status FROM lessons WHERE id NOT LIKE 'placement_test%' ORDER BY order_index ASC");
+        const lessons: any[] = await db.getAllAsync("SELECT id, title, description, status, order_index FROM lessons WHERE id NOT LIKE 'placement_test%' ORDER BY order_index ASC");
         const dependencies: any[] = await db.getAllAsync('SELECT lesson_id, prerequisite_id FROM lesson_dependencies');
 
         const dependencyMap = new Map<string, string[]>();

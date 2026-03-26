@@ -25,6 +25,8 @@ interface SettingsState {
     setHasDecidedPlacementTest: (decided: boolean) => void;
     homeViewMode: 'tree' | 'list';
     setHomeViewMode: (mode: 'tree' | 'list') => void;
+    themeMode: 'light' | 'dark' | 'system';
+    setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -32,8 +34,8 @@ export const useSettingsStore = create<SettingsState>()(
         (set) => ({
             englishVoice: KOKORO_VOICE_AF_HEART as VoiceConfig, // Default Kokoro voice
             spanishVoiceId: null, // Default will be resolved by the system if null
-            sfxEnabled: true,
-            bgmEnabled: true,
+            sfxEnabled: false,
+            bgmEnabled: false,
             isKokoroDownloaded: false,
             hasDecidedKokoroDownload: false,
             wantsKokoro: false,
@@ -50,6 +52,8 @@ export const useSettingsStore = create<SettingsState>()(
             setHasDecidedPlacementTest: (decided: boolean) => set({ hasDecidedPlacementTest: decided }),
             homeViewMode: 'list',
             setHomeViewMode: (mode: 'tree' | 'list') => set({ homeViewMode: mode }),
+            themeMode: 'light',
+            setThemeMode: (mode: 'light' | 'dark' | 'system') => set({ themeMode: mode }),
         }),
         {
             name: 'settings-storage',

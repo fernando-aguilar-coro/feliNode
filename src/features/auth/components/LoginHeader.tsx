@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { AppText, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface LoginHeaderProps {
     step: 'initial' | 'email' | 'code';
@@ -26,8 +25,12 @@ export const LoginHeader: React.FC<LoginHeaderProps> = ({ step, email }) => {
 
     return (
         <View style={styles.container}>
-            <View style={[styles.iconContainer, { backgroundColor: theme.colors.surface }]}>
-                <MaterialCommunityIcons name="cat" size={56} color={theme.colors.primary} />
+            <View >
+                <Image
+                    source={require('../../../../assets/icon.png')}
+                    style={{ width: 160, height: 160, borderRadius: 40 }}
+                    resizeMode="contain"
+                />
             </View>
             <AppText variant="xxl" align="center" style={{ color: theme.colors.primary, marginBottom: 8, fontSize: 40 }}>
                 {getTitle()}

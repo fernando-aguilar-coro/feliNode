@@ -15,6 +15,7 @@ import { lightColors, darkColors } from './colors';
 import { spacing } from './spacing';
 import { typography } from './typography';
 import { theme as defaultTheme } from './index';
+import { useSettingsStore } from '../store/SettingsStore';
 
 type ThemeType = typeof defaultTheme & {
     dark: boolean;
@@ -38,8 +39,9 @@ export const { LightTheme: NavLightTheme, DarkTheme: NavDarkTheme } = adaptNavig
 
 export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const systemColorScheme = useColorScheme();
-    const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>('dark');
-    const [isDark, setIsDark] = useState(systemColorScheme === 'dark');
+    const themeMode = useSettingsStore(state => state.themeMode);
+    const setThemeMode = useSettingsStore(state => state.setThemeMode);
+    const [isDark, setIsDark] = useState(themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark');
 
     useEffect(() => {
         if (themeMode === 'system') {
@@ -76,7 +78,7 @@ export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     const toggleTheme = () => {
-        setThemeMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+        setThemeMode(themeMode === 'light' ? 'dark' : 'light');
     };
 
     return (

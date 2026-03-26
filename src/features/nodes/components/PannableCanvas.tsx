@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withDecay } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withDecay, withTiming } from 'react-native-reanimated';
 
 
 // Basic props for the PannableCanvas
@@ -15,6 +15,7 @@ interface PannableCanvasProps {
 
 export interface PannableCanvasRef {
     reset: () => void;
+    centerOn: (x: number, y: number, screenW: number, screenH: number) => void;
 }
 
 const clamp = (val: number, min: number, max: number) => {
@@ -58,16 +59,27 @@ export const PannableCanvas = React.forwardRef<PannableCanvasRef, PannableCanvas
     React.useImperativeHandle(ref, () => ({
         reset: () => {
             // Reset to initial values with animation
-            // Cancel momentum might be needed if tracking ID, but updating values usually stops decay naturally
-            // We set velocity to 0 effectively by overwriting value.
-
-            translationX.value = initialX;
-            translationY.value = initialY;
-            scale.value = 1;
+            translationX.value = withTiming(initialX);
+            translationY.value = withTiming(initialY);
+            scale.value = withTiming(1);
 
             // Reset saved state
             prevTranslationX.value = initialX;
             prevTranslationY.value = initialY;
+            startScale.value = 1;
+        },
+        centerOn: (nodeX, nodeY, screenW, screenH) => {
+            // Center the node
+            const targetX = (screenW / 2) - nodeX;
+            // Add a little offset for better UX (e.g. padding top)
+            const targetY = (screenH / 2) - nodeY - 50; 
+            
+            translationX.value = withTiming(targetX, { duration: 800 });
+            translationY.value = withTiming(targetY, { duration: 800 });
+            scale.value = withTiming(1, { duration: 800 });
+
+            prevTranslationX.value = targetX;
+            prevTranslationY.value = targetY;
             startScale.value = 1;
         }
     }));

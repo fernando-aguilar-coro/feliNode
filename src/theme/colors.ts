@@ -10,14 +10,14 @@ const common = {
 
     // Status
     success: '#00B894',
-    error: '#FF7675',
-    warning: '#FFEAA7',
-    info: '#74B9FF',
+    error: '#D63031',
+    warning: '#F39C12',
+    info: '#0984E3',
 };
 
 export const lightColors = {
     ...common,
-    background: '#FFFFFF',
+    background: '#ffff',
     surface: '#F5F6FA',
     text: '#2D3436',
     textSecondary: '#636E72',

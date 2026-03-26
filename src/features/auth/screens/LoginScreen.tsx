@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
-import { Button } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useUserStore } from '../../../store/UserStore';
 import { Screen, Spacer, AppText, AppButton } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';

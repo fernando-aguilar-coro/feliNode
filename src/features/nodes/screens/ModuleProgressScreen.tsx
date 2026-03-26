@@ -1,25 +1,14 @@
-import React, { useMemo, useCallback } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { ModuleAccordion } from '../components/list/ModuleAccordion';
 import { OverallProgress } from '../components/progress/OverallProgress';
 import { useModuleProgress } from '../hooks/useModuleProgress';
-import { StreakBadge } from '../../gamification/components/StreakBadge';
-import { CurrencyBadge } from '../../gamification/components/CurrencyBadge';
-import { useSettingsStore } from '../../../store/SettingsStore';
-import { useNavigation } from '@react-navigation/native';
-import { audioService } from '../../settings/services/audio.service';
+import { ModuleStatsCards } from '../components/progress/ModuleStatsCards';
 
 export const ModuleProgressScreen = () => {
     const theme = useAppTheme();
-    const navigation = useNavigation<any>();
-    const showStreak = useSettingsStore(state => state.showStreak);
     const { modules, isLoading, expandedModules, toggleModule } = useModuleProgress();
-
-    const navigateToStreakDetails = useCallback(() => {
-        audioService.playClickSound();
-        navigation.navigate('StreakDetails');
-    }, [navigation]);
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -35,11 +24,6 @@ export const ModuleProgressScreen = () => {
         listContent: {
             paddingBottom: 40,
         },
-        headerContainer: {
-            paddingHorizontal: 20,
-            paddingTop: 20,
-            paddingBottom: 10,
-        },
         headerTitle: {
             fontSize: 28,
             fontWeight: 'bold',
@@ -49,35 +33,16 @@ export const ModuleProgressScreen = () => {
             fontSize: 16,
             color: theme.colors.textSecondary,
             marginTop: 4,
-        },
-        topBannerContainer: {
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-            opacity: 0.8,
-            alignItems: 'center',
-            paddingHorizontal: 16,
-            marginTop: 12,
-            marginBottom: 4,
-            gap: 8,
         }
     }), [theme]);
 
     const renderHeader = useMemo(() => (
         <View>
-            <View style={[styles.topBannerContainer, { opacity: 0.8 }]}>
-                {showStreak && (
-                    <TouchableOpacity
-                        onPress={navigateToStreakDetails}
-                        activeOpacity={0.8}
-                    >
-                        <StreakBadge />
-                    </TouchableOpacity>
-                )}
-                <CurrencyBadge />
-            </View>
+            <ModuleStatsCards orientation="row" />
+
             {modules.length > 0 && <OverallProgress modules={modules} />}
         </View>
-    ), [modules, showStreak, styles.topBannerContainer, navigateToStreakDetails]);
+    ), [modules]);
 
     if (isLoading) {
         return (

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, TextInput, Keyboard, TouchableWithoutFeedback, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TextInput, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
 import { AppText, AppButton, Spacer, Screen } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { PronunciationExercise } from '../components/exercises/PronunciationExercise';
