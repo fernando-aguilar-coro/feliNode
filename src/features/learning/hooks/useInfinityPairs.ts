@@ -1,11 +1,25 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Pair, InfinityPairsService } from '../services/InfinityPairs.service';
+import {
+    calculateComboPoints,
+    shouldGrantTimeBonus,
+    shouldGrantLifeBonus,
+    extractMissedPair,
+    addUniqueMissedPair,
+    fillGridFromBuffer,
+} from '../helpers/exercises/InfinityPairs.helpers';
 
 export interface InfinityPairItem {
     id: string;
     text: string;
     pairId: number;
     col: 'left' | 'right';
+}
+
+/** A failed attempt stores the english/spanish texts for the error summary. */
+export interface MissedPair {
+    left: string;
+    right: string;
 }
 
 interface UseInfinityPairsProps {
@@ -20,12 +34,12 @@ interface UseInfinityPairsProps {
 export const useInfinityPairs = ({
     lessonId,
     visibleCount = 8,
-    batchSize = 25,
+    batchSize = 15,
     fillBatchSize = 3,
     initialLives = 7,
     initialTime = 60,
 }: UseInfinityPairsProps = {}) => {
-    // Game State
+    // ── Game board state ────────────────────────────────────────────────────
     const [pairBuffer, setPairBuffer] = useState<Pair[]>([]);
     const [leftItems, setLeftItems] = useState<(InfinityPairItem | null)[]>(Array(visibleCount).fill(null));
     const [rightItems, setRightItems] = useState<(InfinityPairItem | null)[]>(Array(visibleCount).fill(null));
@@ -33,27 +47,36 @@ export const useInfinityPairs = ({
     const [matchedIds, setMatchedIds] = useState<Set<number>>(new Set());
     const [errorIds, setErrorIds] = useState<[string, string] | null>(null);
 
-    // Meta State
+    // ── Scoring & progression ───────────────────────────────────────────────
     const [score, setScore] = useState(0);
     const [roundScore, setRoundScore] = useState(0);
     const [roundGoal, setRoundGoal] = useState(batchSize);
     const [roundNum, setRoundNum] = useState(1);
+    const [combo, setCombo] = useState(0);           // internal – resets at ×7 for cyclic bonuses
+    const [displayCombo, setDisplayCombo] = useState(0); // visible to user – resets only on fail
 
+    // ── Resources ───────────────────────────────────────────────────────────
     const [lives, setLives] = useState(initialLives);
     const [timeLeft, setTimeLeft] = useState(initialTime);
     const [isGameOver, setIsGameOver] = useState(false);
+    const [isLevelUp, setIsLevelUp] = useState(false);
 
-    // Loading State
+    // ── Error summary ───────────────────────────────────────────────────────
+    const [missedPairs, setMissedPairs] = useState<MissedPair[]>([]);
+
+    // ── Loading ─────────────────────────────────────────────────────────────
     const [isFetching, setIsFetching] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-    // Trackers
+    // ── Refs / trackers ─────────────────────────────────────────────────────
     const nextPairId = useRef(0);
     const isFetchingRef = useRef(false);
     const lastFetchTime = useRef(0);
     const fetchThreshold = 5;
+    /** Set by handlePress, consumed by the screen to trigger haptic once. */
+    const triggerErrorHaptic = useRef(false);
 
-    // Timer logic
+    // ── Timer ───────────────────────────────────────────────────────────────
     useEffect(() => {
         if (isInitialLoading || isGameOver) return;
 
@@ -69,6 +92,7 @@ export const useInfinityPairs = ({
         return () => clearInterval(timer);
     }, [isInitialLoading, isGameOver]);
 
+    // ── Fetch pairs from AI ─────────────────────────────────────────────────
     const fetchPairs = useCallback(async (isInitial = false) => {
         if (isFetchingRef.current) return;
 
@@ -80,7 +104,6 @@ export const useInfinityPairs = ({
         if (isInitial) setIsInitialLoading(true);
 
         const newPairs = await InfinityPairsService.fetchPairs(lessonId, batchSize, score);
-
         if (newPairs.length > 0) {
             setPairBuffer(prev => [...prev, ...newPairs]);
         }
@@ -91,135 +114,150 @@ export const useInfinityPairs = ({
         if (isInitial) setIsInitialLoading(false);
     }, [lessonId, batchSize]);
 
-    // Initial Fetch
+    // ── Initial fetch ───────────────────────────────────────────────────────
     useEffect(() => {
         fetchPairs(true);
     }, [fetchPairs]);
 
-    // Handle Round progression
+    // ── Round progression — brief level-up ceremony ─────────────────────────
     useEffect(() => {
-        if (roundScore >= roundGoal) {
-            // Level Up
-            setRoundScore(0);
-            setRoundNum(r => r + 1);
-            setRoundGoal(g => g + 5);
-            setTimeLeft(initialTime);
+        if (roundScore >= roundGoal && !isLevelUp) {
+            setIsLevelUp(true);
+            setTimeout(() => {
+                // Clear the grid so fillGridFromBuffer treats it as initial fill & shuffles positions
+                setLeftItems(Array(visibleCount).fill(null));
+                setRightItems(Array(visibleCount).fill(null));
+                setMatchedIds(new Set());
+                setSelectedId(null);
+                setRoundScore(0);
+                setRoundNum(r => r + 1);
+                setRoundGoal(g => g + 5);
+                setTimeLeft(initialTime);
+                setIsLevelUp(false);
+            }, 1500);
         }
-    }, [roundScore, roundGoal, initialTime]);
+    }, [roundScore, roundGoal, initialTime, isLevelUp]);
 
-    // Grid filling logic
+    // ── Grid filling — uses extracted helper ────────────────────────────────
     useEffect(() => {
         if (isInitialLoading || isGameOver) return;
 
-        let bufferClone = [...pairBuffer];
-        let changed = false;
+        const result = fillGridFromBuffer(
+            leftItems, rightItems, pairBuffer,
+            nextPairId.current, visibleCount, fillBatchSize,
+        );
 
-        const newLeftItems = [...leftItems];
-        const newRightItems = [...rightItems];
-
-        let leftEmptyIndices: number[] = [];
-        let rightEmptyIndices: number[] = [];
-
-        newLeftItems.forEach((item, index) => { if (item === null) leftEmptyIndices.push(index); });
-        newRightItems.forEach((item, index) => { if (item === null) rightEmptyIndices.push(index); });
-
-        const isInitialFill = leftEmptyIndices.length === visibleCount;
-
-        // Check if we have enough empty slots to fill (must fill 3 at a time, unless initial fill)
-        const emptySpots = Math.min(leftEmptyIndices.length, rightEmptyIndices.length);
-
-        if (isInitialFill || emptySpots >= fillBatchSize) {
-            if (isInitialFill) {
-                leftEmptyIndices.sort(() => Math.random() - 0.5);
-                rightEmptyIndices.sort(() => Math.random() - 0.5);
-            }
-
-            // Fill either the whole board or `fillBatchSize` spots
-            const pairsToAdd = isInitialFill ? emptySpots : fillBatchSize;
-            const actualAdd = Math.min(pairsToAdd, bufferClone.length);
-
-            for (let k = 0; k < actualAdd; k++) {
-                const pair = bufferClone.shift();
-                if (pair) {
-                    const id = nextPairId.current++;
-                    const lIndex = leftEmptyIndices[k];
-                    const rIndex = rightEmptyIndices[k];
-
-                    newLeftItems[lIndex] = { id: `l-${id}`, text: pair.left, pairId: id, col: 'left' };
-                    newRightItems[rIndex] = { id: `r-${id}`, text: pair.right, pairId: id, col: 'right' };
-                    changed = true;
-                }
-            }
+        if (result.changed) {
+            nextPairId.current = result.nextId;
+            setLeftItems(result.newLeftItems);
+            setRightItems(result.newRightItems);
+            setPairBuffer(result.remainingBuffer);
         }
 
-        if (changed) {
-            setLeftItems(newLeftItems);
-            setRightItems(newRightItems);
-            setPairBuffer(bufferClone);
-        }
-
-        if (bufferClone.length < fetchThreshold && !isFetchingRef.current) {
+        if (result.remainingBuffer.length < fetchThreshold && !isFetchingRef.current) {
             fetchPairs();
         }
-
     }, [pairBuffer, leftItems, rightItems, isInitialLoading, isGameOver, fetchPairs, visibleCount, fillBatchSize]);
 
+    // ── Core interaction handler ────────────────────────────────────────────
     const handlePress = (item: InfinityPairItem) => {
         if (isGameOver) return;
         if (errorIds) return;
         if (matchedIds.has(item.pairId)) return;
 
+        // First selection
         if (selectedId === null) {
             setSelectedId(item.id);
-        } else if (selectedId === item.id) {
+            return;
+        }
+
+        // Deselect same item
+        if (selectedId === item.id) {
             setSelectedId(null);
+            return;
+        }
+
+        const allItems = [...leftItems, ...rightItems].filter(Boolean) as InfinityPairItem[];
+        const firstItem = allItems.find(i => i.id === selectedId);
+        if (!firstItem) return;
+
+        // Same column → just switch selection
+        if (firstItem.col === item.col) {
+            setSelectedId(item.id);
+            return;
+        }
+
+        if (firstItem.pairId === item.pairId) {
+            handleMatch(item.pairId);
         } else {
-            const allItems = [...leftItems, ...rightItems].filter(Boolean) as InfinityPairItem[];
-            const firstItem = allItems.find(i => i.id === selectedId);
-
-            if (!firstItem) return;
-
-            if (firstItem.col === item.col) {
-                setSelectedId(item.id);
-                return;
-            }
-
-            if (firstItem.pairId === item.pairId) {
-                // MATCH
-                setMatchedIds(prev => new Set(prev).add(item.pairId));
-                setSelectedId(null);
-                setScore(s => s + 1);
-                setRoundScore(s => s + 1);
-
-                setTimeout(() => {
-                    setLeftItems(prev => prev.map(i => i?.pairId === item.pairId ? null : i));
-                    setRightItems(prev => prev.map(i => i?.pairId === item.pairId ? null : i));
-                    setMatchedIds(prev => {
-                        const newSet = new Set(prev);
-                        newSet.delete(item.pairId);
-                        return newSet;
-                    });
-                }, 400);
-
-            } else {
-                // FAILURE
-                setLives(prev => {
-                    const newLives = prev - 1;
-                    if (newLives <= 0) {
-                        setIsGameOver(true);
-                    }
-                    return newLives;
-                });
-                setErrorIds([selectedId, item.id]);
-                setTimeout(() => {
-                    setErrorIds(null);
-                    setSelectedId(null);
-                }, 800);
-            }
+            handleMismatch(allItems, item.id);
         }
     };
 
+    // ── Match sub-handler ───────────────────────────────────────────────────
+    const handleMatch = (pairId: number) => {
+        setMatchedIds(prev => new Set(prev).add(pairId));
+        setSelectedId(null);
+
+        const newInternalCombo = combo + 1;
+        const newDisplayCombo = displayCombo + 1;
+        setDisplayCombo(newDisplayCombo);
+
+        const points = calculateComboPoints(newInternalCombo);
+        setScore(s => s + points);
+        setRoundScore(s => s + points);
+
+        if (shouldGrantTimeBonus(newInternalCombo)) {
+            setTimeLeft(prev => prev + 5);
+        }
+
+        if (shouldGrantLifeBonus(newInternalCombo)) {
+            setLives(prev => prev + 1);
+            setCombo(0);  // reset internal cycle
+        } else {
+            setCombo(newInternalCombo);
+        }
+
+        setTimeout(() => {
+            setLeftItems(prev => prev.map(i => i?.pairId === pairId ? null : i));
+            setRightItems(prev => prev.map(i => i?.pairId === pairId ? null : i));
+            setMatchedIds(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(pairId);
+                return newSet;
+            });
+        }, 400);
+    };
+
+    // ── Mismatch sub-handler ────────────────────────────────────────────────
+    const handleMismatch = (allItems: InfinityPairItem[], pressedItemId: string) => {
+        setCombo(0);
+        setDisplayCombo(0);
+
+        // Track missed pair for game-over summary
+        const missed = extractMissedPair(allItems, selectedId!, pressedItemId);
+        if (missed) {
+            setMissedPairs(prev => addUniqueMissedPair(prev, missed));
+        }
+
+        triggerErrorHaptic.current = true;
+
+        setLives(prev => {
+            const newLives = prev - 1;
+            if (newLives <= 0) setIsGameOver(true);
+            return newLives;
+        });
+
+        setErrorIds([selectedId!, pressedItemId]);
+        setTimeout(() => {
+            setErrorIds(null);
+            setSelectedId(null);
+        }, 800);
+    };
+
+    // ── Restart ─────────────────────────────────────────────────────────────
     const restartGame = useCallback(() => {
+        InfinityPairsService.resetUsedPairs();
         setPairBuffer([]);
         setLeftItems(Array(visibleCount).fill(null));
         setRightItems(Array(visibleCount).fill(null));
@@ -230,9 +268,13 @@ export const useInfinityPairs = ({
         setLives(initialLives);
         setTimeLeft(initialTime);
         setIsGameOver(false);
+        setIsLevelUp(false);
         setIsInitialLoading(true);
         setSelectedId(null);
         setErrorIds(null);
+        setCombo(0);
+        setDisplayCombo(0);
+        setMissedPairs([]);
         setMatchedIds(new Set());
         fetchPairs(true);
     }, [visibleCount, batchSize, initialLives, initialTime, fetchPairs]);
@@ -250,8 +292,12 @@ export const useInfinityPairs = ({
         roundGoal,
         roundScore,
         isGameOver,
+        isLevelUp,
         isInitialLoading,
+        combo: displayCombo,
+        missedPairs,
+        triggerErrorHaptic,
         handlePress,
-        restartGame
+        restartGame,
     };
 };

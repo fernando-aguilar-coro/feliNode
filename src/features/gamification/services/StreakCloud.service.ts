@@ -1,6 +1,6 @@
 import { supabase } from '../../../api/supabaseClient';
 import { streakRepository } from '../../../db_local/repositories';
-import { NotificationService } from './Notification.service';
+import { NotificationService } from '../../../services/Notification.service';
 import { useUserStore } from '../../../store/UserStore';
 
 export interface StreakData {

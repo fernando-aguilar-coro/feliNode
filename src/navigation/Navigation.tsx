@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import LoginScreen from '../features/auth/screens/LoginScreen';
-import { PlacementTestScreen } from '../features/learning/components/PlacementTestScreen';
+import { TestScreen } from '../features/learning/components/TestScreen';
 import { ChoseInitialTest } from '../features/learning/screens/ChoseInitialTest';
 
 import { LoadingScreen } from '../components';
@@ -93,7 +93,7 @@ export const Navigation = () => {
                         />
                         <Stack.Screen
                             name="PlacementEvaluation"
-                            component={PlacementTestScreen}
+                            component={TestScreen}
                             options={{ title: 'Placement Test' }}
                         />
                     </>

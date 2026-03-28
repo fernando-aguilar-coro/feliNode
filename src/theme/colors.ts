@@ -1,6 +1,6 @@
 const common = {
     // Brand
-    primary: '#7db0b0ff',
+    primary: '#7db0b0',
     secondary: '#5d554f74',
 
     // Base
@@ -17,7 +17,7 @@ const common = {
 
 export const lightColors = {
     ...common,
-    background: '#ffff',
+    background: '#FFFFFF',
     surface: '#F5F6FA',
     text: '#2D3436',
     textSecondary: '#636E72',

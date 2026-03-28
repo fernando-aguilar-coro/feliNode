@@ -1,7 +1,8 @@
 import React from 'react';
-import { List, Switch } from 'react-native-paper';
+import { List, Switch, Button } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useSettingsStore } from '../../../store/SettingsStore';
+import { NotificationService } from '../../../services/Notification.service';
 
 export const NotificationSettingsSection = () => {
     const theme = useAppTheme();
@@ -19,6 +20,14 @@ export const NotificationSettingsSection = () => {
                 left={props => <List.Icon {...props} icon="fire" color={theme.colors.text} />}
                 right={() => <Switch value={showStreak} onValueChange={setShowStreak} />}
             />
+            <Button 
+                mode="text" 
+                onPress={() => NotificationService.triggerTestNotification()}
+                style={{ alignSelf: 'flex-start', marginLeft: 8 }}
+                textColor={theme.colors.primary}
+            >
+                Probar Notificación 🔔
+            </Button>
         </List.Section>
     );
 };

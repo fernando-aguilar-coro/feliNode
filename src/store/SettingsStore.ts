@@ -14,6 +14,7 @@ interface SettingsState {
     wantsKokoro: boolean;
     showStreak: boolean;
     hasDecidedPlacementTest: boolean;
+    hasSeenFirstPracticeModal: boolean;
     setEnglishVoice: (voice: VoiceConfig) => void;
     setSpanishVoiceId: (id: string) => void;
     setSfxEnabled: (enabled: boolean) => void;
@@ -23,6 +24,7 @@ interface SettingsState {
     setWantsKokoro: (wants: boolean) => void;
     setShowStreak: (show: boolean) => void;
     setHasDecidedPlacementTest: (decided: boolean) => void;
+    setHasSeenFirstPracticeModal: (seen: boolean) => void;
     homeViewMode: 'tree' | 'list';
     setHomeViewMode: (mode: 'tree' | 'list') => void;
     themeMode: 'light' | 'dark' | 'system';
@@ -41,6 +43,7 @@ export const useSettingsStore = create<SettingsState>()(
             wantsKokoro: false,
             showStreak: true,
             hasDecidedPlacementTest: false,
+            hasSeenFirstPracticeModal: false,
             setEnglishVoice: (voice) => set({ englishVoice: voice }),
             setSpanishVoiceId: (id) => set({ spanishVoiceId: id }),
             setSfxEnabled: (enabled) => set({ sfxEnabled: enabled }),
@@ -50,6 +53,7 @@ export const useSettingsStore = create<SettingsState>()(
             setWantsKokoro: (wants: boolean) => set({ wantsKokoro: wants }),
             setShowStreak: (show: boolean) => set({ showStreak: show }),
             setHasDecidedPlacementTest: (decided: boolean) => set({ hasDecidedPlacementTest: decided }),
+            setHasSeenFirstPracticeModal: (seen: boolean) => set({ hasSeenFirstPracticeModal: seen }),
             homeViewMode: 'list',
             setHomeViewMode: (mode: 'tree' | 'list') => set({ homeViewMode: mode }),
             themeMode: 'light',

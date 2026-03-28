@@ -63,9 +63,10 @@ export const ShopFloatingButton = () => {
         <AnimatedTouchableOpacity
             style={[styles.button, animatedStyle]}
             onPress={() => navigation.navigate('Home', { screen: 'ShopScreen' })}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
         >
-            <Ionicons name="cart" size={28} color="#FFD700" />
+            <Ionicons name="cart" size={32} color="#FFD700" />
         </AnimatedTouchableOpacity>
     );
 };
@@ -75,19 +76,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 100,
         left: 20,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: 'rgba(30, 30, 30, 0.95)', // Elegante oscuro traslúcido
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
         zIndex: 9999,
-        borderWidth: 1.5,
-        borderColor: 'rgba(255, 215, 0, 0.6)', // Borde dorado subtil
     },
 });

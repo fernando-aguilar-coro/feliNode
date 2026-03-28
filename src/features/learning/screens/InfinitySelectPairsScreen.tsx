@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { Screen, AppText, AppButton, Spacer } from '../../../components';
+import { ProgressBar } from 'react-native-paper';
+import { Screen, AppText, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +11,14 @@ import { useInfinityPairs, InfinityPairItem } from '../hooks/useInfinityPairs';
 import { audioService } from '../../settings/services/audio.service';
 import { infinityProgressRepository } from '../../../db_local/repositories';
 import { TtsService } from '../../learning/services/Tts.service';
+import * as Haptics from 'expo-haptics';
+
+// Extracted sub-components
+import { PairsGameHeader } from '../components/PairsGameHeader';
+import { PairsGameOverView } from '../components/PairsGameOverView';
+import { PairsLevelUpBanner } from '../components/PairsLevelUpBanner';
+import { PairsComboChip } from '../components/PairsComboChip';
+import { PairCard } from '../components/PairCard';
 
 type InfinitySelectPairsNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'InfinitySelectPairs'>;
 type InfinitySelectPairsRouteProp = RouteProp<HomeStackParamList, 'InfinitySelectPairs'>;
@@ -33,36 +42,42 @@ export const InfinitySelectPairsScreen = () => {
         roundGoal,
         roundScore,
         isGameOver,
+        isLevelUp,
         isInitialLoading,
+        combo,
+        missedPairs,
+        triggerErrorHaptic,
         handlePress,
-        restartGame
+        restartGame,
     } = useInfinityPairs({
         lessonId,
         visibleCount: 7,
-        batchSize: 20,
         fillBatchSize: 3,
         initialLives: 7,
-        initialTime: 90
+        initialTime: 90,
     });
 
+    const isTimeLow = timeLeft <= 10 && !isGameOver;
+
+    // ── Sound & haptic effects ──────────────────────────────────────────────
     React.useEffect(() => {
-        if (errorIds) audioService.playIncorrectSound();
+        if (errorIds) {
+            audioService.playIncorrectSound();
+            if (triggerErrorHaptic.current) {
+                triggerErrorHaptic.current = false;
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            }
+        }
     }, [errorIds]);
 
-    React.useEffect(() => {
-        if (roundNum > 1) audioService.playSuccessSound();
-    }, [roundNum]);
 
     React.useEffect(() => {
-        if (timeLeft === 10 && !isGameOver) {
-            audioService.playTimerSound();
-        }
+        if (timeLeft === 10 && !isGameOver) audioService.playTimerSound();
     }, [timeLeft, isGameOver]);
 
     React.useEffect(() => {
         if (isGameOver) {
             if (score > 0) audioService.playSuccessSound();
-
             const targetId = lessonId?.trim() ? `Pairs: ${lessonId.trim()}` : 'General Pairs';
             infinityProgressRepository.saveInfinityScore(targetId, score).catch(e => {
                 console.error('[InfinityPairs] Error saving score:', e);
@@ -70,18 +85,16 @@ export const InfinitySelectPairsScreen = () => {
         }
     }, [isGameOver, score, lessonId]);
 
-    const handleExit = () => {
-        navigation.goBack();
-    };
+    const handleExit = () => navigation.goBack();
 
     const handleItemPress = (item: InfinityPairItem) => {
         if (item.col === 'left') {
-            // Solo hablar las palabras en inglés (izquierda) con TTS Nativo
             TtsService.speak(item.text, { forceNative: true, language: 'en-US' });
         }
         handlePress(item);
     };
 
+    // ── Loading ─────────────────────────────────────────────────────────────
     if (isInitialLoading) {
         return (
             <Screen style={styles.loadingContainer}>
@@ -92,105 +105,90 @@ export const InfinitySelectPairsScreen = () => {
         );
     }
 
+    // ── Game Over ───────────────────────────────────────────────────────────
     if (isGameOver) {
         return (
-            <Screen style={styles.gameOverContainer}>
-                <Ionicons name={lives <= 0 ? "skull-outline" : "time-outline"} size={80} color={theme.colors.error} />
-                <Spacer height={24} />
-                <AppText variant="xl" weight="bold">¡Juego Terminado!</AppText>
-                <Spacer height={8} />
-                <AppText>{lives <= 0 ? "Te quedaste sin vidas." : "Se agotó el tiempo."}</AppText>
-                <Spacer height={16} />
-                <AppText>Puntuación Final: {score}</AppText>
-                <Spacer height={4} />
-                <AppText>Rondas superadas: {roundNum - 1}</AppText>
-                <Spacer height={32} />
-                <AppButton title="Volver a Jugar" onPress={restartGame} style={{ width: '80%', marginBottom: 12 }} />
-                <AppButton title="Salir" variant="secondary" onPress={handleExit} style={{ width: '80%' }} />
+            <Screen>
+                <PairsGameOverView
+                    lives={lives}
+                    score={score}
+                    roundNum={roundNum}
+                    missedPairs={missedPairs}
+                    onRestart={restartGame}
+                    onExit={handleExit}
+                />
             </Screen>
         );
     }
 
-    const renderItem = (item: InfinityPairItem | null) => {
-        if (!item) {
-            return <View style={[styles.itemEmpty, { borderColor: theme.colors.border }]} key={Math.random()} />;
-        }
-
-        const isMatched = matchedIds.has(item.pairId);
-        const isSelected = selectedId === item.id;
-        const isError = errorIds?.includes(item.id);
-
-        let backgroundColor = theme.colors.surface;
-        let borderColor = theme.colors.border;
-        let opacity = 1;
-
-        if (isMatched) {
-            backgroundColor = theme.colors.success + '40';
-            borderColor = theme.colors.success;
-            opacity = 0.5;
-        } else if (isError) {
-            backgroundColor = theme.colors.error + '40';
-            borderColor = theme.colors.error;
-        } else if (isSelected) {
-            backgroundColor = theme.colors.primary + '40';
-            borderColor = theme.colors.primary;
-        }
-
-        return (
-            <TouchableOpacity
-                key={item.id}
-                style={[
-                    styles.item,
-                    { backgroundColor, borderColor, opacity }
-                ]}
-                onPress={() => handleItemPress(item)}
-                disabled={isMatched}
-            >
-                <AppText style={{ color: theme.colors.text, textAlign: 'center' }}>
-                    {item.text}
-                </AppText>
-            </TouchableOpacity>
-        );
-    };
+    // ── Play ────────────────────────────────────────────────────────────────
+    const progressValue = Math.min(roundScore / roundGoal, 1);
 
     return (
         <Screen style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={handleExit} style={styles.backButton}>
-                    <Ionicons name="close" size={28} color={theme.colors.text} />
-                </TouchableOpacity>
-                <View style={styles.statsContainer}>
-                    <View style={[styles.badge, { backgroundColor: theme.colors.error + '20' }]}>
-                        <Ionicons name="heart" size={16} color={theme.colors.error} />
-                        <Spacer width={theme.spacing.xs} />
-                        <AppText weight="bold" color={theme.colors.error}>{lives}</AppText>
-                    </View>
-                    <Spacer width={8} />
-                    <View style={[styles.badge, { backgroundColor: theme.colors.warning + '20' }]}>
-                        <Ionicons name="time" size={16} color={theme.colors.warning} />
-                        <Spacer width={theme.spacing.xs} />
-                        <AppText weight="bold" color={theme.colors.warning}>{timeLeft}s</AppText>
-                    </View>
-                    <Spacer width={8} />
-                    <View style={[styles.badge, { backgroundColor: theme.colors.primary + '20' }]}>
-                        <Ionicons name="flag" size={16} color={theme.colors.primary} />
-                        <Spacer width={theme.spacing.xs} />
-                        <AppText weight="bold" color={theme.colors.primary}>{roundScore}/{roundGoal}</AppText>
-                    </View>
+            {isLevelUp && <PairsLevelUpBanner roundNum={roundNum} color={theme.colors.primary} />}
+
+            <PairsGameHeader
+                lives={lives}
+                timeLeft={timeLeft}
+                isTimeLow={isTimeLow}
+                onExit={handleExit}
+            />
+
+            {/* Round info + Score */}
+            <View style={styles.roundRow}>
+                <AppText style={{ color: theme.colors.secondary, fontSize: 12 }}>
+                    RONDA {roundNum}
+                </AppText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Ionicons name="star" size={13} color={theme.colors.warning} />
+                    <AppText weight="bold" style={{ fontSize: 14, color: theme.colors.text }}>
+                        {score}
+                    </AppText>
                 </View>
             </View>
 
-            <AppText style={[styles.question, { color: theme.colors.text }]}>
-                Ronda {roundNum} - Puntuación: {score}
-            </AppText>
+            {/* Progress bar */}
+            <View style={styles.progressContainer}>
+                <ProgressBar
+                    progress={progressValue}
+                    color={theme.colors.primary}
+                    style={[styles.progressBar, { backgroundColor: theme.colors.primary + '20' }]}
+                />
+                <AppText style={{ fontSize: 10, color: theme.colors.secondary, marginTop: 3, textAlign: 'right' }}>
+                    {roundScore}/{roundGoal}
+                </AppText>
+            </View>
 
+            {/* Grid */}
             <View style={styles.columnsContainer}>
                 <View style={styles.column}>
-                    {leftItems.map(renderItem)}
+                    {leftItems.map((item, idx) => (
+                        <PairCard
+                            key={item?.id ?? `empty-l-${idx}`}
+                            item={item}
+                            isMatched={item ? matchedIds.has(item.pairId) : false}
+                            isSelected={item ? selectedId === item.id : false}
+                            isError={item ? !!errorIds?.includes(item.id) : false}
+                            onPress={handleItemPress}
+                        />
+                    ))}
                 </View>
                 <View style={styles.column}>
-                    {rightItems.map(renderItem)}
+                    {rightItems.map((item, idx) => (
+                        <PairCard
+                            key={item?.id ?? `empty-r-${idx}`}
+                            item={item}
+                            isMatched={item ? matchedIds.has(item.pairId) : false}
+                            isSelected={item ? selectedId === item.id : false}
+                            isError={item ? !!errorIds?.includes(item.id) : false}
+                            onPress={handleItemPress}
+                        />
+                    ))}
                 </View>
+
+                {/* Combo overlay — centered on grid, doesn't block touches */}
+                <PairsComboChip combo={combo} color={theme.colors.primary} />
             </View>
         </Screen>
     );
@@ -199,73 +197,36 @@ export const InfinitySelectPairsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        paddingTop: 4,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    gameOverContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 24,
-    },
-    header: {
+    roundRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 6,
     },
-    backButton: {
-        padding: 8,
+    progressContainer: {
+        marginBottom: 4,
     },
-    statsContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    badge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 20,
-    },
-    question: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 24,
-        textAlign: 'center',
+    progressBar: {
+        height: 7,
+        borderRadius: 4,
     },
     columnsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%',
         flex: 1,
+        marginTop: 6,
     },
     column: {
         flex: 1,
-        gap: 16,
-        marginHorizontal: 8,
-    },
-    item: {
-        paddingVertical: 18,
-        paddingHorizontal: 16,
-        borderRadius: 12,
-        borderWidth: 2,
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 60,
-    },
-    itemEmpty: {
-        paddingVertical: 18,
-        borderRadius: 12,
-        borderWidth: 2,
-        borderStyle: 'dashed',
-        width: '100%',
-        minHeight: 60,
-        opacity: 0.3,
+        gap: 10,
+        marginHorizontal: 5,
     },
 });

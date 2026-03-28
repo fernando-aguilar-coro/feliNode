@@ -13,6 +13,7 @@ import { CurrencyService } from '../../gamification/services/Currency.service';
 import { useSettingsStore } from '../../../store/SettingsStore';
 import { useCurrencyStore } from '../../../store/CurrencyStore';
 import { KokoroDisclaimerModal } from '../components/KokoroDisclaimerModal';
+import { FirstPracticeModal } from '../components/FirstPracticeModal';
 
 export const HomeScreen = () => {
     const netInfo = useNetInfo();
@@ -126,6 +127,7 @@ export const HomeScreen = () => {
             </View>
 
             <KokoroDisclaimerModal />
+            <FirstPracticeModal />
         </SafeAreaView>
     );
 };
