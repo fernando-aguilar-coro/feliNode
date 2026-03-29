@@ -167,7 +167,7 @@ export const InfinitySelectPairsScreen = () => {
                         <PairCard
                             key={item?.id ?? `empty-l-${idx}`}
                             item={item}
-                            isMatched={item ? matchedIds.has(item.pairId) : false}
+                            isMatched={item ? matchedIds.has(item.id) : false}
                             isSelected={item ? selectedId === item.id : false}
                             isError={item ? !!errorIds?.includes(item.id) : false}
                             onPress={handleItemPress}
@@ -179,7 +179,7 @@ export const InfinitySelectPairsScreen = () => {
                         <PairCard
                             key={item?.id ?? `empty-r-${idx}`}
                             item={item}
-                            isMatched={item ? matchedIds.has(item.pairId) : false}
+                            isMatched={item ? matchedIds.has(item.id) : false}
                             isSelected={item ? selectedId === item.id : false}
                             isError={item ? !!errorIds?.includes(item.id) : false}
                             onPress={handleItemPress}

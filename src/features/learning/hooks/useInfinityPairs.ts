@@ -44,7 +44,7 @@ export const useInfinityPairs = ({
     const [leftItems, setLeftItems] = useState<(InfinityPairItem | null)[]>(Array(visibleCount).fill(null));
     const [rightItems, setRightItems] = useState<(InfinityPairItem | null)[]>(Array(visibleCount).fill(null));
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [matchedIds, setMatchedIds] = useState<Set<number>>(new Set());
+    const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
     const [errorIds, setErrorIds] = useState<[string, string] | null>(null);
 
     // ── Scoring & progression ───────────────────────────────────────────────
@@ -163,7 +163,7 @@ export const useInfinityPairs = ({
     const handlePress = (item: InfinityPairItem) => {
         if (isGameOver) return;
         if (errorIds) return;
-        if (matchedIds.has(item.pairId)) return;
+        if (matchedIds.has(item.id)) return;
 
         // First selection
         if (selectedId === null) {
@@ -187,16 +187,34 @@ export const useInfinityPairs = ({
             return;
         }
 
-        if (firstItem.pairId === item.pairId) {
-            handleMatch(item.pairId);
+        const leftItem = firstItem.col === 'left' ? firstItem : item;
+        const rightItem = firstItem.col === 'right' ? firstItem : item;
+
+        // Check if there's any original pair on the current board that matches these two texts
+        const isMatch = allItems.some(i => i.col === 'left' && i.text === leftItem.text) &&
+            allItems.some(i => i.col === 'right' && i.text === rightItem.text) &&
+            allItems.some(leftSearch => 
+                leftSearch.col === 'left' && leftSearch.text === leftItem.text &&
+                allItems.some(rightSearch => 
+                    rightSearch.col === 'right' && rightSearch.pairId === leftSearch.pairId && rightSearch.text === rightItem.text
+                )
+            );
+
+        if (isMatch) {
+            handleMatch(firstItem.id, item.id);
         } else {
             handleMismatch(allItems, item.id);
         }
     };
 
     // ── Match sub-handler ───────────────────────────────────────────────────
-    const handleMatch = (pairId: number) => {
-        setMatchedIds(prev => new Set(prev).add(pairId));
+    const handleMatch = (id1: string, id2: string) => {
+        setMatchedIds(prev => {
+            const next = new Set(prev);
+            next.add(id1);
+            next.add(id2);
+            return next;
+        });
         setSelectedId(null);
 
         const newInternalCombo = combo + 1;
@@ -219,11 +237,12 @@ export const useInfinityPairs = ({
         }
 
         setTimeout(() => {
-            setLeftItems(prev => prev.map(i => i?.pairId === pairId ? null : i));
-            setRightItems(prev => prev.map(i => i?.pairId === pairId ? null : i));
+            setLeftItems(prev => prev.map(i => i && (i.id === id1 || i.id === id2) ? null : i));
+            setRightItems(prev => prev.map(i => i && (i.id === id1 || i.id === id2) ? null : i));
             setMatchedIds(prev => {
                 const newSet = new Set(prev);
-                newSet.delete(pairId);
+                newSet.delete(id1);
+                newSet.delete(id2);
                 return newSet;
             });
         }, 400);

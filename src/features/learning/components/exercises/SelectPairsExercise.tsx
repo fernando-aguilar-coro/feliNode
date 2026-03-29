@@ -24,7 +24,7 @@ export const SelectPairsExercise = ({ exercise, onAnswer, userAnswer }: Props) =
     const [leftItems, setLeftItems] = useState<Item[]>([]);
     const [rightItems, setRightItems] = useState<Item[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [matchedIds, setMatchedIds] = useState<Set<number>>(new Set());
+    const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
     const [errorIds, setErrorIds] = useState<[string, string] | null>(null);
 
     useEffect(() => {
@@ -46,15 +46,15 @@ export const SelectPairsExercise = ({ exercise, onAnswer, userAnswer }: Props) =
     }, [exercise, onAnswer]);
 
     useEffect(() => {
-        if (matchedIds.size > 0 && matchedIds.size === exercise.pairs.length) {
+        if (matchedIds.size > 0 && matchedIds.size === exercise.pairs.length * 2) {
             onAnswer('DONE');
         } else {
             onAnswer('');
         }
-    }, [matchedIds, exercise.pairs.length, onAnswer]);
+    }, [matchedIds.size, exercise.pairs.length, onAnswer]);
 
     const handlePress = (item: Item) => {
-        if (matchedIds.has(item.pairId)) return; // already matched
+        if (matchedIds.has(item.id)) return; // already matched
         if (errorIds) return; // wait for error clear
 
         // Speak item text with Native TTS
@@ -80,9 +80,22 @@ export const SelectPairsExercise = ({ exercise, onAnswer, userAnswer }: Props) =
                 return;
             }
 
-            if (firstItem.pairId === item.pairId) {
+            const leftItem = firstItem.id.startsWith('l-') ? firstItem : item;
+            const rightItem = firstItem.id.startsWith('r-') ? firstItem : item;
+
+            const isMatch = exercise.pairs.some((p) => 
+                String(p.left).trim().toLowerCase() === leftItem.text.trim().toLowerCase() && 
+                String(p.right).trim().toLowerCase() === rightItem.text.trim().toLowerCase()
+            );
+
+            if (isMatch) {
                 // Match
-                setMatchedIds(prev => new Set(prev).add(item.pairId));
+                setMatchedIds(prev => {
+                    const next = new Set(prev);
+                    next.add(firstItem.id);
+                    next.add(item.id);
+                    return next;
+                });
                 setSelectedId(null);
             } else {
                 // No match
@@ -97,7 +110,7 @@ export const SelectPairsExercise = ({ exercise, onAnswer, userAnswer }: Props) =
     };
 
     const renderItem = (item: Item) => {
-        const isMatched = matchedIds.has(item.pairId);
+        const isMatched = matchedIds.has(item.id);
         const isSelected = selectedId === item.id;
         const isError = errorIds?.includes(item.id);
 

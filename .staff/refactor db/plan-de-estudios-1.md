@@ -78,8 +78,8 @@ Este documento combina la **didáctica educativa** del currículo mexicano con l
     - 6.5 Adjetivos Posesivos vs. Pronombres Reflexivos [✅ Ya en DB]
     - 6.6 Modales de Permiso y Petición (Can, could, may, would) [✅ Ya en DB]
     - 6.7 Must / Have to (Obligación y necesidad)[✅ Ya en DB]
-    - 6.8 Consejos y Crítica (Should, ought to, had better)
-    - 6.9 Modales de Probabilidad y Deducción (May, might, could, must be, can't be)
+    - 6.8 Consejos y Crítica (Should, ought to, had better)[✅ Ya en DB]
+    - 6.9 Modales de Probabilidad y Deducción (May, might, could, must be, can't be)[✅ Ya en DB]
     - 6.10 Preposiciones de Movimiento (Into, onto, through, across, past)
     - 6.11 Adjetivo + Preposición (Interested in, proud of, good at)
     - 6.12 Verbo + Preposición (Listen to, depend on, wait for)

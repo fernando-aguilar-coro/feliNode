@@ -7,7 +7,8 @@ import { useExercises } from '../hooks/useExercises';
 import { TheoryViewer } from '../components/TheoryViewer';
 import { ExerciseContainer } from '../components/exercises/ExerciseContainer';
 import { ProgressBar } from '../components/ProgressBar';
-import { Screen, AppText, Spacer, AppButton } from '../../../components';
+import { LessonEndView } from '../components/LessonEndView';
+import { Screen, AppText, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { audioService } from '../../settings/services/audio.service';
@@ -38,12 +39,17 @@ export const LessonScreen = () => {
     const {
         currentExercise,
         isFinished,
+        isGameOver,
         checkAnswer,
         nextExercise,
         lastResult,
         completedCount,
         initialTotal,
-        overrideResult
+        overrideResult,
+        lives,
+        combo,
+        maxCombo,
+        missedExercises,
     } = useExercises(exercises, isExam);
 
     // Effect to bridge the "finished exercises" state to "completeLesson"
@@ -53,6 +59,14 @@ export const LessonScreen = () => {
             completeLesson();
         }
     }, [isFinished, status, completeLesson]);
+
+    // Effect to handle game over (ran out of lives)
+    useEffect(() => {
+        if (isGameOver && status === 'exercises') {
+            audioService.playIncorrectSound();
+            completeLesson();
+        }
+    }, [isGameOver, status, completeLesson]);
 
     // Effect to handle mode-specific logic
     useEffect(() => {
@@ -71,7 +85,7 @@ export const LessonScreen = () => {
             flex: 1,
         },
         header: {
-            paddingVertical: theme.spacing.md,
+            paddingVertical: theme.spacing.xs,
         },
     }), [theme]);
 
@@ -87,27 +101,17 @@ export const LessonScreen = () => {
 
     if (status === 'completed') {
         return (
-            <Screen style={styles.centerContainer}>
-                <AppText variant="xxl" weight="bold" color={theme.colors.success} align="center">
-                    ¡Lección Completada!
-                </AppText>
-                <Spacer height={theme.spacing.md} />
-                <AppText variant="lg" align="center">
-                    ¡Buen trabajo! Has dominado esta lección.
-                </AppText>
-                <Spacer height={theme.spacing.xl} />
-                <View style={{ width: '100%', gap: theme.spacing.md }}>
-                    <AppButton
-                        title="Continuar"
-                        onPress={onExit}
-                        variant="outline"
-                    />
-                    <AppButton
-                        title="Más ejercicios (Infinito)"
-                        onPress={() => navigation.navigate('InfinityExercise', { lessonId })}
-                        variant="outline"
-                    />
-                </View>
+            <Screen>
+                <LessonEndView
+                    success={!isGameOver}
+                    lives={lives}
+                    completedCount={completedCount}
+                    totalExercises={initialTotal}
+                    maxCombo={maxCombo}
+                    missedExercises={missedExercises}
+                    onContinue={onExit}
+                    onInfinity={() => navigation.navigate('InfinityExercise', { lessonId })}
+                />
             </Screen>
         );
     }
@@ -125,7 +129,13 @@ export const LessonScreen = () => {
                 <View style={styles.exercisesContainer}>
                     <View style={styles.header}>
                         {initialTotal > 0 && (
-                            <ProgressBar current={completedCount} total={initialTotal} />
+                            <ProgressBar
+                                current={completedCount}
+                                total={initialTotal}
+                                lives={lives}
+                                combo={combo}
+                                onExit={onExit}
+                            />
                         )}
                     </View>
 
@@ -141,12 +151,6 @@ export const LessonScreen = () => {
                     ) : (
                         <View style={styles.centerContainer}>
                             <AppText align="center">No se encontraron ejercicios.</AppText>
-                            <Spacer height={theme.spacing.md} />
-                            <AppButton
-                                title="Volver"
-                                onPress={onExit}
-                                variant="primary"
-                            />
                         </View>
                     )}
                 </View>

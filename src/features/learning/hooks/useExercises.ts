@@ -1,21 +1,48 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Exercise, ExerciseType } from '../types/exercise';
 import { TextValidationService } from '../services/TextValidation.service';
 import { userProgressRepository } from '../../../db_local/repositories';
+
+/** Represents a missed exercise for the end-screen review. */
+export interface MissedExercise {
+    question: string;
+    correctAnswer: string;
+    userAnswer: string;
+}
+
+interface UseExercisesOptions {
+    initialLives?: number;
+    comboForLife?: number;
+}
 
 /**
  * Hook to manage the state and logic of a set of exercises.
  * 
  * @param initialExercises - The array of exercises to present.
  * @param isExam - Whether this session is an exam (prevents repeating wrong answers).
+ * @param options - Optional config for lives & combo thresholds.
  * @returns Object containing current exercise, state flags, and control methods.
  */
-export const useExercises = (initialExercises: Exercise[], isExam: boolean = false) => {
+export const useExercises = (
+    initialExercises: Exercise[],
+    isExam: boolean = false,
+    options?: UseExercisesOptions,
+) => {
+    const maxLives = options?.initialLives ?? 7;
+    const comboForLife = options?.comboForLife ?? 2;
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [exercises, setExercises] = useState<Exercise[]>(initialExercises);
     const [isFinished, setIsFinished] = useState(false);
     const [lastResult, setLastResult] = useState<{ correct: boolean; message?: string } | null>(null);
     const [completedCount, setCompletedCount] = useState(0);
+
+    // ── Game mechanics ──────────────────────────────────────────────────────
+    const [lives, setLives] = useState(maxLives);
+    const [isGameOver, setIsGameOver] = useState(false);
+    const [combo, setCombo] = useState(0);
+    const [maxCombo, setMaxCombo] = useState(0);
+    const [missedExercises, setMissedExercises] = useState<MissedExercise[]>([]);
 
     // Sync local state with prop updates (e.g. when async fetch completes)
     useEffect(() => {
@@ -24,16 +51,20 @@ export const useExercises = (initialExercises: Exercise[], isExam: boolean = fal
         setIsFinished(false);
         setLastResult(null);
         setCompletedCount(0);
+        setLives(maxLives);
+        setIsGameOver(false);
+        setCombo(0);
+        setMaxCombo(0);
+        setMissedExercises([]);
     }, [initialExercises]);
-
-    const currentExercise = exercises[currentIndex];
 
     /**
      * Validates the user's answer for the current exercise.
      * @param userAnswer - The string input from the user.
      */
-    const checkAnswer = (userAnswer: string) => {
-        if (!currentExercise) return;
+    const checkAnswer = useCallback((userAnswer: string) => {
+        if (!exercises[currentIndex] || isGameOver) return;
+        const currentExercise = exercises[currentIndex];
 
         let isCorrect = false;
         const isPronunciation = currentExercise.type === ExerciseType.PRONUNCIATION;
@@ -42,18 +73,52 @@ export const useExercises = (initialExercises: Exercise[], isExam: boolean = fal
         if (isPronunciation || isListening) {
             isCorrect = true;
         } else {
-            // Improved validation: ignore extra spaces and trailing punctuation
-            // Now also handles contractions via TextValidationService
             isCorrect = TextValidationService.normalizeAnswer(userAnswer) === TextValidationService.normalizeAnswer(currentExercise.correctAnswer);
         }
 
         if (isCorrect) {
             setCompletedCount(prev => prev + 1);
+
+            // ── Combo logic ──
+            setCombo(prev => {
+                const newCombo = prev + 1;
+                setMaxCombo(mc => Math.max(mc, newCombo));
+                // Grant a life at comboForLife threshold (only at exact multiples)
+                if (newCombo > 0 && newCombo % comboForLife === 0) {
+                    setLives(l => Math.min(l + 1, maxLives));
+                }
+                return newCombo;
+            });
+
             if (currentExercise.unlocksLessonId) {
                 userProgressRepository.saveUserProgress(currentExercise.unlocksLessonId, 100).catch((err: any) => console.error('[useExercises] Error unlocking lesson:', err));
             }
         } else {
-            // Si te equivocas, el ejercicio se añade al final de la cola para repetirlo (a menos que sea un examen)
+            // Reset combo on mistake
+            setCombo(0);
+
+            // Track missed exercise
+            const correctAnswerText = currentExercise.type !== ExerciseType.PRONUNCIATION ? currentExercise.correctAnswer : '';
+            setMissedExercises(prev => {
+                // Avoid duplicate entries for the same question
+                if (prev.some(m => m.question === currentExercise.question)) return prev;
+                return [...prev, {
+                    question: currentExercise.question,
+                    correctAnswer: correctAnswerText,
+                    userAnswer,
+                }];
+            });
+
+            // Lose a life
+            setLives(prev => {
+                const newLives = prev - 1;
+                if (newLives <= 0) {
+                    setIsGameOver(true);
+                }
+                return Math.max(newLives, 0);
+            });
+
+            // Re-add to the end for retry (unless exam mode or game over)
             if (!isExam) {
                 setExercises(prev => [...prev, currentExercise]);
             }
@@ -67,33 +132,33 @@ export const useExercises = (initialExercises: Exercise[], isExam: boolean = fal
         });
 
         return isCorrect;
-    };
+    }, [exercises, currentIndex, isGameOver, isExam, comboForLife, maxLives]);
 
     /**
      * Advances to the next exercise or marks the session as finished.
      */
-    const nextExercise = () => {
+    const nextExercise = useCallback(() => {
+        if (isGameOver) return;
         setLastResult(null);
         if (currentIndex < exercises.length - 1) {
             setCurrentIndex(prev => prev + 1);
         } else {
             setIsFinished(true);
         }
-    };
+    }, [currentIndex, exercises.length, isGameOver]);
 
     /**
      * Allows an external validator (like AI) to override the result of the current exercise.
      * If the override is 'correct', we undo the penalty (remove duplication) and update stats.
      */
-    const overrideResult = (isCorrect: boolean) => {
-        if (!currentExercise) return;
+    const overrideResult = useCallback((isCorrect: boolean) => {
+        if (!exercises[currentIndex]) return;
+        const currentExercise = exercises[currentIndex];
 
         if (isCorrect) {
-            // Check if we previously marked it as incorrect/failed
-            // If so, we likely added it to the end of the list. We should remove that duplicate.
+            // Remove duplicate added at the end
             setExercises(prev => {
                 const newExercises = [...prev];
-                // Check if the last element is the same as the current one (simple heuristic for "just added")
                 if (newExercises.length > initialExercises.length && newExercises[newExercises.length - 1].id === currentExercise.id) {
                     newExercises.pop();
                 }
@@ -102,33 +167,52 @@ export const useExercises = (initialExercises: Exercise[], isExam: boolean = fal
 
             setCompletedCount(prev => prev + 1);
 
+            // Restore the lost life
+            setLives(prev => Math.min(prev + 1, maxLives));
+
+            // Remove from missed exercises
+            setMissedExercises(prev => prev.filter(m => m.question !== currentExercise.question));
+
+            // Restore combo (set to 1 since AI confirmed it correct)
+            setCombo(1);
+
+            // If game was over due to this mistake, undo it
+            setIsGameOver(false);
+
             setLastResult({
                 correct: true,
                 message: '¡Corregido por la IA!',
             });
         }
-    };
+    }, [exercises, currentIndex, initialExercises.length, maxLives]);
 
     /**
      * Adds new exercises to the current list.
      * Useful for infinite scrolling / continuous learning.
      */
-    const addExercises = (newExercises: Exercise[]) => {
+    const addExercises = useCallback((newExercises: Exercise[]) => {
         setExercises(prev => [...prev, ...newExercises]);
-    };
+    }, []);
 
     return {
-        currentExercise,
+        currentExercise: exercises[currentIndex],
         currentIndex,
-        totalExercises: exercises.length, // List length might grow
-        initialTotal: initialExercises.length, // Fixed initial length for progress bar (or we might need to update this logic if we want dynamic progress)
-        completedCount, // Actual progress
+        totalExercises: exercises.length,
+        initialTotal: initialExercises.length,
+        completedCount,
         isFinished,
+        isGameOver,
         checkAnswer,
         nextExercise,
         lastResult,
         overrideResult,
         addExercises,
-        exercises // Expose full list if needed
+        exercises,
+        // ── Game state ──
+        lives,
+        maxLives,
+        combo,
+        maxCombo,
+        missedExercises,
     };
 };
