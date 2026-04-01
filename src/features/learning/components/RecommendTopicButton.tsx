@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, ActivityIndicator, StyleSheet, Alert, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { lessonRepository } from '../../../db_local/repositories';
@@ -11,6 +12,7 @@ interface RecommendTopicButtonProps {
 
 export const RecommendTopicButton: React.FC<RecommendTopicButtonProps> = ({ onTopicReceived }) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [currentLessonTitle, setCurrentLessonTitle] = useState<string>('');
 
@@ -84,7 +86,7 @@ export const RecommendTopicButton: React.FC<RecommendTopicButtonProps> = ({ onTo
             onTopicReceived(recommended);
         } catch (error) {
             console.error(error);
-            Alert.alert("Error", "No se pudo obtener una recomendación de tema.");
+            Alert.alert(t('learning.pronunciation.error'), t('learning.exercises.errorRecommend'));
         } finally {
             setLoading(false);
         }
@@ -102,7 +104,7 @@ export const RecommendTopicButton: React.FC<RecommendTopicButtonProps> = ({ onTo
                 <View style={styles.content}>
                     <MaterialCommunityIcons name="lightbulb-on-outline" size={20} color={theme.colors.white || '#FFFFFF'} style={styles.icon} />
                     <AppText variant="md" color={theme.colors.white || '#FFFFFF'} weight="bold">
-                        Sugerir tema
+                        {t('learning.exercises.suggestTopic')}
                     </AppText>
                 </View>
             )}

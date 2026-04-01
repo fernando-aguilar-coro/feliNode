@@ -7,6 +7,7 @@ import { useStreak } from '../../../gamification/hooks/useStreak';
 import { useSettingsStore } from '../../../../store/SettingsStore';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { audioService } from '../../../settings/services/audio.service';
+import { useTranslation } from 'react-i18next';
 
 interface ModuleStatsCardsProps {
     orientation?: 'row' | 'column';
@@ -15,6 +16,7 @@ interface ModuleStatsCardsProps {
 export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps) => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
+    const { t } = useTranslation();
     const showStreak = useSettingsStore(state => state.showStreak);
     const { currencies, loadCurrencies } = useCurrencies();
     const { streak } = useStreak();
@@ -49,7 +51,7 @@ export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps)
                         <Text style={[styles.statValue, { color: theme.colors.text }]}>
                             {streak?.current_streak || 0}
                         </Text>
-                        <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Racha</Text>
+                        <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>{t('nodes.progress.streak')}</Text>
                     </View>
                 </TouchableOpacity>
             )}
@@ -62,7 +64,7 @@ export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps)
                 <FontAwesome5 name="star" size={24} color="#FFD700" solid />
                 <View style={styles.statTextContainer}>
                     <Text style={[styles.statValue, { color: theme.colors.text }]}>{currencies.xp || 0}</Text>
-                    <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Exp</Text>
+                    <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>{t('nodes.progress.exp')}</Text>
                 </View>
             </View>
 
@@ -78,7 +80,7 @@ export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps)
                 <FontAwesome5 name="coins" size={24} color="#FFBA08" />
                 <View style={styles.statTextContainer}>
                     <Text style={[styles.statValue, { color: theme.colors.text }]}>{currencies.michi_coins || 0}</Text>
-                    <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Monedas</Text>
+                    <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>{t('nodes.progress.coins')}</Text>
                 </View>
             </TouchableOpacity>
         </View>

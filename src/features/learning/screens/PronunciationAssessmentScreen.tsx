@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TextInput, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText, AppButton, Spacer, Screen } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { PronunciationExercise } from '../components/exercises/PronunciationExercise';
@@ -10,9 +11,10 @@ import { userProgressRepository, lessonRepository } from '../../../db_local/repo
 
 export const PronunciationAssessmentScreen = () => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const [phrase, setPhrase] = useState('');
     const [isExercising, setIsExercising] = useState(false);
-    const [currentLessonTitle, setCurrentLessonTitle] = useState<string>("Práctica General");
+    const [currentLessonTitle, setCurrentLessonTitle] = useState<string>(t('learning.pronunciation.generalPractice'));
 
     useEffect(() => {
         const fetchContext = async () => {
@@ -56,7 +58,7 @@ export const PronunciationAssessmentScreen = () => {
     const mockExercise: PronunciationExerciseType = {
         id: 'custom-assessment',
         type: ExerciseType.PRONUNCIATION,
-        question: 'Pronuncia la siguiente frase:',
+        question: t('learning.pronunciation.leeFrase'),
         phrase: phrase,
     };
 
@@ -139,7 +141,7 @@ export const PronunciationAssessmentScreen = () => {
     return (
         <Screen>
             <View style={styles.header}>
-                <AppText variant="lg" weight="bold" style={styles.title}>Evaluación de Voz</AppText>
+                <AppText variant="lg" weight="bold" style={styles.title}>{t('learning.pronunciation.title')}</AppText>
             </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -147,10 +149,10 @@ export const PronunciationAssessmentScreen = () => {
                     {!isExercising ? (
                         <View style={styles.inputContainer}>
                             <AppText variant="lg" weight="bold" style={styles.label}>
-                                ¿Qué frase quieres practicar?
+                                {t('learning.pronunciation.question')}
                             </AppText>
                             <AppText variant="sm" color={theme.colors.textSecondary} style={styles.subtitle}>
-                                Escribe una frase en español o inglés para evaluar tu pronunciación.
+                                {t('learning.pronunciation.description')}
                             </AppText>
 
                             <Spacer height={theme.spacing.md} />
@@ -159,7 +161,7 @@ export const PronunciationAssessmentScreen = () => {
                                 style={styles.input}
                                 value={phrase}
                                 onChangeText={setPhrase}
-                                placeholder="Escribe aquí tu frase..."
+                                placeholder={t('learning.pronunciation.inputPlaceholder')}
                                 placeholderTextColor={theme.colors.textLight}
                                 autoCapitalize="sentences"
                                 multiline
@@ -179,7 +181,7 @@ export const PronunciationAssessmentScreen = () => {
                             <Spacer height={theme.spacing.md} />
 
                             <AppButton
-                                title="Comenzar Práctica"
+                                title={t('learning.pronunciation.startPractice')}
                                 onPress={handleStart}
                                 disabled={!phrase.trim()}
                                 variant="primary"
@@ -199,7 +201,7 @@ export const PronunciationAssessmentScreen = () => {
                             <Spacer height={theme.spacing.xl} />
 
                             <AppButton
-                                title="Probar otra frase"
+                                title={t('learning.pronunciation.tryAnother')}
                                 onPress={handleReset}
                                 variant="outline"
                                 style={styles.fullWidth}

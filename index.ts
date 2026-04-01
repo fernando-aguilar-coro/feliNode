@@ -1,6 +1,7 @@
 import { registerRootComponent } from 'expo';
 
 import { App } from './App';
+import './src/i18n';
 
 import notifee, { EventType } from '@notifee/react-native';
 

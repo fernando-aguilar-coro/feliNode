@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
@@ -14,6 +15,7 @@ export const LessonModeSelectionScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<LessonModeSelectionRouteProp>();
+    const { t } = useTranslation();
     const { lessonId } = route.params || { lessonId: 'lesson_verbs_intro' }; // Default for testing
     const [lessonTitle, setLessonTitle] = useState<string>('');
 
@@ -56,27 +58,27 @@ export const LessonModeSelectionScreen = () => {
     return (
         <Screen style={styles.container}>
             <AppText variant="xxl" weight="bold" align="center">
-                {lessonTitle || 'Cargando...'}
+                {lessonTitle || t('learning.modeSelection.loading')}
             </AppText>
             <Spacer height={theme.spacing.sm} />
             <AppText variant="lg" align="center" style={{ opacity: 0.8 }}>
-                Elige tu modo
+                {t('learning.modeSelection.chooseMode')}
             </AppText>
             <Spacer height={theme.spacing.xl} />
 
             <View style={styles.buttonContainer}>
                 <AppButton
-                    title="Teoría"
+                    title={t('learning.modeSelection.theory')}
                     onPress={() => handleSelectMode(undefined as any)} // Theory implies standard start
                     variant="outline"
                 />
                 <AppButton
-                    title="Ejercicios Infinitos"
+                    title={t('learning.modeSelection.infinityExercises')}
                     onPress={() => handleSelectMode('infinity')}
                     variant="outline"
                 />
                 <AppButton
-                    title="Examen"
+                    title={t('learning.modeSelection.exam')}
                     onPress={() => handleSelectMode('practice')}
                     variant="outline"
                 />
@@ -84,7 +86,7 @@ export const LessonModeSelectionScreen = () => {
 
             <Spacer height={theme.spacing.xl} />
             <AppButton
-                title="Volver"
+                title={t('learning.modeSelection.back')}
                 onPress={() => navigation.goBack()}
                 variant="ghost"
             />

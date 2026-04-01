@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Modal, Portal, Text, Button } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface DeleteAccountModalProps {
     visible: boolean;
@@ -12,15 +13,16 @@ interface DeleteAccountModalProps {
 
 export const DeleteAccountModal = ({ visible, onDismiss, onConfirm, loading }: DeleteAccountModalProps) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
 
     return (
         <Portal>
             <Modal visible={visible} onDismiss={onDismiss} contentContainerStyle={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
                 <Text variant="titleLarge" style={{ color: theme.colors.error, marginBottom: 16 }}>
-                    ¿Eliminar cuenta?
+                    {t('settings.deleteAccount.title')}
                 </Text>
                 <Text variant="bodyMedium" style={{ color: theme.colors.textSecondary, marginBottom: 24 }}>
-                    Esta acción es irreversible. Se borrará todo tu progreso de forma permanente y no podrás recuperarlo.
+                    {t('settings.deleteAccount.description')}
                 </Text>
                 <Button
                     mode="contained"
@@ -30,7 +32,7 @@ export const DeleteAccountModal = ({ visible, onDismiss, onConfirm, loading }: D
                     disabled={loading}
                     style={styles.button}
                 >
-                    Eliminar permanentemente
+                    {t('settings.deleteAccount.confirm')}
                 </Button>
                 <Button
                     mode="text"
@@ -39,7 +41,7 @@ export const DeleteAccountModal = ({ visible, onDismiss, onConfirm, loading }: D
                     disabled={loading}
                     style={styles.button}
                 >
-                    Cancelar
+                    {t('settings.deleteAccount.cancel')}
                 </Button>
             </Modal>
         </Portal>

@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native
 import Svg, { Path } from 'react-native-svg';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useUserStore } from '../../../store/UserStore';
+import { useTranslation } from 'react-i18next';
 
 interface SocialLoginProps {
     loading: boolean;
@@ -21,12 +22,13 @@ const GoogleIcon = ({ width = 24, height = 24 }: { width?: number; height?: numb
 
 export const SocialLogin: React.FC<SocialLoginProps> = ({ loading, onError }) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
 
     const handleGoogleSignIn = async () => {
         try {
             await useUserStore.getState().signInWithGoogle();
         } catch (e: any) {
-            onError(e.message || 'Error con Google Sign In');
+            onError(e.message || t('auth.login.googleSignInError'));
         }
     };
 
@@ -53,7 +55,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({ loading, onError }) =>
                     <GoogleIcon />
                 </View>
                 <Text style={[styles.buttonText, { color: textColor }]}>
-                    Continuar con Google
+                    {t('auth.login.continueWithGoogle')}
                 </Text>
             </TouchableOpacity>
         </View>

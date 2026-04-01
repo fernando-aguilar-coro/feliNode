@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Screen, AppText, AppTextArea } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,7 @@ const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 export const PracticeLandingScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<PracticeLandingNavigationProp>();
+    const { t } = useTranslation();
     const [maxScore, setMaxScore] = useState(0);
     const [maxPairsScore, setMaxPairsScore] = useState(0);
 
@@ -251,11 +253,11 @@ export const PracticeLandingScreen = () => {
                                 <Ionicons name="infinite-outline" size={32} color={theme.colors.primary} />
                             </View>
                             <View style={styles.cardContent}>
-                                <AppText style={styles.cardTitle}>Desafío Infinito</AppText>
-                                <AppText style={styles.cardDesc}>Ejercicios de vocabulario y gramática sin fin.</AppText>
+                                <AppText style={styles.cardTitle}>{t('learning.practice.infinityChallenge')}</AppText>
+                                <AppText style={styles.cardDesc}>{t('learning.practice.infinityDesc')}</AppText>
                                 <View style={styles.scoreContainer}>
                                     <Ionicons name="trophy" size={14} color={theme.colors.warning} />
-                                    <AppText style={styles.scoreText}>Récord: {maxScore}</AppText>
+                                    <AppText style={styles.scoreText}>{t('learning.practice.record', { score: maxScore })}</AppText>
                                 </View>
                             </View>
                             <View style={styles.playIconWrapper}>
@@ -274,11 +276,11 @@ export const PracticeLandingScreen = () => {
                                 <Ionicons name="duplicate-outline" size={32} color={theme.colors.secondary} />
                             </View>
                             <View style={styles.cardContent}>
-                                <AppText style={styles.cardTitle}>Emparejar</AppText>
-                                <AppText style={styles.cardDesc}>Une palabras con su significado o traducción.</AppText>
+                                <AppText style={styles.cardTitle}>{t('learning.practice.matching')}</AppText>
+                                <AppText style={styles.cardDesc}>{t('learning.practice.matchingDesc')}</AppText>
                                 <View style={styles.scoreContainer}>
                                     <Ionicons name="trophy" size={14} color={theme.colors.warning} />
-                                    <AppText style={styles.scoreText}>Récord: {maxPairsScore}</AppText>
+                                    <AppText style={styles.scoreText}>{t('learning.practice.record', { score: maxPairsScore })}</AppText>
                                 </View>
                             </View>
                             <View style={styles.playIconWrapper}>
@@ -297,8 +299,8 @@ export const PracticeLandingScreen = () => {
                                 <Ionicons name="mic-outline" size={32} color={theme.colors.success || '#10b981'} />
                             </View>
                             <View style={styles.cardContent}>
-                                <AppText style={styles.cardTitle}>Evaluación de Voz</AppText>
-                                <AppText style={styles.cardDesc}>Habla libremente y evalúa tu pronunciación.</AppText>
+                                <AppText style={styles.cardTitle}>{t('learning.practice.voiceAssessment')}</AppText>
+                                <AppText style={styles.cardDesc}>{t('learning.practice.voiceDesc')}</AppText>
                             </View>
                             <View style={styles.playIconWrapper}>
                                 <Ionicons name="play" size={20} color={theme.colors.success || '#10b981'} />
@@ -316,8 +318,8 @@ export const PracticeLandingScreen = () => {
                                 <Ionicons name="chatbubbles-outline" size={32} color={theme.colors.info || '#3b82f6'} />
                             </View>
                             <View style={styles.cardContent}>
-                                <AppText style={styles.cardTitle}>Conversación Libre</AppText>
-                                <AppText style={styles.cardDesc}>Práctica hablar con IA de forma natural.</AppText>
+                                <AppText style={styles.cardTitle}>{t('learning.practice.freeConversation')}</AppText>
+                                <AppText style={styles.cardDesc}>{t('learning.practice.freeConvDesc')}</AppText>
                             </View>
                             <View style={styles.playIconWrapper}>
                                 <Ionicons name="play" size={20} color={theme.colors.info || '#3b82f6'} />
@@ -341,15 +343,15 @@ export const PracticeLandingScreen = () => {
                 >
                     <View style={styles.modalContent}>
                         <AppText style={styles.modalTitle}>
-                            {selectedMode === 'combined' ? 'Desafío Infinito' : 'Emparejar'}
+                            {selectedMode === 'combined' ? t('learning.practice.infinityChallenge') : t('learning.practice.matching')}
                         </AppText>
                         <AppText style={styles.modalSubtitle}>
-                            Elige un enfoque o tema opcional para tu práctica.
+                            {t('learning.practice.chooseFocus')}
                         </AppText>
 
                         <AppTextArea
-                            label="Enfoque (Opcional)"
-                            placeholder="Ej. greetings, grammar, animals..."
+                            label={t('learning.practice.focusLabel')}
+                            placeholder={t('learning.practice.focusPlaceholder')}
                             value={modalTopic}
                             onChangeText={setModalTopic}
                             numberOfLines={4}
@@ -363,13 +365,13 @@ export const PracticeLandingScreen = () => {
                                 style={[styles.modalButton, { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border }]}
                                 onPress={() => setModalVisible(false)}
                             >
-                                <AppText style={[styles.modalButtonText, { color: theme.colors.textSecondary }]}>Cancelar</AppText>
+                                <AppText style={[styles.modalButtonText, { color: theme.colors.textSecondary }]}>{t('learning.practice.cancel')}</AppText>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
                                 onPress={handleStartExercise}
                             >
-                                <AppText style={[styles.modalButtonText, { color: '#FFF' }]}>Empezar</AppText>
+                                <AppText style={[styles.modalButtonText, { color: '#FFF' }]}>{t('learning.practice.start')}</AppText>
                             </TouchableOpacity>
                         </View>
                     </View>

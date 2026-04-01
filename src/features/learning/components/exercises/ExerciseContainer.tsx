@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Exercise, ExerciseType } from '../../types/exercise';
 import { MultipleChoiceExercise } from './MultipleChoiceExercise';
 import { FillInTheBlankExercise } from './FillInTheBlankExercise';
@@ -24,6 +25,7 @@ interface Props {
 
 export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lessonContext, onOverrideResult }: Props) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const [userAnswer, setUserAnswer] = useState('');
     const [hasChecked, setHasChecked] = useState(false);
     const [aiResult, setAiResult] = useState<{ correct: boolean; message: string } | null>(null);
@@ -111,7 +113,7 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
                 );
             default:
                 /* Tipo de ejercicio desconocido o no implementado */
-                return <AppText>Tipo de ejercicio desconocido</AppText>;
+                return <AppText>{t('learning.exercises.unknownType')}</AppText>;
         }
     };
 
@@ -186,9 +188,9 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
                 /* Botón para comprobar la respuesta */
                 <AppButton
                     title={
-                        exercise.type === ExerciseType.PRONUNCIATION ? "Saltar" :
-                            (exercise.type === ExerciseType.LISTENING && !userAnswer) ? "Saltar" :
-                                "Comprobar Respuesta"
+                        exercise.type === ExerciseType.PRONUNCIATION ? t('learning.exercises.skip') :
+                            (exercise.type === ExerciseType.LISTENING && !userAnswer) ? t('learning.exercises.skip') :
+                                t('learning.exercises.checkAnswer')
                     }
                     onPress={handleCheck}
                     disabled={
@@ -206,7 +208,7 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
             ) : (
                 /* Botón para pasar al siguiente ejercicio */
                 <AppButton
-                    title="Siguiente"
+                    title={t('learning.exercises.next')}
                     onPress={onNext}
                     variant="secondary"
                 />

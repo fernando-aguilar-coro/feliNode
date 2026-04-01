@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { AppText, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface LoginHeaderProps {
     step: 'initial' | 'email' | 'code';
@@ -10,17 +11,18 @@ interface LoginHeaderProps {
 
 export const LoginHeader: React.FC<LoginHeaderProps> = ({ step, email }) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
 
     const getTitle = () => {
-        if (step === 'initial') return 'Inicia sesión';
-        if (step === 'email') return 'Bienvenido';
-        return 'Verificación';
+        if (step === 'initial') return t('auth.login.titleInitial');
+        if (step === 'email') return t('auth.login.titleEmail');
+        return t('auth.login.titleVerify');
     };
 
     const getSubtitle = () => {
-        if (step === 'initial') return 'Aprende inglés de forma fácil y divertida.';
-        if (step === 'email') return 'Inicia sesión con tu correo electrónico';
-        return `Ingresa el código enviado a ${email}`;
+        if (step === 'initial') return t('auth.login.subtitleInitial');
+        if (step === 'email') return t('auth.login.subtitleEmail');
+        return t('auth.login.subtitleVerify', { email });
     };
 
     return (

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { AppTextInput, AppButton, Spacer, AppText } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface LoginFormProps {
     email: string;
@@ -25,14 +26,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     onBack,
 }) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
 
     return (
         <View style={styles.container}>
             {step === 'email' ? (
                 <View>
                     <AppTextInput
-                        label="Correo electrónico"
-                        placeholder="ejemplo@correo.com"
+                        label={t('auth.login.emailLabel')}
+                        placeholder={t('auth.login.emailPlaceholder')}
                         value={email}
                         onChangeText={onEmailChange}
                         keyboardType="email-address"
@@ -42,8 +44,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             ) : (
                 <View>
                     <AppTextInput
-                        label="Código de verificación"
-                        placeholder="123456"
+                        label={t('auth.login.codeLabel')}
+                        placeholder={t('auth.login.codePlaceholder')}
                         value={code}
                         onChangeText={onCodeChange}
                         keyboardType="number-pad"
@@ -56,7 +58,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             <Spacer height={theme.spacing.lg} />
 
             <AppButton
-                title={loading ? "Procesando..." : (step === 'email' ? "Continuar con Email" : "Verificar e Ingresar")}
+                title={loading ? t('auth.login.processing') : (step === 'email' ? t('auth.login.continueWithEmail') : t('auth.login.verifyAndLogin'))}
                 onPress={onSubmit}
                 disabled={loading}
                 variant="primary"
@@ -65,7 +67,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
             <Spacer height={theme.spacing.md} />
             <AppButton
-                title={step === 'email' ? "Volver" : "Cambiar correo"}
+                title={step === 'email' ? t('auth.login.goBack') : t('auth.login.changeEmail')}
                 onPress={onBack}
                 disabled={loading}
                 variant="outline"

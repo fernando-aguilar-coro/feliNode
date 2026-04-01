@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { List, Surface, Divider } from 'react-native-paper';
-import { Text, View, Modal, TouchableOpacity, StyleSheet } from 'react-native';
-import { useAppTheme, useThemeControl } from '../../../theme/ThemeContext';
-import { useSettingsStore } from '../../../store/SettingsStore';
+import { View, StyleSheet, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { Button, Surface, Appbar, List, Divider } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../../../theme/ThemeContext';
+import { AppText } from '../../../components';
 
 const LANGUAGES = [
     { code: 'en', label: 'English' },
@@ -12,11 +12,9 @@ const LANGUAGES = [
     { code: 'hi', label: 'हिन्दी' },
 ];
 
-export const InterfaceSettingsSection = () => {
+export const LanguagePicker = () => {
+    const { i18n, t } = useTranslation();
     const theme = useAppTheme();
-    const { isDark, toggleTheme } = useThemeControl();
-    const { t, i18n } = useTranslation();
-    const setLanguage = useSettingsStore(state => state.setLanguage);
     const [visible, setVisible] = useState(false);
 
     const openModal = () => setVisible(true);
@@ -24,47 +22,24 @@ export const InterfaceSettingsSection = () => {
 
     const handleSelect = (langCode: string) => {
         i18n.changeLanguage(langCode);
-        setLanguage(langCode);
         closeModal();
     };
 
     const currentLang = LANGUAGES.find((lang) => i18n.language.startsWith(lang.code)) || LANGUAGES[0];
 
     return (
-        <List.Section>
-            <List.Subheader style={{ color: theme.colors.textSecondary }}>{t('settings.interface.title')}</List.Subheader>
-
-            <List.Item
-                title={isDark ? t('settings.interface.darkMode') : t('settings.interface.lightMode')}
-                titleStyle={{ color: theme.colors.text }}
-                description={t('settings.interface.tapToChangeTheme')}
-                descriptionStyle={{ color: theme.colors.textSecondary }}
-
-                // El icono de la izquierda cambia visualmente indicando el estado actual
-                left={props => (
-                    <List.Icon
-                        {...props}
-                        icon={isDark ? "weather-night" : "weather-sunny"}
-                        color={isDark ? theme.colors.primary : theme.colors.text}
-                    />
-                )}
-
-                // Icono derecho simple de "chevron" o nada
-                right={props => <List.Icon {...props} icon="chevron-right" color={theme.colors.primary} />}
-
-                // La acción ocurre al tocar toda la fila
-                onPress={toggleTheme}
-            />
-
-            <List.Item
-                title={t('settings.interface.language')}
-                titleStyle={{ color: theme.colors.text }}
-                description={t('settings.interface.tapToChangeLanguage')}
-                descriptionStyle={{ color: theme.colors.textSecondary }}
-                left={props => <List.Icon {...props} icon="translate" color={theme.colors.text} />}
-                right={props => <Text style={{ alignSelf: 'center', color: theme.colors.primary, marginRight: 16, fontWeight: 'bold' }}>{currentLang.label.toUpperCase()}</Text>}
-                onPress={openModal}
-            />
+        <View style={styles.container}>
+            <Button 
+                onPress={openModal} 
+                icon="translate" 
+                mode="outlined" 
+                textColor={theme.colors.textSecondary}
+                style={[styles.button, { borderColor: theme.colors.outline }]}
+                contentStyle={styles.buttonContent}
+                labelStyle={styles.buttonLabel}
+            >
+                {currentLang.label}
+            </Button>
 
             <Modal
                 visible={visible}
@@ -98,11 +73,28 @@ export const InterfaceSettingsSection = () => {
                     </Surface>
                 </TouchableOpacity>
             </Modal>
-        </List.Section>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        width: '100%',
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    button: {
+        borderRadius: 25,
+        borderWidth: 1.5,
+    },
+    buttonContent: {
+        height: 50,
+        paddingHorizontal: 20,
+    },
+    buttonLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.5)',
@@ -117,7 +109,14 @@ const styles = StyleSheet.create({
         elevation: 10,
         padding: 10,
     },
+    modalHeader: {
+        padding: 20,
+        alignItems: 'center',
+    },
     listItem: {
         paddingVertical: 10,
+    },
+    closeButton: {
+        marginTop: 10,
     }
 });

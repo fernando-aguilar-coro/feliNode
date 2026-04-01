@@ -1,20 +1,25 @@
 import React from 'react';
-import { List } from 'react-native-paper';
+import { List, Switch } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useSettingsStore } from '../../../store/SettingsStore';
+import { useTranslation } from 'react-i18next';
 
 export const LearningSettingsSection = () => {
     const theme = useAppTheme();
+    const showStreak = useSettingsStore(state => state.showStreak);
+    const setShowStreak = useSettingsStore(state => state.setShowStreak);
+    const { t } = useTranslation();
 
     return (
         <List.Section>
-            <List.Subheader style={{ color: theme.colors.textSecondary }}>Aprendizaje</List.Subheader>
+            <List.Subheader style={{ color: theme.colors.textSecondary }}>{t('settings.learning.title')}</List.Subheader>
             <List.Item
-                title="Idioma de la Interfaz"
+                title={t('settings.notifications.showStreak')}
                 titleStyle={{ color: theme.colors.text }}
-                description="Español"
+                description={t('settings.notifications.showStreakDesc')}
                 descriptionStyle={{ color: theme.colors.textSecondary }}
-                left={props => <List.Icon {...props} icon="translate" color={theme.colors.text} />}
-                onPress={() => { }}
+                left={props => <List.Icon {...props} icon="fire" color={theme.colors.text} />}
+                right={() => <Switch value={showStreak} onValueChange={setShowStreak} />}
             />
         </List.Section>
     );

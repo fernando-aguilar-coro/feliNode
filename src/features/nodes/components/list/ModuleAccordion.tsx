@@ -6,6 +6,7 @@ import { useAppTheme } from '../../../../theme/ThemeContext';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ModuleProgress, LessonProgress } from '../../services/ModuleProgress.service';
 import { audioService } from '../../../settings/services/audio.service';
+import { useTranslation } from 'react-i18next';
 
 interface ModuleAccordionProps {
     module: ModuleProgress;
@@ -16,6 +17,7 @@ interface ModuleAccordionProps {
 export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ module, isExpanded, onToggle }) => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
+    const { t } = useTranslation();
 
     const progress = module.totalLessonsCount === 0 ? 0 : module.completedLessonsCount / module.totalLessonsCount;
     const progressPercentage = Math.round(progress * 100);
@@ -226,11 +228,11 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
                         </View>
                         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
                             <Text style={styles.moduleTitle}>
-                                {isSpecialModule ? module.title : `Módulo ${module.order_index}: ${module.title}`}
+                                {isSpecialModule ? module.title : t('nodes.progress.module', { index: module.order_index, title: module.title })}
                             </Text>
                             {isSpecialModule && (
                                 <View style={styles.specialBadge}>
-                                    <Text style={styles.specialBadgeText}>Examen</Text>
+                                    <Text style={styles.specialBadgeText}>{t('nodes.progress.exam')}</Text>
                                 </View>
                             )}
                         </View>
@@ -245,7 +247,7 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
                 <View style={styles.progressContainer}>
                     <View style={styles.progressHeader}>
                         <Text style={styles.progressText}>
-                            {progressPercentage}% Completado
+                            {t('nodes.progress.completedPercentage', { percentage: progressPercentage })}
                         </Text>
                         <Text style={styles.progressText}>
                             {module.completedLessonsCount}/{module.totalLessonsCount}

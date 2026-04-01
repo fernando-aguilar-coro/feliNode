@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Text } from 'react-native';
 import { useUserStore } from '../../../store/UserStore';
 import { Screen, Spacer, AppText, AppButton } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { LoginHeader, LoginForm, SocialLogin } from '../components';
+import { useTranslation } from 'react-i18next';
+import { LoginHeader, LoginForm, SocialLogin, LanguagePicker } from '../components';
 
 export default function LoginScreen() {
     const theme = useAppTheme();
     const { sendOtp, verifyOtp, loading, loginAsGuest } = useUserStore();
+    const { t, i18n } = useTranslation();
     const [email, setEmail] = useState('');
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
@@ -15,7 +17,7 @@ export default function LoginScreen() {
 
     const handleSendOtp = async () => {
         if (!email) {
-            setError('Por favor ingresa tu correo');
+            setError(t('auth.login.emailRequired'));
             return;
         }
         setError('');
@@ -23,25 +25,26 @@ export default function LoginScreen() {
             await sendOtp(email);
             setStep('code');
         } catch (err: any) {
-            setError(err.message || 'Error al enviar el código');
+            setError(err.message || t('auth.login.sendCodeError'));
         }
     };
 
     const handleVerifyOtp = async () => {
         if (!code || code.length < 6) {
-            setError('Por favor ingresa el código de 6 dígitos');
+            setError(t('auth.login.codeRequired'));
             return;
         }
         setError('');
         try {
             await verifyOtp(email, code);
         } catch (err: any) {
-            setError(err.message || 'El código es incorrecto o ha expirado');
+            setError(err.message || t('auth.login.verifyCodeError'));
         }
     };
 
     return (
         <Screen style={{ backgroundColor: theme.colors.background }}>
+
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
@@ -58,7 +61,7 @@ export default function LoginScreen() {
                         {step === 'initial' && (
                             <View style={styles.initialContainer}>
                                 <AppButton
-                                    title='Iniciar sesión con Email'
+                                    title={t('auth.login.loginWithEmail')}
                                     onPress={() => { setStep('email'); setError(''); }}
                                     style={styles.guestButton}
                                     disabled={loading}
@@ -67,7 +70,7 @@ export default function LoginScreen() {
                                 <SocialLogin loading={loading} onError={setError} />
                                 <Spacer height={theme.spacing.xl} />
                                 <AppButton
-                                    title="Modo Invitado"
+                                    title={t('auth.login.guestMode')}
                                     onPress={loginAsGuest}
                                     disabled={loading}
                                     variant="outline"
@@ -107,6 +110,8 @@ export default function LoginScreen() {
                     </View>
 
                     <Spacer height={theme.spacing.xl} />
+                    <LanguagePicker />
+                    <Spacer height={theme.spacing.lg} />
                 </ScrollView>
             </KeyboardAvoidingView>
         </Screen>
@@ -114,6 +119,21 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+    langContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        zIndex: 10,
+    },
+    langButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 15,
+        marginLeft: 8,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
     scrollContent: {
         flexGrow: 1,
         justifyContent: 'center',

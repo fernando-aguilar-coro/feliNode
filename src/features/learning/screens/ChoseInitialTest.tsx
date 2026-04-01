@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { theme } from '../../../theme';
@@ -9,6 +10,7 @@ import { useSettingsStore } from '../../../store/SettingsStore';
 export const ChoseInitialTest = () => {
     const navigation = useNavigation<any>();
     const { setHasDecidedPlacementTest } = useSettingsStore();
+    const { t } = useTranslation();
 
     const handleSelectTest = (lessonId: string) => {
         navigation.navigate('PlacementEvaluation', { lessonId });
@@ -18,17 +20,17 @@ export const ChoseInitialTest = () => {
         <Screen style={styles.container}>
             <View style={styles.content}>
                 <AppText variant="xxl" weight="bold" align="center">
-                    Elige tu nivel
+                    {t('learning.choseInitialTest.title')}
                 </AppText>
                 <Spacer height={theme.spacing.lg} />
                 <AppText variant="md" color={theme.colors.textSecondary} align="center">
-                    Selecciona la prueba que mejor se adapte a ti.
+                    {t('learning.choseInitialTest.subtitle')}
                 </AppText>
 
                 <Spacer height={theme.spacing.xl} />
 
                 <AppButton
-                    title="Empezar de 0"
+                    title={t('learning.choseInitialTest.startFromZero')}
                     onPress={() => setHasDecidedPlacementTest(true)}
                     variant="primary"
                     style={styles.button}
@@ -36,12 +38,12 @@ export const ChoseInitialTest = () => {
                 <Spacer height={theme.spacing.lg} />
 
                 <AppText variant="sm" color={theme.colors.textSecondary} align="center">
-                    O toma una prueba de nivel:
+                    {t('learning.choseInitialTest.orTakeLevelTest')}
                 </AppText>
                 <Spacer height={theme.spacing.md} />
 
                 <AppButton
-                    title="Nivel Básico"
+                    title={t('learning.choseInitialTest.basicLevel')}
                     onPress={() => handleSelectTest('placement_test_basic')}
                     variant="outline"
                     style={styles.button}
@@ -49,7 +51,7 @@ export const ChoseInitialTest = () => {
                 <Spacer height={theme.spacing.md} />
 
                 <AppButton
-                    title="Nivel Intermedio"
+                    title={t('learning.choseInitialTest.intermediateLevel')}
                     onPress={() => handleSelectTest('placement_test_intermediate')}
                     variant="outline"
                     style={styles.button}
@@ -57,7 +59,7 @@ export const ChoseInitialTest = () => {
                 <Spacer height={theme.spacing.md} />
 
                 <AppButton
-                    title="Nivel Avanzado"
+                    title={t('learning.choseInitialTest.advancedLevel')}
                     onPress={() => handleSelectTest('placement_test_advanced')}
                     variant="outline"
                     style={styles.button}

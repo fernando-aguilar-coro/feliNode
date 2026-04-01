@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useExercises } from '../hooks/useExercises';
@@ -19,6 +20,7 @@ export const InfinityExerciseScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation();
     const route = useRoute<InfinityExerciseRouteProp>();
+    const { t } = useTranslation();
 
     // Default to 'General English' if no lessonId is passed, or handle it in the service
     const { lessonId } = route.params || {};
@@ -174,7 +176,7 @@ export const InfinityExerciseScreen = () => {
             <Screen style={styles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
                 <Spacer height={theme.spacing.sm} />
-                <AppText>Generando ejercicios infinitos...</AppText>
+                <AppText>{t('learning.infinity.generating')}</AppText>
             </Screen>
         );
     }
@@ -182,13 +184,13 @@ export const InfinityExerciseScreen = () => {
     if (gameOver) {
         return (
             <Screen style={styles.centerContainer}>
-                <AppText style={styles.gameOverTitle}>Game Over</AppText>
+                <AppText style={styles.gameOverTitle}>{t('learning.infinity.gameOver')}</AppText>
                 <AppText style={styles.gameOverText}>
-                    ¡Te has quedado sin vidas! Has completado {completedCount} ejercicios correctamente.
+                    {t('learning.infinity.livesLost', { count: completedCount })}
                 </AppText>
-                <AppButton title="Intentar de nuevo" onPress={handleRestart} />
+                <AppButton title={t('learning.infinity.tryAgain')} onPress={handleRestart} />
                 <Spacer height={theme.spacing.md} />
-                <AppButton title="Salir" onPress={handleExit} variant="outline" />
+                <AppButton title={t('learning.infinity.exit')} onPress={handleExit} variant="outline" />
             </Screen>
         );
     }
@@ -196,11 +198,11 @@ export const InfinityExerciseScreen = () => {
     if (!currentExercise && !loading) {
         return (
             <Screen style={styles.centerContainer}>
-                <AppText>No se pudieron generar ejercicios.</AppText>
+                <AppText>{t('learning.infinity.errorGenerating')}</AppText>
                 <Spacer height={theme.spacing.md} />
-                <AppButton title="Reintentar" onPress={loadInitialExercises} />
+                <AppButton title={t('learning.infinity.retry')} onPress={loadInitialExercises} />
                 <Spacer height={theme.spacing.sm} />
-                <AppButton title="Volver" onPress={handleExit} variant="outline" />
+                <AppButton title={t('learning.infinity.back')} onPress={handleExit} variant="outline" />
             </Screen>
         );
     }
@@ -209,12 +211,12 @@ export const InfinityExerciseScreen = () => {
         <Screen>
             <View style={styles.header}>
                 <AppButton
-                    title="Salir"
+                    title={t('learning.infinity.exit')}
                     onPress={handleExit}
                     variant="ghost"
                 />
                 <View style={styles.livesContainer}>
-                    <AppText variant="lg">❤️ x {lives}</AppText>
+                    <AppText variant="lg">{t('learning.infinity.lives', { lives })}</AppText>
                 </View>
             </View>
 
@@ -223,12 +225,12 @@ export const InfinityExerciseScreen = () => {
                 onCheck={handleCheckAnswer}
                 onNext={handleNextExercise}
                 lastResult={lastResult}
-                lessonContext="Modo Infinito"
+                lessonContext={t('learning.infinity.modeName')}
                 onOverrideResult={handleOverrideResult}
             />
             {generatingMore && (
                 <View style={{ alignItems: 'center', padding: 10 }}>
-                    <AppText variant="sm">Cargando más...</AppText>
+                    <AppText variant="sm">{t('learning.infinity.loadingMore')}</AppText>
                 </View>
             )}
         </Screen>

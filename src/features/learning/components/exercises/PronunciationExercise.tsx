@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText, Spacer, AppButton, TranslateButton } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { Microphone } from '../Microphone';
@@ -17,6 +18,7 @@ interface Props {
 
 export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const [status, setStatus] = useState<'idle' | 'recording' | 'processing' | 'result'>('idle');
     const [result, setResult] = useState<PronunciationResult | null>(null);
     const [recordedUri, setRecordedUri] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
             onAnswer(data.overallScore.toString());
             setStatus('result');
         } catch (error) {
-            Alert.alert("Error", "No se pudo analizar la pronunciación.");
+            Alert.alert(t('learning.pronunciation.error'), t('learning.pronunciation.errorAssess'));
             onAnswer("");
             setStatus('idle');
         }
@@ -98,14 +100,14 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
         <ScrollView contentContainerStyle={styles.container}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: theme.spacing.md }}>
                 <AppText variant="lg" style={[styles.question, { marginRight: theme.spacing.xs }]}>
-                    Lee esta frase:
+                    {t('learning.pronunciation.leeFrase')}
                 </AppText>
                 <TranslateButton textToTranslate={exercise.phrase} size={22} />
             </View>
 
             {result && (
                 <View style={styles.scoreContainer}>
-                    <AppText variant="sm" color={theme.colors.textSecondary}>Precisión General:</AppText>
+                    <AppText variant="sm" color={theme.colors.textSecondary}>{t('learning.pronunciation.precision')}</AppText>
                     <AppText variant="xxl" style={{ color: getScoreColor(result.overallScore) }} weight="bold">
                         {result.overallScore.toFixed(0)}%
                     </AppText>
@@ -120,15 +122,15 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={theme.colors.primary} />
                     <Spacer height={theme.spacing.sm} />
-                    <AppText variant="sm" color={theme.colors.textLight}>Analizando...</AppText>
+                    <AppText variant="sm" color={theme.colors.textLight}>{t('learning.pronunciation.analizando')}</AppText>
                 </View>
             ) : null}
 
             {recordedUri && !result && status !== 'processing' ? (
                 <View style={styles.reviewContainer}>
                     <View style={styles.reviewButtons}>
-                        <AppButton title="Reintentar" onPress={handleRetry} variant="outline" style={{ marginRight: 10 }} />
-                        <AppButton title="Enviar" onPress={handleSend} variant="primary" />
+                        <AppButton title={t('learning.pronunciation.reintentar')} onPress={handleRetry} variant="outline" style={{ marginRight: 10 }} />
+                        <AppButton title={t('learning.pronunciation.enviar')} onPress={handleSend} variant="primary" />
                     </View>
                 </View>
             ) : status !== 'result' && status !== 'processing' ? (
@@ -141,7 +143,7 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
 
             {status === 'result' && (
                 <View style={styles.reviewContainer}>
-                    <AppButton title="Intentar de nuevo" onPress={handleRetry} variant="outline" />
+                    <AppButton title={t('learning.infinity.tryAgain')} onPress={handleRetry} variant="outline" />
                 </View>
             )}
 

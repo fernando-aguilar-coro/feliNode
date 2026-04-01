@@ -4,6 +4,7 @@ import { ProgressBar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { ModuleProgress } from '../../services/ModuleProgress.service';
+import { useTranslation } from 'react-i18next';
 
 interface OverallProgressProps {
     modules: ModuleProgress[];
@@ -11,6 +12,7 @@ interface OverallProgressProps {
 
 export const OverallProgress: React.FC<OverallProgressProps> = ({ modules }) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
 
     const totalLessons = modules.reduce((sum, mod) => sum + mod.totalLessonsCount, 0);
     const completedLessons = modules.reduce((sum, mod) => sum + mod.completedLessonsCount, 0);
@@ -23,7 +25,7 @@ export const OverallProgress: React.FC<OverallProgressProps> = ({ modules }) => 
                 <View style={styles.titleContainer}>
                     <MaterialCommunityIcons name="trophy-variant" size={28} color={theme.colors.primary} />
                     <Text style={[styles.title, { color: theme.colors.text }]}>
-                        Tu Progreso Global
+                        {t('nodes.progress.overallProgress')}
                     </Text>
                 </View>
                 <Text style={[styles.percentageText, { color: theme.colors.primary }]}>
@@ -39,7 +41,7 @@ export const OverallProgress: React.FC<OverallProgressProps> = ({ modules }) => 
             
             <View style={styles.footer}>
                 <Text style={[styles.detailsText, { color: theme.colors.textSecondary }]}>
-                    {completedLessons} de {totalLessons} lecciones completadas
+                    {t('nodes.progress.lessonsCompleted', { completed: completedLessons, total: totalLessons })}
                 </Text>
             </View>
         </View>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, ActivityIndicator, StyleSheet, Alert, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText } from '../../../components';
 import { theme } from '../../../theme';
 import { GeminiService } from '../../../api/Gemini.service';
@@ -11,6 +12,7 @@ interface RecommendationButtonProps {
 }
 
 export const RecommendationButton: React.FC<RecommendationButtonProps> = ({ onRecommendationReceived, currentLesson }) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
 
     const handlePress = async () => {
@@ -22,7 +24,7 @@ export const RecommendationButton: React.FC<RecommendationButtonProps> = ({ onRe
             onRecommendationReceived(phrase);
         } catch (error) {
             console.error(error);
-            Alert.alert("Error", "No se pudo obtener una recomendación.");
+            Alert.alert(t('learning.pronunciation.error'), t('learning.exercises.errorRecommendPhrase'));
         } finally {
             setLoading(false);
         }
@@ -40,7 +42,7 @@ export const RecommendationButton: React.FC<RecommendationButtonProps> = ({ onRe
                 <View style={styles.content}>
                     <MaterialCommunityIcons name="magic-staff" size={24} color={theme.colors.white} style={styles.icon} />
                     <AppText variant="md" color={theme.colors.white} weight="bold">
-                        Recomendar frase
+                        {t('learning.exercises.suggestPhrase')}
                     </AppText>
                 </View>
             )}

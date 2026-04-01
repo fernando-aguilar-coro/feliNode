@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Divider, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import {
     AudioSettingsSection,
     LearningSettingsSection,
@@ -13,11 +14,12 @@ import {
 
 export const SettingsScreen = () => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
             <ScrollView contentContainerStyle={styles.content}>
-                <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.text }]}>Ajustes</Text>
+                <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.text }]}>{t('settings.title')}</Text>
 
                 <AudioSettingsSection />
                 <Divider style={{ backgroundColor: theme.colors.border }} />

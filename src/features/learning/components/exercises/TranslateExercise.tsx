@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Snackbar } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 import { TranslateExercise as TranslateExerciseType } from '../../types/exercise';
 import { AppText, AppTextInput } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
@@ -17,6 +18,7 @@ interface Props {
 
 export const TranslateExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [tappedWord, setTappedWord] = useState('');
     const [translatedWord, setTranslatedWord] = useState('');
@@ -110,7 +112,7 @@ export const TranslateExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
             <AppTextInput
                 value={userAnswer}
                 onChangeText={onAnswer}
-                placeholder="Traduce esta frase..."
+                placeholder={t('learning.exercises.translatePhrase')}
                 multiline
                 style={styles.input}
             />
@@ -121,13 +123,13 @@ export const TranslateExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
                 duration={3000}
                 style={{ backgroundColor: theme.colors.surface }}
                 action={{
-                    label: 'Cerrar',
+                    label: t('learning.exercises.close'),
                     onPress: () => setSnackbarVisible(false),
                     textColor: theme.colors.primary
                 }}
             >
                 <AppText style={{ color: theme.colors.text }}>
-                    "{tappedWord}" significa: <AppText weight="bold" style={{ color: theme.colors.primary }}>{translatedWord}</AppText>
+                    {t('learning.exercises.wordSignifies', { word: tappedWord })} <AppText weight="bold" style={{ color: theme.colors.primary }}>{translatedWord}</AppText>
                 </AppText>
             </Snackbar>
         </View>

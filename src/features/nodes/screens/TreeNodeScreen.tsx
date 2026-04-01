@@ -4,6 +4,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNodes } from '../hooks/useNodes';
 import { TreeNode } from '../types/NodeTypes';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useNodesStore } from '../../../store/NodesStore';
 import { TreeCanvas } from '../components/TreeCanvas';
 import { PannableCanvasRef } from '../components/PannableCanvas';
@@ -14,7 +16,9 @@ import { ModuleStatsCards } from '../components/progress/ModuleStatsCards';
 export const TreeNodeScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
-    const { canvasWidth, canvasHeight, isLoading, error } = useNodes(400, 600);
+    const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
+    const { canvasWidth, canvasHeight, error } = useNodes(400, 600);
     const canvasRef = useRef<PannableCanvasRef>(null);
 
 
@@ -56,7 +60,7 @@ export const TreeNodeScreen = () => {
         },
         fab: {
             position: 'absolute',
-            bottom: 30,
+            bottom: Math.max(insets.bottom + 16, 30),
             right: 30,
             backgroundColor: theme.colors.primary,
             width: 56,
@@ -75,6 +79,7 @@ export const TreeNodeScreen = () => {
         },
         topRightContainer: {
             position: 'absolute',
+            top: Math.max(insets.top + 8, 16),
             right: 16,
             flexDirection: 'column',
             alignItems: 'flex-end',
@@ -87,7 +92,7 @@ export const TreeNodeScreen = () => {
     if (error) {
         return (
             <View style={styles.centerContainer}>
-                <Text style={styles.errorText}>Error: {error}</Text>
+                <Text style={styles.errorText}>{t('nodes.tree.errorTitle')}: {error}</Text>
             </View>
         );
     }

@@ -3,10 +3,12 @@ import { StyleSheet, View } from 'react-native';
 import { List, Button } from 'react-native-paper';
 import { useUserStore } from '../../../store/UserStore';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import { DeleteAccountModal } from './DeleteAccountModal';
 
 export const AccountSettingsSection = () => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const logout = useUserStore((state) => state.logout);
     const deleteAccount = useUserStore((state) => state.deleteAccount);
     const isGuest = useUserStore((state) => state.isGuest);
@@ -34,7 +36,7 @@ export const AccountSettingsSection = () => {
 
     return (
         <List.Section>
-            <List.Subheader style={{ color: theme.colors.textSecondary }}>Cuenta</List.Subheader>
+            <List.Subheader style={{ color: theme.colors.textSecondary }}>{t('settings.account.title')}</List.Subheader>
             <View style={styles.buttonContainer}>
                 {isGuest ? (
                     <Button
@@ -48,7 +50,7 @@ export const AccountSettingsSection = () => {
                         }}
                         icon="google"
                     >
-                        Vincular Cuenta con Google
+                        {t('settings.account.linkGoogle')}
                     </Button>
                 ) : (
                     <>
@@ -59,7 +61,7 @@ export const AccountSettingsSection = () => {
                             style={{ borderColor: theme.colors.error, marginBottom: 12 }}
                             icon="logout"
                         >
-                            Cerrar Sesión
+                            {t('settings.account.logout')}
                         </Button>
                         <Button
                             mode="contained"
@@ -67,7 +69,7 @@ export const AccountSettingsSection = () => {
                             buttonColor={theme.colors.error}
                             icon="delete"
                         >
-                            Eliminar Cuenta
+                            {t('settings.account.deleteAccount')}
                         </Button>
                     </>
                 )}

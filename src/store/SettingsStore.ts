@@ -29,6 +29,8 @@ interface SettingsState {
     setHomeViewMode: (mode: 'tree' | 'list') => void;
     themeMode: 'light' | 'dark' | 'system';
     setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
+    language: string | null;
+    setLanguage: (lang: string) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -58,6 +60,8 @@ export const useSettingsStore = create<SettingsState>()(
             setHomeViewMode: (mode: 'tree' | 'list') => set({ homeViewMode: mode }),
             themeMode: 'light',
             setThemeMode: (mode: 'light' | 'dark' | 'system') => set({ themeMode: mode }),
+            language: null,
+            setLanguage: (lang: string) => set({ language: lang }),
         }),
         {
             name: 'settings-storage',

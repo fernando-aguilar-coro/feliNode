@@ -1,6 +1,18 @@
 import notifee, { TriggerType, TimestampTrigger, IntervalTrigger, TimeUnit } from '@notifee/react-native';
+import i18n from '../i18n';
 
 export const NotificationService = {
+    checkPermissions: async () => {
+        const settings = await notifee.getNotificationSettings();
+        return settings.authorizationStatus >= 1;
+    },
+    requestPermissions: async () => {
+        const settings = await notifee.requestPermission();
+        return settings.authorizationStatus >= 1;
+    },
+    cancelAllNotifications: async () => {
+        await notifee.cancelAllNotifications();
+    },
     scheduleStreakReminder: async (currentStreak: number, lastActiveDate: string | null) => {
         try {
             // 1. Request permissions (required for iOS and Android 13+)
@@ -9,7 +21,7 @@ export const NotificationService = {
             // 2. Create a channel (required for Android)
             const channelId = await notifee.createChannel({
                 id: 'streak-reminders',
-                name: 'Recordatorios de Racha',
+                name: i18n.t('notificationService.channelName'),
                 sound: 'default'
             });
 
@@ -24,33 +36,8 @@ export const NotificationService = {
 
             const getRandomMsg = (arr: { title: string, body: string }[]) => arr[Math.floor(Math.random() * arr.length)];
 
-            const messages8h = [
-                { title: '¡Momento de practicar! 📚', body: 'Solo unos minutos hoy pueden mejorar mucho tu inglés.' },
-                { title: 'Pequeños pasos, gran progreso 🌟', body: 'Practica un poco ahora y sigue avanzando.' },
-                { title: '¿Listo para tu inglés de hoy? 🤔', body: 'Nunca es tarde para aprender algo nuevo. ¡Empieza!' },
-                { title: 'Tu meta está cerca 🗣️', body: 'Cada práctica te acerca a hablar con fluidez.' },
-                { title: 'Constancia es la clave 🧠', body: 'Un poco cada día hace la diferencia. ¡Vamos!' },
-                { title: 'No rompas la racha 🔥', body: 'Llevas buen progreso, ¡continúa hoy!' },
-                { title: 'Un minuto cuenta ⏱️', body: 'Incluso una práctica corta suma. ¡Inténtalo ahora!' },
-                { title: 'Tu futuro te lo agradecerá 💼', body: 'Aprender inglés abre muchas puertas. ¡Sigue practicando!' },
-                { title: 'Hazlo parte de tu día 🌅', body: 'Convierte el inglés en un hábito diario.' },
-                { title: 'Sigue avanzando 🚀', body: 'No importa si es poco, lo importante es no parar.' },
-                { title: 'Hoy es buen día para aprender 📖', body: 'Tu próxima mejora en inglés empieza ahora.' },
-                { title: 'Entrena tu mente 🧩', body: 'Practicar inglés también fortalece tu memoria.' },
-                { title: 'Un paso más 💪', body: 'Cada sesión te hace mejor que ayer.' },
-                { title: 'No lo dejes para mañana ⏳', body: 'Aprovecha este momento para practicar.' },
-                { title: 'Hazlo divertido 🎯', body: 'Aprender inglés también puede ser entretenido.' },
-                { title: '¿5 minutos? Eso basta ⌛', body: 'Un poco de práctica hoy es mejor que nada.' },
-                { title: 'Tu inglés está creciendo 🌱', body: 'Sigue practicando para verlo florecer.' },
-                { title: 'Desafío del día ⚡', body: 'Entra y completa tu práctica diaria.' },
-                { title: 'Sigue construyendo tu habilidad 🏗️', body: 'Cada palabra nueva cuenta.' },
-                { title: 'Tu versión bilingüe te espera 🌍', body: 'Da otro paso hoy.' },
-                { title: '¡Hora de un repaso rápido! 🚀', body: 'Unos minutos de inglés hacen la diferencia.' },
-                { title: 'Mantén tu mente fresca 🧠', body: '¿Qué te parece practicar un poco de inglés ahora?' },
-                { title: 'Pequeños pasos, grandes logros 🌟', body: 'Es un buen momento para una lección corta.' },
-                { title: '¡El inglés te espera! 🇬🇧', body: 'Sigue mejorando tus habilidades en este momento.' },
-                { title: '¿Tienes un rato libre? ☕', body: 'Aprovecha para aprender algo nuevo en inglés.' }
-            ];
+            // Get translated generic practice messages
+            const messages8h = i18n.t('notificationService.practice', { returnObjects: true }) as { title: string, body: string }[];
 
             // 3.5 Schedule 8-hour repeating generic reminder independent of streaks
             const trigger8h: IntervalTrigger = {
@@ -103,20 +90,9 @@ export const NotificationService = {
                 // They haven't played today, so they need to play by tonight.
             }
 
-            // Message banks
-            const messages18 = [
-                { title: '¡Es hora de practicar! 📚', body: `Tienes una racha de ${currentStreak} días. ¡Haz una lección ahora para que no afecte a tus protectores!` },
-                { title: '¡Tu racha está en riesgo! 🚨', body: `Protege tu racha de ${currentStreak} días dedicando unos minutos al inglés.` },
-                { title: 'El tiempo vuela ⏰', body: `Conserva tu racha de ${currentStreak} días practicando ahora.` },
-                { title: '¡No te rindas! 💪', body: `Asegura tu racha de ${currentStreak} días con una lección corta.` },
-            ];
-
-            const messages23 = [
-                { title: '¡No pierdas tu racha! 🔥', body: 'Solo queda una hora para medianoche. ¡Completa una lección ahora mismo!' },
-                { title: 'Última oportunidad ⏳', body: 'Tu racha está a punto de reiniciarse. ¡Practica ya!' },
-                { title: '¡Actúa rápido! ⚡', body: 'Queda muy poco para que termine el día. ¡Salva tu racha!' },
-                { title: '¡Es ahora o nunca! 🏃', body: 'No dejes que el reloj te gane sin practicar hoy.' },
-            ];
+            // Message banks from translations interpolating variables
+            const messages18 = i18n.t('notificationService.risk', { streak: currentStreak, returnObjects: true }) as { title: string, body: string }[];
+            const messages23 = i18n.t('notificationService.danger', { returnObjects: true }) as { title: string, body: string }[];
 
 
 
@@ -184,42 +160,6 @@ export const NotificationService = {
 
         } catch (error) {
             console.error('[NotificationService] Error scheduling notification:', error);
-        }
-    },
-
-    triggerTestNotification: async () => {
-        try {
-            await notifee.requestPermission();
-            const channelId = await notifee.createChannel({
-                id: 'streak-reminders',
-                name: 'Recordatorios de Racha',
-                sound: 'default'
-            });
-
-            const showDelayed = (title: string, body: string, id: string, delay: number) => {
-                setTimeout(async () => {
-                    await notifee.displayNotification({
-                        id,
-                        title,
-                        body,
-                        android: {
-                            channelId,
-                            smallIcon: 'ic_launcher',
-                            pressAction: {
-                                id: 'default',
-                            },
-                        },
-                    });
-                }, delay);
-            };
-
-            // Test notifications simulating the real ones
-            showDelayed('¡Momento de practicar! 📚', 'Solo unos minutos hoy pueden mejorar mucho tu inglés.', 'test-8h', 100);
-            showDelayed('¡Tu racha está en riesgo! 🚨', 'Protege tu racha de 7 días dedicando unos minutos al inglés.', 'test-18h', 2000); // 2s later
-            showDelayed('Última oportunidad ⏳', 'Tu racha está a punto de reiniciarse. ¡Practica ya!', 'test-23h', 4000); // 4s later
-
-        } catch (error) {
-            console.error('[NotificationService] Error triggering test notification:', error);
         }
     }
 };

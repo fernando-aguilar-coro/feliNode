@@ -3,6 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { List, Switch, Portal, Dialog, RadioButton, Button, IconButton } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useSettingsStore } from '../../../store/SettingsStore';
+import { useTranslation } from 'react-i18next';
 import { ReactNativeTts } from '../../learning/helpers/tts/reactNativeTTS';
 import { audioService } from '../services/audio.service';
 import {
@@ -25,6 +26,7 @@ const kokoroVoices = [
 
 export const AudioSettingsSection = () => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const {
         sfxEnabled, setSfxEnabled,
         bgmEnabled, setBgmEnabled,
@@ -77,17 +79,17 @@ export const AudioSettingsSection = () => {
     };
 
     const getSpanishVoiceLabel = () => {
-        if (!spanishVoiceId) return 'Voz por defecto';
+        if (!spanishVoiceId) return t('settings.audio.defaultVoice');
         const voice = esVoices.find(v => v.id === spanishVoiceId);
-        return voice ? voice.name : 'Voz configurada';
+        return voice ? voice.name : t('settings.audio.configuredVoice');
     };
 
     return (
         <List.Section>
-            <List.Subheader style={{ color: theme.colors.textSecondary }}>Audio</List.Subheader>
+            <List.Subheader style={{ color: theme.colors.textSecondary }}>{t('settings.audio.title')}</List.Subheader>
 
             <List.Item
-                title="Voz en español"
+                title={t('settings.audio.spanishVoice')}
                 titleStyle={{ color: theme.colors.text }}
                 description={getSpanishVoiceLabel()}
                 descriptionStyle={{ color: theme.colors.textSecondary }}
@@ -96,7 +98,7 @@ export const AudioSettingsSection = () => {
             />
 
             <List.Item
-                title="Voz en ingles"
+                title={t('settings.audio.englishVoice')}
                 titleStyle={{ color: theme.colors.text }}
                 description={getEnglishVoiceLabel()}
                 descriptionStyle={{ color: theme.colors.textSecondary }}
@@ -106,9 +108,9 @@ export const AudioSettingsSection = () => {
 
             {!isKokoroDownloaded ? (
                 <List.Item
-                    title="Modelo de voz Kokoro (Inglés)"
+                    title={t('settings.audio.kokoroModel')}
                     titleStyle={{ color: theme.colors.text }}
-                    description={isDownloading ? `Descargando: ...` : "Requiere descarga para voz offline"}
+                    description={isDownloading ? t('settings.audio.downloading') : t('settings.audio.offlineVoiceDesc')}
                     descriptionStyle={{ color: theme.colors.textSecondary }}
                     left={props => <List.Icon {...props} icon="download" color={theme.colors.text} />}
                     right={() => (
@@ -118,15 +120,15 @@ export const AudioSettingsSection = () => {
                             onPress={handleDownloadKokoro}
                             textColor={theme.colors.primary}
                         >
-                            Descargar
+                            {t('settings.audio.download')}
                         </Button>
                     )}
                 />
             ) : (
                 <List.Item
-                    title="Modelo de voz Kokoro (Inglés)"
+                    title={t('settings.audio.kokoroModel')}
                     titleStyle={{ color: theme.colors.text }}
-                    description="Instalado"
+                    description={t('settings.audio.installed')}
                     descriptionStyle={{ color: 'green' }}
                     left={props => <List.Icon {...props} icon="check-circle" color="green" />}
                     right={() => (
@@ -135,7 +137,7 @@ export const AudioSettingsSection = () => {
                                 onPress={handleDownloadKokoro}
                                 textColor={theme.colors.primary}
                             >
-                                Actualizar
+                                {t('settings.audio.update')}
                             </Button>
                             <IconButton
                                 icon="delete-outline"
@@ -149,14 +151,14 @@ export const AudioSettingsSection = () => {
             )}
 
             <List.Item
-                title="Efectos de sonido"
+                title={t('settings.audio.sfx')}
                 titleStyle={{ color: theme.colors.text }}
                 left={props => <List.Icon {...props} icon="volume-high" color={theme.colors.text} />}
                 right={() => <Switch value={sfxEnabled} onValueChange={setSfxEnabled} />}
             />
 
             <List.Item
-                title="Música de fondo"
+                title={t('settings.audio.bgm')}
                 titleStyle={{ color: theme.colors.text }}
                 left={props => <List.Icon {...props} icon="music-note" color={theme.colors.text} />}
                 right={() => <Switch value={bgmEnabled} onValueChange={(val) => {
@@ -172,7 +174,7 @@ export const AudioSettingsSection = () => {
             {/* Spanish Voice Dialog */}
             <Portal>
                 <Dialog visible={esModalVisible} onDismiss={() => setEsModalVisible(false)} style={{ backgroundColor: theme.colors.surface }}>
-                    <Dialog.Title style={{ color: theme.colors.text }}>Seleccionar voz española</Dialog.Title>
+                    <Dialog.Title style={{ color: theme.colors.text }}>{t('settings.audio.selectSpanishVoice')}</Dialog.Title>
                     <Dialog.ScrollArea>
                         <ScrollView style={{ maxHeight: 300 }}>
                             <RadioButton.Group value={spanishVoiceId || ''} onValueChange={val => setSpanishVoiceId(val)}>
@@ -188,7 +190,7 @@ export const AudioSettingsSection = () => {
                         </ScrollView>
                     </Dialog.ScrollArea>
                     <Dialog.Actions>
-                        <Button onPress={() => setEsModalVisible(false)} textColor={theme.colors.primary}>Cerrar</Button>
+                        <Button onPress={() => setEsModalVisible(false)} textColor={theme.colors.primary}>{t('settings.audio.close')}</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
@@ -196,7 +198,7 @@ export const AudioSettingsSection = () => {
             {/* English Voice Dialog */}
             <Portal>
                 <Dialog visible={enModalVisible} onDismiss={() => setEnModalVisible(false)} style={{ backgroundColor: theme.colors.surface }}>
-                    <Dialog.Title style={{ color: theme.colors.text }}>Seleccionar voz inglesa</Dialog.Title>
+                    <Dialog.Title style={{ color: theme.colors.text }}>{t('settings.audio.selectEnglishVoice')}</Dialog.Title>
                     <Dialog.ScrollArea>
                         <ScrollView style={{ maxHeight: 300 }}>
                             {kokoroVoices.map((v) => (
@@ -212,7 +214,7 @@ export const AudioSettingsSection = () => {
                         </ScrollView>
                     </Dialog.ScrollArea>
                     <Dialog.Actions>
-                        <Button onPress={() => setEnModalVisible(false)} textColor={theme.colors.primary}>Cerrar</Button>
+                        <Button onPress={() => setEnModalVisible(false)} textColor={theme.colors.primary}>{t('settings.audio.close')}</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
