@@ -3,11 +3,14 @@ import { ScrollView, StyleSheet, View, TouchableOpacity, DeviceEventEmitter } fr
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import Tts from 'react-native-tts';
+import { useTranslation } from 'react-i18next';
 import { AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { TtsService } from '../services/Tts.service';
 import { getMarkdownStyles } from '../styles/md.style';
 import { TranslationFab } from './TranslationFab';
+import { useSettingsStore } from '../../../store/SettingsStore';
+import { franc } from 'franc';
 
 const renderRules = {
     table: (node: any, children: any, styles: any) => (
@@ -16,7 +19,7 @@ const renderRules = {
             horizontal
             showsHorizontalScrollIndicator={true}
             style={{ marginVertical: 10 }}
-            contentContainerStyle={{ flexGrow: 1 }} 
+            contentContainerStyle={{ flexGrow: 1 }}
         >
             <View style={styles.table}>{children}</View>
         </ScrollView>
@@ -30,6 +33,8 @@ interface TheoryViewerProps {
 
 export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue }) => {
     const theme = useAppTheme();
+    const { t, i18n } = useTranslation();
+    const { language: nativeLanguage } = useSettingsStore();
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [displayContent, setDisplayContent] = useState(content);
@@ -63,8 +68,34 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
     const handlePlay = () => {
         setIsPlaying(true);
         setIsPaused(false);
-        // Si está traducido al inglés, narra en en-US, de lo contrario en es-ES
-        TtsService.speakLongText(displayContent, isTranslated ? 'en-US' : 'es-ES');
+
+        // Usamos franc para detectar el idioma del texto exacto que se está mostrando.
+        const detected = franc(displayContent);
+        
+        let voiceLang = 'en-US';
+        if (detected === 'spa') {
+            voiceLang = 'es-ES';
+        } else if (detected === 'cmn' || detected === 'zho') {
+            // TODO: Soporte para voces nativas de Chino
+            voiceLang = 'en-US'; 
+        } else if (detected === 'hin') {
+            // TODO: Soporte para voces nativas de Hindi
+            voiceLang = 'en-US'; 
+        } else if (detected === 'eng') {
+            voiceLang = 'en-US';
+        } else {
+            // Fallback en caso de que el texto sea muy corto para franc
+            // Usamos la lógica basada en isTranslated como respaldo seguro
+            if (nativeLanguage === 'en') {
+                // Para ingleses: si traducen, es a español. Si no, su original ya era español.
+                voiceLang = 'es-ES';
+            } else {
+                // Para hispanos/otros: si traducen, es a inglés. Si no, su original era español u otro.
+                voiceLang = isTranslated ? 'en-US' : 'es-ES';
+            }
+        }
+
+        TtsService.speakLongText(displayContent, voiceLang);
     };
 
     const handleStop = () => {
@@ -123,7 +154,7 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
             >
                 <View style={styles.header}>
                     <AppText variant="xxl" weight="bold" style={styles.title}>
-                        {isTranslated ? "Theory" : "Teoría"}
+                        {t('learning.theory.title')}
                     </AppText>
                     <View style={styles.controls}>
                         <TouchableOpacity onPress={handlePlay} style={styles.controlButton}>
@@ -145,7 +176,7 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
                             </>
                         )}
                         <AppButton
-                            title={isTranslated ? "Skip" : "Saltar"}
+                            title={t('learning.theory.skip')}
                             onPress={onContinue}
                             variant="ghost"
                             style={styles.skipButton}
@@ -161,14 +192,14 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
 
                 <Spacer height={theme.spacing.xl} />
                 <AppButton
-                    title={isTranslated ? "Go to exam" : "Ir al examen"}
+                    title={t('learning.theory.goToExam')}
                     onPress={onContinue}
                     variant="primary"
                 />
                 <Spacer height={theme.spacing.xxl} />
             </ScrollView>
 
-            <TranslationFab 
+            <TranslationFab
                 originalText={content}
                 onTranslatedText={(text, translated) => {
                     setDisplayContent(text);

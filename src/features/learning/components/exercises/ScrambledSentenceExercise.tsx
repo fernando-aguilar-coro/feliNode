@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Platform, UIManager } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ScrambledSentenceExercise as ScrambledSentenceExerciseType } from '../../types/exercise';
 import { AppText, TranslateButton } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
@@ -16,6 +17,7 @@ interface Props {
 
 export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
     useEffect(() => {
@@ -78,7 +80,7 @@ export const ScrambledSentenceExercise = ({ exercise, onAnswer, userAnswer }: Pr
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.md }}>
                 <AppText variant="sm" style={[styles.instruction, { marginBottom: 0 }]}>
-                    Toca las palabras para formar la oración:
+                    {t('learning.exercises.scrambled')}
                 </AppText>
                 {userAnswer.trim().length > 0 && (
                     <TranslateButton textToTranslate={userAnswer.trim()} size={20} />

@@ -2,20 +2,21 @@ import React, { useState } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { FAB } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { translateMd } from '../../../services/Translation.service';
+import { translateMd, mapI18nToTranslateLanguage } from '../../../services/Translation.service';
 import { TranslateLanguage } from '@react-native-ml-kit/translate-text';
+import { useSettingsStore } from '../../../store/SettingsStore';
 
 interface TranslationFabProps {
   /**
    * Texto original en español (usualmente markdown) a traducir.
    */
   originalText: string;
-  
+
   /**
    * Callback invocado cuando ocurre la traducción o se restaura el texto.
    */
   onTranslatedText: (text: string, isTranslated: boolean) => void;
-  
+
   /**
    * Estilo adicional para colocar el FAB (por defecto abajo a la derecha).
    */
@@ -24,6 +25,8 @@ interface TranslationFabProps {
 
 export const TranslationFab: React.FC<TranslationFabProps> = ({ originalText, onTranslatedText, style }) => {
   const theme = useAppTheme();
+  const { language: nativeLanguage } = useSettingsStore();
+
   const [isTranslated, setIsTranslated] = useState<boolean>(false);
   const [translatedTextCache, setTranslatedTextCache] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -43,11 +46,19 @@ export const TranslationFab: React.FC<TranslationFabProps> = ({ originalText, on
       return;
     }
 
-    // Realizar la traducción usando ML Kit (Español -> Inglés) preservando el Markdown
     setLoading(true);
     try {
-      // Configuramos para traducir de español a inglés usando translateMd
-      const result = await translateMd(originalText, TranslateLanguage.ENGLISH, TranslateLanguage.SPANISH);
+      // El texto original está en el idioma nativo del usuario
+      const sourceLang = mapI18nToTranslateLanguage(nativeLanguage);
+      
+      // Lógica de destino:
+      // - Si el usuario habla inglés, traducimos a español (caso especial).
+      // - Para todos los demás idiomas (es, zh, hi), traducimos a inglés para practicar.
+      const targetLang = (nativeLanguage === 'en') 
+        ? TranslateLanguage.SPANISH 
+        : TranslateLanguage.ENGLISH;
+
+      const result = await translateMd(originalText, targetLang, sourceLang);
       setTranslatedTextCache(result);
       setIsTranslated(true);
       onTranslatedText(result, true);

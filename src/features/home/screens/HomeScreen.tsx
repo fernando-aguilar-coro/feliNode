@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +17,7 @@ import { KokoroDisclaimerModal } from '../components/KokoroDisclaimerModal';
 import { FirstPracticeModal } from '../components/FirstPracticeModal';
 
 export const HomeScreen = () => {
+    const { t } = useTranslation();
     const netInfo = useNetInfo();
     const theme = useAppTheme();
     const homeViewMode = useSettingsStore(state => state.homeViewMode);
@@ -100,7 +102,7 @@ export const HomeScreen = () => {
             {netInfo.isConnected === false && (
                 <View style={styles.offlineContainer}>
                     <Text style={styles.offlineText}>
-                        Conexión a internet no disponible, algunas funciones no estarán disponibles
+                        {t('home.offline')}
                     </Text>
                 </View>
             )}
@@ -113,7 +115,7 @@ export const HomeScreen = () => {
                         color={theme.colors.white}
                     />
                     <Text style={styles.bannerText}>
-                        {homeViewMode === 'list' ? 'Cambiar a Mapa de Nodos' : 'Cambiar a Vista de Lista'}
+                        {homeViewMode === 'list' ? t('home.viewModes.tree') : t('home.viewModes.list')}
                     </Text>
                 </View>
             </TouchableOpacity>

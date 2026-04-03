@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AppText, Spacer } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { PronunciationResult, PronunciationWordResult, PronunciationSyllableResult } from '../../services/Pronunciation.service';
@@ -13,6 +14,7 @@ interface Props {
 
 export const PronunciationFeedbackAzure = ({ result, targetText }: Props) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
 
     const getScoreColor = (score: number) => {
         if (score >= 80) return theme.colors.success;
@@ -157,15 +159,15 @@ export const PronunciationFeedbackAzure = ({ result, targetText }: Props) => {
             {/* Detailed View - Always Visible */}
             <View style={styles.detailsContainer}>
                 <AppText variant="md" weight="bold" color={theme.colors.textSecondary} style={{ marginBottom: theme.spacing.sm }}>
-                    Análisis Detallado
+                    {t('learning.pronunciation.detailedAnalysis')}
                 </AppText>
 
                 {/* Global Metrics */}
                 <View style={styles.metricsRow}>
-                    <MetricBadge label="Precisión" score={result.overallScore} />
-                    {result.fluencyScore !== undefined && <MetricBadge label="Fluidez" score={result.fluencyScore} />}
-                    {result.completenessScore !== undefined && <MetricBadge label="Completitud" score={result.completenessScore} />}
-                    {result.pronScore !== undefined && <MetricBadge label="Pronunciación" score={result.pronScore} />}
+                    <MetricBadge label={t('learning.pronunciation.metrics.precision')} score={result.overallScore} />
+                    {result.fluencyScore !== undefined && <MetricBadge label={t('learning.pronunciation.metrics.fluency')} score={result.fluencyScore} />}
+                    {result.completenessScore !== undefined && <MetricBadge label={t('learning.pronunciation.metrics.completeness')} score={result.completenessScore} />}
+                    {result.pronScore !== undefined && <MetricBadge label={t('learning.pronunciation.metrics.pronunciation')} score={result.pronScore} />}
                 </View>
 
                 <Spacer height={theme.spacing.md} />

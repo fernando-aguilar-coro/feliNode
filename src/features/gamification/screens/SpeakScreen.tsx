@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     View,
     Text,
@@ -23,6 +24,7 @@ import { audioService } from '../../settings/services/audio.service';
 
 
 export const SpeakScreen = () => {
+    const { t } = useTranslation();
     const theme = useAppTheme();
     const { messages, isLoading, isCallActive, clearChat, error } = useSpeakStore();
     const { toggleCallMode, sendMessage } = useSpeakSpeech();
@@ -105,7 +107,7 @@ export const SpeakScreen = () => {
                                 <View style={[styles.bubbleWrapper, styles.aiWrapper]}>
                                     <View style={[styles.bubble, { backgroundColor: theme.colors.surface, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: theme.colors.border }]}>
                                         <Text style={[styles.bubbleText, { color: theme.colors.text, opacity: 0.6 }]}>
-                                            Pensando<Animated.Text>…</Animated.Text>
+                                            {t('gamification.speak.thinking')}<Animated.Text>…</Animated.Text>
                                         </Text>
                                     </View>
                                 </View>

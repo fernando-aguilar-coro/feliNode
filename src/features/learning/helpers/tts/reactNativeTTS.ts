@@ -71,9 +71,9 @@ class ReactNativeTtsService {
                     await Tts.setDefaultVoice(selectedVoice);
                 }
 
-                // Re-apply rate if needed, or rely on stored state? 
-                // In original snippet rate was hardcoded 0.5 here.
-                await Tts.setDefaultRate(0.6);
+                // Ajustamos la velocidad: un poco más lento para inglés (0.45) vs español (0.6)
+                const targetRate = this.currentLanguage.startsWith('en') ? 0.45 : 0.6;
+                await Tts.setDefaultRate(targetRate);
                 Tts.speak(this.speechQueue[this.currentSpeechIndex]);
             } catch (error) {
                 console.error("Error playing chunk:", error);

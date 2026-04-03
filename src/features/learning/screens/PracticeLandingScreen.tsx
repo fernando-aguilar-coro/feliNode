@@ -197,6 +197,9 @@ export const PracticeLandingScreen = () => {
             alignItems: 'center',
             justifyContent: 'center',
             marginRight: theme.spacing.md,
+            backgroundColor: theme.colors.primary + '15',
+            borderWidth: 1,
+            borderColor: theme.colors.primary + '30'
         },
         cardContent: {
             flex: 1,
@@ -226,7 +229,7 @@ export const PracticeLandingScreen = () => {
             width: 44,
             height: 44,
             borderRadius: 22,
-            backgroundColor: theme.colors.background,
+            backgroundColor: theme.colors.primary + '10',
             alignItems: 'center',
             justifyContent: 'center',
             marginLeft: theme.spacing.sm,
@@ -249,7 +252,7 @@ export const PracticeLandingScreen = () => {
                             activeOpacity={0.8}
                             onPress={() => openModal('combined')}
                         >
-                            <View style={[styles.cardIconBg, { backgroundColor: 'transparent' }]}>
+                            <View style={styles.cardIconBg}>
                                 <Ionicons name="infinite-outline" size={32} color={theme.colors.primary} />
                             </View>
                             <View style={styles.cardContent}>
@@ -272,8 +275,8 @@ export const PracticeLandingScreen = () => {
                             activeOpacity={0.8}
                             onPress={() => openModal('pairs')}
                         >
-                            <View style={[styles.cardIconBg, { backgroundColor: 'transparent' }]}>
-                                <Ionicons name="duplicate-outline" size={32} color={theme.colors.secondary} />
+                            <View style={styles.cardIconBg}>
+                                <Ionicons name="duplicate-outline" size={32} color={theme.colors.primary} />
                             </View>
                             <View style={styles.cardContent}>
                                 <AppText style={styles.cardTitle}>{t('learning.practice.matching')}</AppText>
@@ -284,7 +287,7 @@ export const PracticeLandingScreen = () => {
                                 </View>
                             </View>
                             <View style={styles.playIconWrapper}>
-                                <Ionicons name="play" size={20} color={theme.colors.secondary} />
+                                <Ionicons name="play" size={20} color={theme.colors.primary} />
                             </View>
                         </AnimatedTouchable>
 
@@ -295,15 +298,15 @@ export const PracticeLandingScreen = () => {
                             activeOpacity={0.8}
                             onPress={handleStartPronunciation}
                         >
-                            <View style={[styles.cardIconBg, { backgroundColor: 'transparent' }]}>
-                                <Ionicons name="mic-outline" size={32} color={theme.colors.success || '#10b981'} />
+                            <View style={styles.cardIconBg}>
+                                <Ionicons name="mic-outline" size={32} color={theme.colors.primary} />
                             </View>
                             <View style={styles.cardContent}>
                                 <AppText style={styles.cardTitle}>{t('learning.practice.voiceAssessment')}</AppText>
                                 <AppText style={styles.cardDesc}>{t('learning.practice.voiceDesc')}</AppText>
                             </View>
                             <View style={styles.playIconWrapper}>
-                                <Ionicons name="play" size={20} color={theme.colors.success || '#10b981'} />
+                                <Ionicons name="play" size={20} color={theme.colors.primary} />
                             </View>
                         </AnimatedTouchable>
 
@@ -314,15 +317,15 @@ export const PracticeLandingScreen = () => {
                             activeOpacity={0.8}
                             onPress={handleStartSpeak}
                         >
-                            <View style={[styles.cardIconBg, { backgroundColor: 'transparent' }]}>
-                                <Ionicons name="chatbubbles-outline" size={32} color={theme.colors.info || '#3b82f6'} />
+                            <View style={styles.cardIconBg}>
+                                <Ionicons name="chatbubbles-outline" size={32} color={theme.colors.primary} />
                             </View>
                             <View style={styles.cardContent}>
                                 <AppText style={styles.cardTitle}>{t('learning.practice.freeConversation')}</AppText>
                                 <AppText style={styles.cardDesc}>{t('learning.practice.freeConvDesc')}</AppText>
                             </View>
                             <View style={styles.playIconWrapper}>
-                                <Ionicons name="play" size={20} color={theme.colors.info || '#3b82f6'} />
+                                <Ionicons name="play" size={20} color={theme.colors.primary} />
                             </View>
                         </AnimatedTouchable>
 

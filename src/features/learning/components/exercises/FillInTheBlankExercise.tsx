@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { FillInTheBlankExercise as FillInTheBlankExerciseType } from '../../types/exercise';
 import { AppText, AppTextInput, TranslateButton } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
@@ -14,6 +15,7 @@ interface Props {
 
 export const FillInTheBlankExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
 
     useEffect(() => {
         TtsService.speak(exercise.sentence);
@@ -58,7 +60,7 @@ export const FillInTheBlankExercise = ({ exercise, onAnswer, userAnswer }: Props
             <AppTextInput
                 value={userAnswer}
                 onChangeText={onAnswer}
-                placeholder="Escribe la palabra que falta..."
+                placeholder={t('learning.exercises.fillBlank')}
                 autoCapitalize="none"
             />
         </View>

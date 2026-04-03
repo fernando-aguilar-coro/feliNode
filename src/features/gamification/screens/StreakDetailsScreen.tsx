@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +9,7 @@ import { useStreak } from '../hooks/useStreak';
 import { audioService } from '../../settings/services/audio.service';
 import { StreakCalendar } from '../components/StreakCalendar';
 export const StreakDetailsScreen = () => {
+    const { t } = useTranslation();
     const navigation = useNavigation();
     const theme = useAppTheme();
     const { streak, loading } = useStreak();
@@ -26,7 +28,7 @@ export const StreakDetailsScreen = () => {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.center}>
-                    <Text style={{ color: theme.colors.text }}>Cargando...</Text>
+                    <Text style={{ color: theme.colors.text }}>{t('gamification.streak.loading')}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -61,13 +63,13 @@ export const StreakDetailsScreen = () => {
                         {current_streak}
                     </Text>
                     <Text style={[styles.streakLabel, { color: theme.colors.text }]}>
-                        {current_streak === 1 ? 'día de racha' : 'días de racha'}
+                        {current_streak === 1 ? t('gamification.streak.dayCount') : t('gamification.streak.daysCount')}
                     </Text>
 
                     <View style={styles.statsRow}>
                         <View style={[styles.statBadge, { backgroundColor: theme.colors.surface }]}>
                             <FontAwesome5 name="medal" size={16} color="#FFD700" />
-                            <Text style={[styles.statText, { color: theme.colors.text }]}> Record: {highest_streak}</Text>
+                            <Text style={[styles.statText, { color: theme.colors.text }]}> {t('gamification.streak.record', { count: highest_streak })}</Text>
                         </View>
                     </View>
                 </View>
@@ -76,10 +78,10 @@ export const StreakDetailsScreen = () => {
                 <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                     <View style={styles.cardHeader}>
                         <Ionicons name="snow" size={24} color="#00BFFF" />
-                        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Protectores de Racha</Text>
+                        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('gamification.streak.protectorsTitle')}</Text>
                     </View>
                     <Text style={[styles.cardDescription, { color: theme.colors.textSecondary || '#666' }]}>
-                        El protector de racha te salva si olvidas practicar por un día.
+                        {t('gamification.streak.protectorsDesc')}
                     </Text>
 
                     <View style={styles.protectorContainer}>
@@ -100,7 +102,7 @@ export const StreakDetailsScreen = () => {
                         ))}
                     </View>
                     <Text style={[styles.protectorStatusText, { color: theme.colors.text }]}>
-                        {freezes_available} / 2 Equipados
+                        {t('gamification.streak.equipped', { count: freezes_available })}
                     </Text>
                 </View>
 

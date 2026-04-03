@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -17,6 +18,7 @@ export type HomeTabParamList = {
 const Tab = createMaterialTopTabNavigator<HomeTabParamList>();
 
 export const HomeTabNavigator = () => {
+    const { t } = useTranslation();
     const theme = useAppTheme();
 
     useFocusEffect(
@@ -60,7 +62,7 @@ export const HomeTabNavigator = () => {
                 name="HomeMain"
                 component={HomeScreen}
                 options={{
-                    tabBarLabel: 'Aprende',
+                    tabBarLabel: t('home.tabs.learn'),
                     tabBarIcon: ({ color }) => (
                         <Ionicons name="compass-outline" size={24} color={color} />
                     ),
@@ -70,7 +72,7 @@ export const HomeTabNavigator = () => {
                 name="InfinityLanding"
                 component={PracticeLandingScreen}
                 options={{
-                    tabBarLabel: 'Practica',
+                    tabBarLabel: t('home.tabs.practice'),
                     tabBarIcon: ({ color }) => (
                         <Ionicons name="sparkles-outline" size={24} color={color} />
                     ),
@@ -80,7 +82,7 @@ export const HomeTabNavigator = () => {
                 name="Settings"
                 component={SettingsScreen}
                 options={{
-                    tabBarLabel: 'Settings',
+                    tabBarLabel: t('home.tabs.settings'),
                     tabBarIcon: ({ color }) => (
                         <Ionicons name="settings-outline" size={24} color={color} />
                     ),

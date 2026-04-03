@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import { useNodesStore } from '../../../store/NodesStore';
-import { getModuleProgressView, ModuleProgress } from '../services/ModuleProgress.service';
+import { getModuleProgressView } from '../services/ModuleProgress.service';
 import { audioService } from '../../settings/services/audio.service';
 
 export const useModuleProgress = () => {
@@ -20,7 +20,7 @@ export const useModuleProgress = () => {
         try {
             const data = await getModuleProgressView();
             setModules(data);
-            
+
             setExpandedModules(prev => {
                 // Expand the first module by default if none are expanded
                 if (data.length > 0 && prev.size === 0) {

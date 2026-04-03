@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { LoadingScreen } from '../../../components';
 import { useRoute } from '@react-navigation/native';
 import { useLessonSession } from '../hooks/useLessonSession';
 import { useExercises } from '../hooks/useExercises';
@@ -17,7 +18,6 @@ export const TestScreen: React.FC = () => {
     const { lessonId } = route.params || {};
     const { setHasDecidedPlacementTest } = useSettingsStore();
 
-    const loadingText = "Cargando evaluación...";
     const onExit = () => setHasDecidedPlacementTest(true);
 
     const {
@@ -92,13 +92,7 @@ export const TestScreen: React.FC = () => {
     }), [theme]);
 
     if (status === 'loading') {
-        return (
-            <Screen style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Spacer height={theme.spacing.sm} />
-                <AppText color={theme.colors.textSecondary}>{loadingText}</AppText>
-            </Screen>
-        );
+        return <LoadingScreen type="placement" />;
     }
 
     if (status === 'completed') {

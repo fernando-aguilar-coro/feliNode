@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { ListeningExercise as ListeningExerciseType } from '../../types/exercise';
 import { AppText } from '../../../../components';
 import { useAppTheme } from '../../../../theme/ThemeContext';
@@ -17,6 +18,7 @@ interface Props {
 
 export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => {
     const theme = useAppTheme();
+    const { t } = useTranslation();
     const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
     useEffect(() => {
@@ -140,7 +142,7 @@ export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
                         >
                             <MaterialCommunityIcons name="volume-high" size={32} color="white" />
                         </TouchableOpacity>
-                        <AppText style={styles.buttonLabel}>Normal</AppText>
+                        <AppText style={styles.buttonLabel}>{t('learning.exercises.listening.normal')}</AppText>
                     </View>
 
                     <View style={styles.controlItem}>
@@ -151,7 +153,7 @@ export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
                         >
                             <MaterialCommunityIcons name="tortoise" size={24} color="white" />
                         </TouchableOpacity>
-                        <AppText style={styles.buttonLabel}>Lento</AppText>
+                        <AppText style={styles.buttonLabel}>{t('learning.exercises.listening.slow')}</AppText>
                     </View>
 
                     <View style={styles.controlItem}>
@@ -162,12 +164,12 @@ export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
                         >
                             <MaterialCommunityIcons name="bug" size={24} color="white" />
                         </TouchableOpacity>
-                        <AppText style={styles.buttonLabel}>Ultra Lento</AppText>
+                        <AppText style={styles.buttonLabel}>{t('learning.exercises.listening.ultraSlow')}</AppText>
                     </View>
                 </View>
 
                 <AppText variant="md" weight="medium" style={styles.instruction}>
-                    Ordena las palabras que escuchas:
+                    {t('learning.exercises.listening.instruction')}
                 </AppText>
 
                 <AnswerArea

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, TouchableOpacity, ActivityIndicator, Alert, View } from 'react-native';
 import { AppText } from '../../../components';
 import { theme } from '../../../theme';
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonContext, onAiResult }: Props) => {
+    const { t } = useTranslation();
     const [isLoading, setIsLoading] = React.useState(false);
     const [explanation, setExplanation] = React.useState<{ specific: string; general: string } | null>(null);
     const [modalType, setModalType] = React.useState<'success' | 'error'>('success');
@@ -61,8 +63,8 @@ export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonCon
             } catch (e) {
                 console.error("Error parsing AI JSON response:", e);
                 // Fallback or error handling
-                specific = "Error al procesar la explicación específica.";
-                general = "No se pudo obtener la explicación general.";
+                specific = t('learning.ai.parseErrorSpecific');
+                general = t('learning.ai.parseErrorGeneral');
                 isCorrect = false;
             }
 
@@ -72,12 +74,12 @@ export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonCon
             // Notify parent to update UI state
             onAiResult({
                 correct: isCorrect,
-                message: isCorrect ? "¡Correcto según la IA!" : "Incorrecto según la IA"
+                message: isCorrect ? t('learning.ai.correct') : t('learning.ai.incorrect')
             });
 
         } catch (error) {
             console.error("Error fetching AI explanation:", error);
-            Alert.alert("Error", "No se pudo obtener la evaluación de la IA en este momento.");
+            Alert.alert(t('learning.ai.errorTitle'), t('learning.ai.errorDesc'));
         } finally {
             setIsLoading(false);
         }
@@ -101,7 +103,7 @@ export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonCon
                         />
                         <View style={styles.textContainer}>
                             <AppText variant="sm" color={theme.colors.primary} weight="bold">
-                                ¡Calificar/explicar con IA!
+                                {t('learning.ai.button')}
                             </AppText>
                         </View>
                     </>
@@ -113,7 +115,7 @@ export const AiExplainButton = ({ userAnswer, question, correctAnswer, lessonCon
                 onClose={handleClose}
                 specificExplanation={explanation?.specific || ''}
                 generalExplanation={explanation?.general || ''}
-                title={modalType === 'success' ? "¡Bien hecho!" : "Corrección"}
+                title={modalType === 'success' ? t('learning.ai.successTitle') : t('learning.ai.errorTitleCard')}
                 type={modalType}
             />
         </>

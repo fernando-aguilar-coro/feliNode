@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Modal, Pressable } from 'react-native';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useCurrencies } from '../hooks/useCurrencies';
@@ -14,6 +15,7 @@ import Animated, { FadeIn, SlideInDown, BounceIn } from 'react-native-reanimated
 // ShopScreen
 // ─────────────────────────────────────────────────────────────────────────────
 export const ShopScreen = () => {
+    const { t } = useTranslation();
     const theme = useAppTheme();
     const { currencies, loading: currencyLoading, loadCurrencies } = useCurrencies();
     const { streak, loading: streakLoading, fetchStreak } = useStreak();
@@ -33,32 +35,32 @@ export const ShopScreen = () => {
 
     const handleBuyStreakProtector = async () => {
         if (streak.freezes_available >= 2) {
-            setPurchaseError("Ya tienes el máximo de protectores de racha.");
+            setPurchaseError(t('gamification.shop.maxProtectors'));
             return;
         }
 
         if (currencies.michi_coins < 70) {
-            setPurchaseError("Necesitas 70 Michi-Coins para comprar un protector.");
+            setPurchaseError(t('gamification.shop.notEnoughCoins', { cost: 70 }));
             return;
         }
 
         Alert.alert(
-            "Confirmar Compra",
-            "¿Comprar 1 Protector de Racha por 70 Michi-Coins?",
+            t('gamification.shop.confirmPurchase'),
+            t('gamification.shop.buyProtectorConfirm'),
             [
-                { text: "Cancelar", style: "cancel" },
+                { text: t('gamification.shop.cancel'), style: "cancel" },
                 {
-                    text: "Confirmar",
+                    text: t('gamification.shop.confirm'),
                     onPress: async () => {
                         setBuying(true);
                         const success = await CurrencyService.buyStreakProtector();
                         if (success) {
-                            setPurchasedItemName("Protector de Racha");
+                            setPurchasedItemName(t('gamification.shop.items.protector.name'));
                             setPurchaseModalVisible(true);
                             loadCurrencies();
                             fetchStreak();
                         } else {
-                            setPurchaseError("No se pudo completar la compra.");
+                            setPurchaseError(t('gamification.shop.purchaseError'));
                         }
                         setBuying(false);
                     }
@@ -69,18 +71,18 @@ export const ShopScreen = () => {
 
     const handleBuyDummyItem = (itemName: string, cost: number) => {
         if (currencies.michi_coins < cost) {
-            setPurchaseError(`Necesitas ${cost} Michi-Coins para comprar este artículo.`);
+            setPurchaseError(t('gamification.shop.notEnoughCoins', { cost }));
             return;
         }
         Alert.alert(
-            "Confirmar Compra",
-            `¿Comprar ${itemName} por ${cost} Michi-Coins?\n(Próximamente)`,
+            t('gamification.shop.confirmPurchase'),
+            t('gamification.shop.buyItemConfirm', { name: itemName, cost }),
             [
-                { text: "Cancelar", style: "cancel" },
+                { text: t('gamification.shop.cancel'), style: "cancel" },
                 {
-                    text: "Confirmar",
+                    text: t('gamification.shop.confirm'),
                     onPress: () => {
-                        setPurchaseError("Este artículo aún no está habilitado.");
+                        setPurchaseError(t('gamification.shop.itemDisabled'));
                     }
                 }
             ]
@@ -90,7 +92,7 @@ export const ShopScreen = () => {
     if (currencyLoading || streakLoading) {
         return (
             <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-                <Text style={{ color: theme.colors.text }}>Cargando tienda...</Text>
+                <Text style={{ color: theme.colors.text }}>{t('gamification.shop.loading')}</Text>
             </View>
         );
     }
@@ -124,12 +126,12 @@ export const ShopScreen = () => {
                             <FontAwesome5 name="snowflake" size={28} color="#00BFFF" />
                         </View>
                         <View style={styles.itemDetails}>
-                            <Text style={[styles.itemName, { color: theme.colors.text }]}>Protector de Racha</Text>
+                            <Text style={[styles.itemName, { color: theme.colors.text }]}>{t('gamification.shop.items.protector.name')}</Text>
                             <Text style={[styles.itemDescription, { color: theme.colors.textSecondary || '#888' }]}>
-                                Permite mantener tu racha intacta si olvidas estudiar un día.
+                                {t('gamification.shop.items.protector.description')}
                             </Text>
                             <Text style={[styles.itemLimit, { color: theme.colors.primary }]}>
-                                Equipados: {streak.freezes_available} / 2
+                                {t('gamification.shop.items.protector.equipped', { count: streak.freezes_available })}
                             </Text>
                         </View>
                         <TouchableOpacity
@@ -150,14 +152,14 @@ export const ShopScreen = () => {
                             <MaterialCommunityIcons name="flash" size={32} color="#FF69B4" />
                         </View>
                         <View style={styles.itemDetails}>
-                            <Text style={[styles.itemName, { color: theme.colors.text }]}>Poción de Doble XP</Text>
+                            <Text style={[styles.itemName, { color: theme.colors.text }]}>{t('gamification.shop.items.doubleXp.name')}</Text>
                             <Text style={[styles.itemDescription, { color: theme.colors.textSecondary || '#888' }]}>
-                                Obtén el doble de experiencia en tu próxima lección.
+                                {t('gamification.shop.items.doubleXp.description')}
                             </Text>
                         </View>
                         <TouchableOpacity
                             style={[styles.buyButton, (currencies.michi_coins < 150) && styles.buyButtonDisabled]}
-                            onPress={() => handleBuyDummyItem("Poción de Doble XP", 150)}
+                            onPress={() => handleBuyDummyItem(t('gamification.shop.items.doubleXp.name'), 150)}
                             disabled={buying || currencies.michi_coins < 150}
                         >
                             <FontAwesome5 name="coins" size={12} color="#FFF" />
@@ -173,14 +175,14 @@ export const ShopScreen = () => {
                             <FontAwesome5 name="user-circle" size={28} color="#32CD32" />
                         </View>
                         <View style={styles.itemDetails}>
-                            <Text style={[styles.itemName, { color: theme.colors.text }]}>Avatar de Oro</Text>
+                            <Text style={[styles.itemName, { color: theme.colors.text }]}>{t('gamification.shop.items.goldAvatar.name')}</Text>
                             <Text style={[styles.itemDescription, { color: theme.colors.textSecondary || '#888' }]}>
-                                Un marco dorado extravagante para tu perfil general.
+                                {t('gamification.shop.items.goldAvatar.description')}
                             </Text>
                         </View>
                         <TouchableOpacity
                             style={[styles.buyButton, (currencies.michi_coins < 1000) && styles.buyButtonDisabled]}
-                            onPress={() => handleBuyDummyItem("Avatar de Oro", 1000)}
+                            onPress={() => handleBuyDummyItem(t('gamification.shop.items.goldAvatar.name'), 1000)}
                             disabled={buying || currencies.michi_coins < 1000}
                         >
                             <FontAwesome5 name="coins" size={12} color="#FFF" />
@@ -204,8 +206,8 @@ export const ShopScreen = () => {
                 <View style={styles.modalOverlay}>
                     <Animated.View entering={BounceIn} style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
                         <FontAwesome5 name="check-circle" size={60} color="#32CD32" style={{ marginBottom: 16 }} />
-                        <Text style={[styles.modalTitle, { color: theme.colors.text }]}>¡Compra Exitosa!</Text>
-                        <Text style={[styles.modalDesc, { color: theme.colors.text }]}>Has adquirido: {purchasedItemName}</Text>
+                        <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('gamification.shop.successTitle')}</Text>
+                        <Text style={[styles.modalDesc, { color: theme.colors.text }]}>{t('gamification.shop.successDesc', { name: purchasedItemName })}</Text>
 
                         <Pressable
                             style={styles.modalButton}
@@ -214,7 +216,7 @@ export const ShopScreen = () => {
                                 setPurchaseError('');
                             }}
                         >
-                            <Text style={styles.modalButtonText}>¡Genial!</Text>
+                            <Text style={styles.modalButtonText}>{t('gamification.shop.great')}</Text>
                         </Pressable>
                     </Animated.View>
                 </View>

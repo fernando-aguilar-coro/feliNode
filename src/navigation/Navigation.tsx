@@ -72,7 +72,7 @@ export const Navigation = () => {
     }
 
     if (isSyncing || (isAuthenticated && isLoadingLessons)) {
-        return <LoadingScreen message={isSyncing ? "Cargando lecciones..." : "Cargando progreso..."} />;
+        return <LoadingScreen type={isSyncing ? 'syncing' : 'progress'} />;
     }
     if (!netInfo.isConnected) {
         return (

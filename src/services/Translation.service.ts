@@ -28,6 +28,19 @@ export const translateText = async (
   }
 };
 
+/**
+ * Mapea códigos de i18next (en, es, zh, hi) a TranslateLanguage de ML Kit.
+ */
+export const mapI18nToTranslateLanguage = (lang: string | null): TranslateLanguage => {
+  switch (lang?.toLowerCase()) {
+    case 'en': return TranslateLanguage.ENGLISH;
+    case 'es': return TranslateLanguage.SPANISH;
+    case 'zh': return TranslateLanguage.CHINESE;
+    case 'hi': return TranslateLanguage.HINDI;
+    default: return TranslateLanguage.ENGLISH; // Por defecto a inglés
+  }
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Table helpers
 // ─────────────────────────────────────────────────────────────────────────────

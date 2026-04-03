@@ -12,11 +12,11 @@ export const LearningSettingsSection = () => {
 
     return (
         <List.Section>
-            <List.Subheader style={{ color: theme.colors.textSecondary }}>{t('settings.learning.title')}</List.Subheader>
+            <List.Subheader style={{ color: theme.colors.textSecondary }}>{t('learning.title')}</List.Subheader>
             <List.Item
-                title={t('settings.notifications.showStreak')}
+                title={t('learning.showStreak')}
                 titleStyle={{ color: theme.colors.text }}
-                description={t('settings.notifications.showStreakDesc')}
+                description={t('learning.showStreakDesc')}
                 descriptionStyle={{ color: theme.colors.textSecondary }}
                 left={props => <List.Icon {...props} icon="fire" color={theme.colors.text} />}
                 right={() => <Switch value={showStreak} onValueChange={setShowStreak} />}

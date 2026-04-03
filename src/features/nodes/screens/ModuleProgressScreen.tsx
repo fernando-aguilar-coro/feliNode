@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
+import { LoadingScreen } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { ModuleAccordion } from '../components/list/ModuleAccordion';
 import { OverallProgress } from '../components/progress/OverallProgress';
@@ -45,11 +46,7 @@ export const ModuleProgressScreen = () => {
     ), [modules]);
 
     if (isLoading) {
-        return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-            </View>
-        );
+        return <LoadingScreen type="lessons" />;
     }
 
 

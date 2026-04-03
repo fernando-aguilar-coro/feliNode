@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { ProgressBar } from 'react-native-paper';
-import { Screen, AppText, Spacer } from '../../../components';
+import { Screen, AppText, Spacer, LoadingScreen } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -96,13 +96,7 @@ export const InfinitySelectPairsScreen = () => {
 
     // ── Loading ─────────────────────────────────────────────────────────────
     if (isInitialLoading) {
-        return (
-            <Screen style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Spacer height={16} />
-                <AppText>Preparando pares infinitos...</AppText>
-            </Screen>
-        );
+        return <LoadingScreen type="pairs" />;
     }
 
     // ── Game Over ───────────────────────────────────────────────────────────

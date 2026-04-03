@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { Screen, AppText, AppButton, Spacer } from '../../../components';
+import { Screen, AppText, AppButton, Spacer, LoadingScreen } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useExercises } from '../hooks/useExercises';
 import { ExerciseContainer } from '../components/exercises/ExerciseContainer';
@@ -172,13 +172,7 @@ export const InfinityExerciseScreen = () => {
     };
 
     if (loading) {
-        return (
-            <Screen style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Spacer height={theme.spacing.sm} />
-                <AppText>{t('learning.infinity.generating')}</AppText>
-            </Screen>
-        );
+        return <LoadingScreen type="generating" />;
     }
 
     if (gameOver) {

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { AppText, Card } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export const ExplanationCard = ({ visible, onClose, specificExplanation, generalExplanation, title, type }: Props) => {
+    const { t } = useTranslation();
     const theme = useAppTheme();
     const color = type === 'success' ? theme.colors.success : theme.colors.error;
 
@@ -98,7 +100,7 @@ export const ExplanationCard = ({ visible, onClose, specificExplanation, general
                             <View style={styles.sectionHeader}>
                                 <MaterialCommunityIcons name="text-box-search-outline" size={20} color={theme.colors.primary} />
                                 <AppText variant="md" weight="bold" color={theme.colors.primary}>
-                                    Análisis Específico
+                                    {t('learning.ai.specificAnalysis')}
                                 </AppText>
                             </View>
                             <Markdown style={mdStyles}>
@@ -113,7 +115,7 @@ export const ExplanationCard = ({ visible, onClose, specificExplanation, general
                             <View style={styles.sectionHeader}>
                                 <MaterialCommunityIcons name="lightbulb-on-outline" size={20} color={theme.colors.primary} />
                                 <AppText variant="md" weight="bold" color={theme.colors.primary}>
-                                    Respuesta correcta paso a paso
+                                    {t('learning.ai.stepByStep')}
                                 </AppText>
                             </View>
                             <Markdown style={mdStyles}>

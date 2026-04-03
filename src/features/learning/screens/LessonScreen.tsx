@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { LoadingScreen } from '../../../components';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useLessonSession } from '../hooks/useLessonSession';
@@ -21,7 +22,6 @@ export const LessonScreen = () => {
     const route = useRoute<Props['route']>();
     const { lessonId, mode } = route.params || { lessonId: 'lesson_verbs_intro' };
     
-    const loadingText = 'Cargando lección...';
     const onExit = () => navigation.navigate('Main');
 
     const {
@@ -90,13 +90,7 @@ export const LessonScreen = () => {
     }), [theme]);
 
     if (status === 'loading') {
-        return (
-            <Screen style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Spacer height={theme.spacing.sm} />
-                <AppText color={theme.colors.textSecondary}>{loadingText}</AppText>
-            </Screen>
-        );
+        return <LoadingScreen type="lesson" />;
     }
 
     if (status === 'completed') {
