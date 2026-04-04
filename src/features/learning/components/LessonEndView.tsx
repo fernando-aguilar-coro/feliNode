@@ -22,6 +22,8 @@ interface LessonEndViewProps {
     onContinue: () => void;
     /** Action to navigate to Infinity mode. */
     onInfinity?: () => void;
+    /** Information about the rewards earned. */
+    rewardsInfo?: { xpGained: number, wasBoosted: boolean, coinsGained: number } | null;
 }
 
 export const LessonEndView: React.FC<LessonEndViewProps> = ({
@@ -33,6 +35,7 @@ export const LessonEndView: React.FC<LessonEndViewProps> = ({
     missedExercises,
     onContinue,
     onInfinity,
+    rewardsInfo
 }) => {
     const theme = useAppTheme();
 
@@ -79,6 +82,25 @@ export const LessonEndView: React.FC<LessonEndViewProps> = ({
                     color={theme.colors.primary}
                 />
             </View>
+
+            {/* XP and Coins row */}
+            {success && rewardsInfo && (
+                <View style={[styles.summaryRow, { backgroundColor: theme.colors.surface, marginTop: 12 }]}>
+                    <SummaryColumn
+                        icon={rewardsInfo.wasBoosted ? "flash" : "star"}
+                        value={rewardsInfo.xpGained}
+                        label={rewardsInfo.wasBoosted ? "¡Doble XP!" : "XP"}
+                        color={rewardsInfo.wasBoosted ? "#FF69B4" : "#FFD700"}
+                    />
+                    <View style={[styles.summaryDivider, { backgroundColor: theme.colors.border }]} />
+                    <SummaryColumn
+                        icon="logo-usd"
+                        value={rewardsInfo.coinsGained}
+                        label="Monedas"
+                        color="#FFA500"
+                    />
+                </View>
+            )}
 
             {/* Missed exercises review */}
             {missedExercises.length > 0 && (

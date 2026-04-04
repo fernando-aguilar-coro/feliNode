@@ -77,14 +77,22 @@ export const initDatabase = async () => {
             freezes_used INTEGER DEFAULT 0,
             updated_at TEXT
           );
+          
           CREATE TABLE IF NOT EXISTS user_currencies (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             xp INTEGER DEFAULT 0,
-            michi_coins INTEGER DEFAULT 300,
+            michi_coins INTEGER DEFAULT 0,
+            inventory TEXT DEFAULT '{}',
             updated_at TEXT
           );
         `);
 
+        // Migration: Add inventory column if it doesn't exist in older databases
+        try {
+          await db.execAsync("ALTER TABLE user_currencies ADD COLUMN inventory TEXT DEFAULT '{}';");
+        } catch (e) {
+          // Column likely already exists, ignore
+        }
 
         dbInstance = db;
         return db;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { ChatMessage } from '../services/SpeakChat.service';
 import { TtsService } from '../../learning/services/Tts.service';
@@ -11,6 +12,7 @@ interface SpeakChatBubbleProps {
 }
 
 export const SpeakChatBubble = ({ message, theme }: SpeakChatBubbleProps) => {
+    const { t } = useTranslation();
     const isUser = message.role === 'user';
     const [isTranslated, setIsTranslated] = useState<boolean>(false);
     const [translatedText, setTranslatedText] = useState<string | null>(null);

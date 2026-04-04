@@ -53,16 +53,27 @@ export const RecommendTopicButton: React.FC<RecommendTopicButtonProps> = ({ onTo
         "Describing People & Personality",
         "Environment & Sustainability",
         "Movies, Music & Entertainment",
-        "At the Doctor's Appointment"
-    ];
-
-    const CONTEXT_TEMPLATES = [
-        "Refuerzo de: {topic}",
-        "Práctica avanzada de: {topic}",
-        "Uso práctico de: {topic}",
-        "Conversación sobre: {topic}",
-        "Dominando el tema: {topic}",
-        "Errores comunes en: {topic}"
+        "At the Doctor's Appointment",
+        "Booking a Hotel Room",
+        "Giving & Following Directions",
+        "At the Pharmacy or Hospital",
+        "Cooking, Recipes & Ingredients",
+        "Public Transport & Commuting",
+        "Banking, Finance & Money",
+        "Weather & Natural Phenomena",
+        "Education, School & University",
+        "Workplace Culture & Etiquette",
+        "Art, Creativity & Museums",
+        "History, Traditions & Culture",
+        "Science & Space Exploration",
+        "Law, Rights & Responsibilities",
+        "Future Plans & Ambitions",
+        "Making Complaints & Solving Issues",
+        "Sports, Games & Competitions",
+        "Family Relationships & Genealogy",
+        "Nature, Wildlife & Outdoors",
+        "Media, News & Journalism",
+        "Philosophy & Life Lessons"
     ];
 
     const handlePress = async () => {
@@ -71,18 +82,11 @@ export const RecommendTopicButton: React.FC<RecommendTopicButtonProps> = ({ onTo
             // Artificial delay to feel more "premium/AI"
             await new Promise(resolve => setTimeout(resolve, 600));
 
-            let recommended = "";
-            
-            // 60% chance to use a random general topic, 40% to use context
-            const useRandom = Math.random() > 0.4 || !currentLessonTitle;
+            // Simplified: pick a random item from suggested or the current lesson
+            const pool = [...SUGGESTED_TOPICS];
+            if (currentLessonTitle) pool.push(currentLessonTitle.trim());
 
-            if (useRandom) {
-                recommended = SUGGESTED_TOPICS[Math.floor(Math.random() * SUGGESTED_TOPICS.length)];
-            } else {
-                const template = CONTEXT_TEMPLATES[Math.floor(Math.random() * CONTEXT_TEMPLATES.length)];
-                recommended = template.replace("{topic}", currentLessonTitle.trim());
-            }
-
+            const recommended = pool[Math.floor(Math.random() * pool.length)];
             onTopicReceived(recommended);
         } catch (error) {
             console.error(error);

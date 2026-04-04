@@ -151,7 +151,7 @@ export const useSpeakStore = create<SpeakStoreState>()(
                     }
                 } catch (err) {
                     console.error('[SpeakStore.sendMessage] Error:', err);
-                    set({ error: 'No se pudo obtener respuesta. Inténtalo de nuevo.', isLoading: false });
+                    set({ error: 'gamification.speak.error', isLoading: false });
 
                     // Si falló el API, reacivar el micrófono si seguíamos en modo llamada
                     if (get().isCallActive && audioCallbacks?.resetBuffer && audioCallbacks?.startListening) {

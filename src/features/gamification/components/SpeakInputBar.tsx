@@ -1,4 +1,4 @@
-import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../theme/ThemeContext';
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export function SpeakInputBar({ onSend }: Props) {
+    const { t } = useTranslation();
     const theme = useAppTheme();
     const value = useSpeakStore(state => state.inputText);
     const onChangeText = useSpeakStore(state => state.setInputText);
@@ -21,7 +22,7 @@ export function SpeakInputBar({ onSend }: Props) {
         <View style={[styles.row, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <TextInput
                 style={[styles.input, { color: theme.colors.text }]}
-                placeholder="Escribe un mensaje…"
+                placeholder={t('gamification.speak.placeholder')}
                 placeholderTextColor="#666"
                 value={value}
                 onChangeText={onChangeText}

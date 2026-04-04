@@ -49,12 +49,15 @@ export const useLessonSession = (lessonId: string) => {
         setStatus('exercises');
     }, []);
 
+    const [rewardsInfo, setRewardsInfo] = useState<{ xpGained: number, wasBoosted: boolean, coinsGained: number } | null>(null);
+
     const completeLesson = useCallback(async () => {
         setStatus('completed');
         try {
             // Assuming perfect score for now as we don't track detailed scoring yet
             await LessonService.completeLesson(lessonId, 100);
-            await CurrencyService.addRewards(100, 30);
+            const rewardResult = await CurrencyService.addRewards(100, 30);
+            setRewardsInfo(rewardResult);
             useNodesStore.getState().triggerRefresh();
         } catch (error) {
             console.error('Failed to complete lesson:', error);
@@ -67,6 +70,7 @@ export const useLessonSession = (lessonId: string) => {
         exercises,
         startExercises,
         completeLesson,
-        lesson
+        lesson,
+        rewardsInfo
     };
 };

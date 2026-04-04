@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet, BackHandler } from 'react-native';
 import { LoadingScreen } from '../../../components';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -9,7 +9,8 @@ import { TheoryViewer } from '../components/TheoryViewer';
 import { ExerciseContainer } from '../components/exercises/ExerciseContainer';
 import { ProgressBar } from '../components/ProgressBar';
 import { LessonEndView } from '../components/LessonEndView';
-import { Screen, AppText, Spacer } from '../../../components';
+import { QuitLessonModal } from '../components/QuitLessonModal';
+import { Screen, AppText } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { audioService } from '../../settings/services/audio.service';
@@ -21,7 +22,7 @@ export const LessonScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
     const route = useRoute<Props['route']>();
     const { lessonId, mode } = route.params || { lessonId: 'lesson_verbs_intro' };
-    
+
     const onExit = () => navigation.navigate('Main');
 
     const {
@@ -30,7 +31,8 @@ export const LessonScreen = () => {
         exercises,
         startExercises,
         completeLesson,
-        lesson
+        lesson,
+        rewardsInfo
     } = useLessonSession(lessonId);
 
     const isExam = lessonId?.includes('placement_test') || false;
@@ -75,6 +77,25 @@ export const LessonScreen = () => {
         }
     }, [status, mode, startExercises]);
 
+    const [isQuitModalVisible, setQuitModalVisible] = useState(false);
+
+    // Manejar el botón físico de retroceso (Android) en la pantalla final
+    useEffect(() => {
+        const handleBackPress = () => {
+            if (status === 'completed') {
+                onExit();
+                return true; // Bloquea el retroceso por defecto y ejecuta nuestra lógica
+            } else if (status === 'exercises' || status === 'theory') {
+                setQuitModalVisible(true);
+                return true;
+            }
+            return false; // Permite el retroceso normal en otros estados
+        };
+
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+        return () => backHandler.remove();
+    }, [status, onExit]);
+
     const styles = useMemo(() => StyleSheet.create({
         centerContainer: {
             flex: 1,
@@ -105,6 +126,7 @@ export const LessonScreen = () => {
                     missedExercises={missedExercises}
                     onContinue={onExit}
                     onInfinity={() => navigation.navigate('InfinityExercise', { lessonId })}
+                    rewardsInfo={rewardsInfo}
                 />
             </Screen>
         );
@@ -128,7 +150,7 @@ export const LessonScreen = () => {
                                 total={initialTotal}
                                 lives={lives}
                                 combo={combo}
-                                onExit={onExit}
+                                onExit={() => setQuitModalVisible(true)}
                             />
                         )}
                     </View>
@@ -149,6 +171,15 @@ export const LessonScreen = () => {
                     )}
                 </View>
             )}
+
+            <QuitLessonModal 
+                visible={isQuitModalVisible}
+                onDismiss={() => setQuitModalVisible(false)}
+                onConfirm={() => {
+                    setQuitModalVisible(false);
+                    onExit();
+                }}
+            />
         </Screen>
     );
 };

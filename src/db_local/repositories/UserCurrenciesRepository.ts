@@ -3,22 +3,29 @@ import { BaseRepository } from '../core/BaseRepository';
 export interface UserCurrencies {
     xp: number;
     michi_coins: number;
+    inventory: Record<string, any>;
 }
 
 export class UserCurrenciesRepository extends BaseRepository {
     async getCurrencies(): Promise<UserCurrencies> {
         const db = await this.db;
         try {
-            const result: any = await db.getFirstAsync('SELECT xp, michi_coins FROM user_currencies LIMIT 1');
+            const result: any = await db.getFirstAsync('SELECT xp, michi_coins, inventory FROM user_currencies LIMIT 1');
             if (result) {
-                return { xp: result.xp, michi_coins: result.michi_coins };
+                let inventory = {};
+                try {
+                    inventory = result.inventory ? JSON.parse(result.inventory) : {};
+                } catch (e) {
+                    console.error('Failed to parse inventory JSON from DB');
+                }
+                return { xp: result.xp, michi_coins: result.michi_coins, inventory };
             } else {
-                await db.runAsync('INSERT INTO user_currencies (xp, michi_coins, updated_at) VALUES (0, 0, ?)', [new Date().toISOString()]);
-                return { xp: 0, michi_coins: 0 };
+                await db.runAsync("INSERT INTO user_currencies (xp, michi_coins, inventory, updated_at) VALUES (0, 0, '{}', ?)", [new Date().toISOString()]);
+                return { xp: 0, michi_coins: 0, inventory: {} };
             }
         } catch (error) {
             console.error('[DB] Error getting user currencies:', error);
-            return { xp: 0, michi_coins: 0 };
+            return { xp: 0, michi_coins: 0, inventory: {} };
         }
     }
 
@@ -35,7 +42,7 @@ export class UserCurrenciesRepository extends BaseRepository {
                 [newXp, newCoins, nowIso]
             );
 
-            return { xp: newXp, michi_coins: newCoins };
+            return { ...current, xp: newXp, michi_coins: newCoins };
         } catch (error) {
             console.error('[DB] Error adding user currencies:', error);
             throw error;
@@ -64,19 +71,40 @@ export class UserCurrenciesRepository extends BaseRepository {
         }
     }
 
+    async updateInventory(newInventory: Record<string, any>): Promise<UserCurrencies> {
+        const db = await this.db;
+        try {
+            const current = await this.getCurrencies();
+            const updatedInventory = { ...current.inventory, ...newInventory };
+            const nowIso = new Date().toISOString();
+            const inventoryStr = JSON.stringify(updatedInventory);
+
+            await db.runAsync(
+                'UPDATE user_currencies SET inventory = ?, updated_at = ?',
+                [inventoryStr, nowIso]
+            );
+            return { ...current, inventory: updatedInventory };
+        } catch (error) {
+            console.error('[DB] Error updating inventory:', error);
+            throw error;
+        }
+    }
+
     async updateCurrenciesFromCloud(cloudData: Partial<UserCurrencies>) {
         const db = await this.db;
         try {
             const current = await this.getCurrencies();
             const newXp = cloudData.xp ?? current.xp;
             const newCoins = cloudData.michi_coins ?? current.michi_coins;
+            const newInventory = cloudData.inventory ? cloudData.inventory : current.inventory;
+            
             const nowIso = new Date().toISOString();
 
             await db.runAsync(
-                'UPDATE user_currencies SET xp = ?, michi_coins = ?, updated_at = ?',
-                [newXp, newCoins, nowIso]
+                'UPDATE user_currencies SET xp = ?, michi_coins = ?, inventory = ?, updated_at = ?',
+                [newXp, newCoins, JSON.stringify(newInventory), nowIso]
             );
-            return { xp: newXp, michi_coins: newCoins };
+            return { xp: newXp, michi_coins: newCoins, inventory: newInventory };
         } catch (error) {
             console.error('[DB] Error updating currencies from cloud:', error);
             throw error;
@@ -92,3 +120,4 @@ export class UserCurrenciesRepository extends BaseRepository {
         }
     }
 }
+

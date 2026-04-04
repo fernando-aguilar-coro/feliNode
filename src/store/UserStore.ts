@@ -165,7 +165,7 @@ export const useUserStore = create<UserState>()(
                     await infinityProgressRepository.clearInfinityProgress();
                     await streakRepository.clearStreak();
                     await userCurrenciesRepository.clearCurrencies();
-                    useCurrencyStore.setState({ currencies: { xp: 0, michi_coins: 0 } });
+                    useCurrencyStore.setState({ currencies: { xp: 0, michi_coins: 0, inventory: {} } });
                 } catch (error) {
                     console.error('Logout error:', error);
                 } finally {
@@ -195,7 +195,7 @@ export const useUserStore = create<UserState>()(
                     await infinityProgressRepository.clearInfinityProgress();
                     await streakRepository.clearStreak();
                     await userCurrenciesRepository.clearCurrencies();
-                    useCurrencyStore.setState({ currencies: { xp: 0, michi_coins: 0 } });
+                    useCurrencyStore.setState({ currencies: { xp: 0, michi_coins: 0, inventory: {} } });
                 } catch (error) {
                     console.error('Delete account error:', error);
                     throw error;

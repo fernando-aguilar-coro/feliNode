@@ -7,9 +7,32 @@ export class CurrencyService {
     }
 
     static async addRewards(xp: number, coins: number) {
-        const result = await userCurrenciesRepository.addCurrencies(xp, coins);
+        const current = await userCurrenciesRepository.getCurrencies();
+        let xpToGrant = xp;
+        let wasBoosted = false;
+
+        const inventory = current.inventory || {};
+        
+        if (xp > 0 && inventory.xp_boost) {
+            xpToGrant = xp * 2;
+            wasBoosted = true;
+            console.log('[CurrencyService] XP Boost active! Doubling XP:', xp, '->', xpToGrant);
+            // Consumir el boost
+            await userCurrenciesRepository.updateInventory({ xp_boost: false });
+            
+            // Actualizamos la store
+            const { useCurrencyStore } = require('../../../store/CurrencyStore');
+            useCurrencyStore.getState().updateInventory({ xp_boost: false });
+        }
+
+        const result = await userCurrenciesRepository.addCurrencies(xpToGrant, coins);
+        
+        // Recargar las monedas actualizadas en Zustand
+        const { useCurrencyStore } = require('../../../store/CurrencyStore');
+        useCurrencyStore.getState().loadCurrencies();
+
         await this.syncCurrencies();
-        return result;
+        return { result, xpGained: xpToGrant, coinsGained: coins, wasBoosted };
     }
 
     static async spendCoins(amount: number) {
@@ -27,7 +50,7 @@ export class CurrencyService {
             return false; // Already maxed out
         }
 
-        const price = 70;
+        const price = 60;
         const success = await this.spendCoins(price);
 
         if (success) {
@@ -79,7 +102,7 @@ export class CurrencyService {
 
             const { data: remoteData, error: remoteError } = await supabase
                 .from('user_currencies')
-                .select('xp, michi_coins, updated_at')
+                .select('xp, michi_coins, inventory, updated_at')
                 .eq('user_id', userId)
                 .maybeSingle();
 
@@ -131,11 +154,12 @@ export class CurrencyService {
                     });
                 }
 
-                const hasRemoteChanged = mergedXp > remoteData.xp || mergedCoins !== remoteData.michi_coins;
+                const hasRemoteChanged = mergedXp > remoteData.xp || mergedCoins !== remoteData.michi_coins || JSON.stringify(localData.inventory) !== JSON.stringify(remoteData.inventory);
                 if (hasRemoteChanged) {
                     const { error: updateError } = await supabase.from('user_currencies').update({
                         xp: mergedXp,
                         michi_coins: mergedCoins,
+                        inventory: JSON.stringify(localData.inventory || {}),
                         updated_at: new Date().toISOString()
                     }).eq('user_id', userId);
 

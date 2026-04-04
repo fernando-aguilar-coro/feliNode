@@ -115,7 +115,7 @@ export const SpeakScreen = () => {
                         </ScrollView>
                         {error && (
                             <Text style={[styles.errorText, { color: theme.colors.error || '#FF6B6B' }]}>
-                                {error}
+                                {t(error)}
                             </Text>
                         )}
                     </View>
