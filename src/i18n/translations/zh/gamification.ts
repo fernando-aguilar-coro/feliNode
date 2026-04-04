@@ -30,6 +30,11 @@ const gamification: Translation['gamification'] = {
       doubleXp: {
         name: "双倍经验药水",
         description: "在下一节课中获得双倍经验。"
+      },
+      coinDoubler: {
+        name: "金币翻倍器",
+        description: "永久翻倍在课程中获得的金币。",
+        equipped: "已购买"
       }
     }
   },

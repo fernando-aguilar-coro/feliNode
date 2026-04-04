@@ -75,6 +75,7 @@ export const useShop = () => {
     };
 
     const handleBuyXpBoost = () => handleBuyGenericItem('xp_boost', t('gamification.shop.items.doubleXp.name'), 90, false);
+    const handleBuyCoinDoubler = () => handleBuyGenericItem('coin_doubler', t('gamification.shop.items.coinDoubler.name'), 300, false);
 
     return {
         currencies,
@@ -89,6 +90,7 @@ export const useShop = () => {
         handleBuyStreakProtector,
         handleBuyGenericItem,
         handleBuyXpBoost,
+        handleBuyCoinDoubler,
         clearError,
         closeModal,
     };

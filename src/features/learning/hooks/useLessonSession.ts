@@ -49,7 +49,7 @@ export const useLessonSession = (lessonId: string) => {
         setStatus('exercises');
     }, []);
 
-    const [rewardsInfo, setRewardsInfo] = useState<{ xpGained: number, wasBoosted: boolean, coinsGained: number } | null>(null);
+    const [rewardsInfo, setRewardsInfo] = useState<{ xpGained: number, wasBoosted: boolean, coinsGained: number, wasCoinsBoosted?: boolean } | null>(null);
 
     const completeLesson = useCallback(async () => {
         setStatus('completed');

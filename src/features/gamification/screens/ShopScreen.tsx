@@ -29,6 +29,7 @@ export const ShopScreen = () => {
         fetchStreak,
         handleBuyStreakProtector,
         handleBuyXpBoost,
+        handleBuyCoinDoubler,
         clearError,
         closeModal,
     } = useShop();
@@ -87,6 +88,19 @@ export const ShopScreen = () => {
                     delay={200}
                 />
 
+                {/* 3. Coin Doubler */}
+                <ShopItemCard
+                    name={t('gamification.shop.items.coinDoubler.name')}
+                    description={t('gamification.shop.items.coinDoubler.description')}
+                    cost={300}
+                    icon={<FontAwesome5 name="coins" size={28} color="#FFD700" />}
+                    onPress={handleBuyCoinDoubler}
+                    disabled={currencies.inventory?.coin_doubler}
+                    statusText={currencies.inventory?.coin_doubler ? t('gamification.shop.items.coinDoubler.equipped', { defaultValue: 'Comprado' }) : undefined}
+                    michiCoins={currencies.michi_coins}
+                    buying={buying}
+                    delay={300}
+                />
 
                 <Animated.View entering={FadeIn.delay(500)}>
                     <AppAds type="banner" containerStyle={{ marginTop: 20, marginBottom: 20 }} />

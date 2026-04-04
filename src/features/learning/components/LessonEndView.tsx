@@ -23,7 +23,7 @@ interface LessonEndViewProps {
     /** Action to navigate to Infinity mode. */
     onInfinity?: () => void;
     /** Information about the rewards earned. */
-    rewardsInfo?: { xpGained: number, wasBoosted: boolean, coinsGained: number } | null;
+    rewardsInfo?: { xpGained: number, wasBoosted: boolean, coinsGained: number, wasCoinsBoosted?: boolean } | null;
 }
 
 export const LessonEndView: React.FC<LessonEndViewProps> = ({
@@ -96,8 +96,8 @@ export const LessonEndView: React.FC<LessonEndViewProps> = ({
                     <SummaryColumn
                         icon="logo-usd"
                         value={rewardsInfo.coinsGained}
-                        label="Monedas"
-                        color="#FFA500"
+                        label={rewardsInfo.wasCoinsBoosted ? "¡Monedas x2!" : "Monedas"}
+                        color={rewardsInfo.wasCoinsBoosted ? "#00CED1" : "#FFA500"}
                     />
                 </View>
             )}

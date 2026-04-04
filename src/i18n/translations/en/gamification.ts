@@ -30,6 +30,11 @@ const gamification: Translation['gamification'] = {
       doubleXp: {
         name: "Double XP Potion",
         description: "Get double experience on your next lesson."
+      },
+      coinDoubler: {
+        name: "Coin Doubler",
+        description: "Permanently double the coins earned in your lessons.",
+        equipped: "Purchased"
       }
     }
   },

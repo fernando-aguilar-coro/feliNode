@@ -9,7 +9,9 @@ export class CurrencyService {
     static async addRewards(xp: number, coins: number) {
         const current = await userCurrenciesRepository.getCurrencies();
         let xpToGrant = xp;
+        let coinsToGrant = coins;
         let wasBoosted = false;
+        let wasCoinsBoosted = false;
 
         const inventory = current.inventory || {};
         
@@ -25,14 +27,20 @@ export class CurrencyService {
             useCurrencyStore.getState().updateInventory({ xp_boost: false });
         }
 
-        const result = await userCurrenciesRepository.addCurrencies(xpToGrant, coins);
+        if (coins > 0 && inventory.coin_doubler) {
+            coinsToGrant = coins * 2;
+            wasCoinsBoosted = true;
+            console.log('[CurrencyService] Coin doubler active! Doubling Coins:', coins, '->', coinsToGrant);
+        }
+
+        const result = await userCurrenciesRepository.addCurrencies(xpToGrant, coinsToGrant);
         
         // Recargar las monedas actualizadas en Zustand
         const { useCurrencyStore } = require('../../../store/CurrencyStore');
         useCurrencyStore.getState().loadCurrencies();
 
         await this.syncCurrencies();
-        return { result, xpGained: xpToGrant, coinsGained: coins, wasBoosted };
+        return { result, xpGained: xpToGrant, coinsGained: coinsToGrant, wasBoosted, wasCoinsBoosted };
     }
 
     static async spendCoins(amount: number) {

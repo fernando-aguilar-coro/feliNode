@@ -30,6 +30,11 @@ const gamification: Translation['gamification'] = {
       doubleXp: {
         name: "डबल XP औषधि",
         description: "अपने अगले पाठ पर दोगुना अनुभव प्राप्त करें।"
+      },
+      coinDoubler: {
+        name: "सिक्का डब्लर",
+        description: "अपने पाठों में अर्जित सिक्कों को स्थायी रूप से दोगुना करें।",
+        equipped: "खरीदा गया"
       }
     }
   },

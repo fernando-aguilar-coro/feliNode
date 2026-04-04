@@ -40,6 +40,11 @@ export interface Translation {
           name: string;
           description: string;
         };
+        coinDoubler: {
+          name: string;
+          description: string;
+          equipped: string;
+        };
       };
     };
     streak: {
