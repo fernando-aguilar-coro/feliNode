@@ -46,6 +46,25 @@ const gamification: Translation['gamification'] = {
     protectorsTitle: "स्ट्रीक प्रोटेक्टर्स",
     protectorsDesc: "यदि आप एक दिन अभ्यास करना भूल जाते हैं तो स्ट्रीक प्रोटेक्टर आपको बचाता है।",
     equipped: "{{count}} / 2 लैस"
+  },
+  ranking: {
+    title: "लीडरबोर्ड",
+    subtitle: "वैश्विक रैंकिंग • अंग्रेजी महारत",
+    emptyTitle: "लीडरबोर्ड खाली है",
+    emptySubtitle: "XP स्कोर करने और रैंकिंग में शीर्ष पर रहने वाले पहले व्यक्ति बनें!",
+    connectionError: "लीडरबोर्ड से कनेक्ट नहीं हो सका। कृपया अपना इंटरनेट कनेक्शन जांचें।",
+    connectionErrorTitle: "कनेक्शन समस्या",
+    tryAgain: "फिर से प्रयास करें",
+    loading: "लीडरबोर्ड लोड हो रहा है...",
+    yourRank: "आपकी रैंक",
+    keepItUp: "लगे रहो!",
+    greatJob: "आप अपने सीखने में बहुत अच्छा काम कर रहे हैं।",
+    notInRanking: "आप अभी तक रैंकिंग में नहीं हैं!",
+    loginToParticipate: "भाग लेने के लिए लॉगिन करें",
+    earnXpToSeeRank: "अपनी स्थिति देखने के लिए पाठ पूरे करके XP अर्जित करें।",
+    createAccountToSave: "अपनी प्रगति को बचाने और प्रतिस्पर्धा करने के लिए एक खाता बनाएं।",
+    anon: "बेनाम",
+    xp: "XP"
   }
 };
 

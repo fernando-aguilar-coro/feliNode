@@ -46,6 +46,25 @@ const gamification: Translation['gamification'] = {
     protectorsTitle: "Streak Protectors",
     protectorsDesc: "The streak protector saves you if you forget to practice for a day.",
     equipped: "{{count}} / 2 Equipped"
+  },
+  ranking: {
+    title: "Leaderboard",
+    subtitle: "Global Rankings • English Mastery",
+    emptyTitle: "Leaderboard Empty",
+    emptySubtitle: "Be the first to score XP and top the ranking!",
+    connectionError: "Could not connect to the leaderboard. Please check your internet connection.",
+    connectionErrorTitle: "Connection Issue",
+    tryAgain: "Try Again",
+    loading: "Loading Leaderboard...",
+    yourRank: "Your Rank",
+    keepItUp: "Keep it up!",
+    greatJob: "You are doing a great job in your learning.",
+    notInRanking: "You are not in the ranking yet!",
+    loginToParticipate: "Log in to participate",
+    earnXpToSeeRank: "Earn XP by completing lessons to see your position.",
+    createAccountToSave: "Create an account to save your progress and compete.",
+    anon: "Anon",
+    xp: "XP"
   }
 };
 

@@ -8,6 +8,7 @@ export interface Translation {
     lesson: string;
     placement: string;
     pairs: string;
+    tips: string[];
   };
   gamification: {
     speak: {
@@ -55,6 +56,25 @@ export interface Translation {
       protectorsTitle: string;
       protectorsDesc: string;
       equipped: string;
+    };
+    ranking: {
+      title: string;
+      subtitle: string;
+      emptyTitle: string;
+      emptySubtitle: string;
+      connectionError: string;
+      connectionErrorTitle: string;
+      tryAgain: string;
+      loading: string;
+      yourRank: string;
+      keepItUp: string;
+      greatJob: string;
+      notInRanking: string;
+      loginToParticipate: string;
+      earnXpToSeeRank: string;
+      createAccountToSave: string;
+      anon: string;
+      xp: string;
     };
   };
   home: {
@@ -122,6 +142,7 @@ export interface Translation {
       streak: string;
       exp: string;
       coins: string;
+      ranking: string;
     };
     tree: {
       errorTitle: string;

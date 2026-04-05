@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { ChatMessage } from '../services/SpeakChat.service';
-import { TtsService } from '../../learning/services/Tts.service';
-import { translateText } from '../../../services/Translation.service';
+import { ChatMessage } from '../../services/SpeakChat.service';
+import { TtsService } from '../../../learning/services/Tts.service';
+import { translateText } from '../../../../services/Translation.service';
 import { Ionicons } from '@expo/vector-icons';
 
 interface SpeakChatBubbleProps {

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useAppTheme } from '../../../../theme/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 
 interface BalanceHeaderProps {
     xp: number;
@@ -10,12 +11,18 @@ interface BalanceHeaderProps {
 
 export const BalanceHeader: React.FC<BalanceHeaderProps> = ({ xp, michiCoins }) => {
     const theme = useAppTheme();
+    const navigation = useNavigation<any>();
+
     return (
         <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
-            <View style={[styles.balancePill, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <TouchableOpacity 
+                activeOpacity={0.7}
+                onPress={() => navigation.navigate('Ranking')}
+                style={[styles.balancePill, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+            >
                 <FontAwesome5 name="star" size={18} color="#FFD700" solid />
                 <Text style={[styles.balanceText, { color: theme.colors.text }]}>{xp} XP</Text>
-            </View>
+            </TouchableOpacity>
             <View style={[styles.balancePill, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <FontAwesome5 name="coins" size={18} color="#FFBA08" />
                 <Text style={[styles.balanceText, { color: theme.colors.text }]}>{michiCoins}</Text>

@@ -9,7 +9,8 @@ const nodes: Translation['nodes'] = {
     lessonsCompleted: "{{completed}} of {{total}} lessons completed",
     streak: "Streak",
     exp: "Exp",
-    coins: "Coins"
+    coins: "Coins",
+    ranking: "Top"
   },
   tree: {
     errorTitle: "Error"

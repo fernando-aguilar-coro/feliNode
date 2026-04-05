@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useAppTheme } from '../../../../theme/ThemeContext';
@@ -8,6 +8,7 @@ import { useSettingsStore } from '../../../../store/SettingsStore';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { audioService } from '../../../settings/services/audio.service';
 import { useTranslation } from 'react-i18next';
+import { getUserPosition } from '../../../../api/getRanking';
 
 interface ModuleStatsCardsProps {
     orientation?: 'row' | 'column';
@@ -21,10 +22,18 @@ export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps)
     const { currencies, loadCurrencies } = useCurrencies();
     const { streak } = useStreak();
 
+    const [userRank, setUserRank] = useState<number | null>(null);
+
+    const loadData = useCallback(async () => {
+        loadCurrencies();
+        const position = await getUserPosition();
+        setUserRank(position);
+    }, [loadCurrencies]);
+
     useFocusEffect(
         useCallback(() => {
-            loadCurrencies();
-        }, [loadCurrencies])
+            loadData();
+        }, [loadData])
     );
 
     const navigateToStreakDetails = useCallback(() => {
@@ -40,7 +49,7 @@ export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps)
                 <TouchableOpacity
                     style={[
                         styles.statCard,
-                        isRow && styles.statCardFlex,
+                        isRow ? styles.statCardRowMode : styles.statCardColumnMode,
                         { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text }
                     ]}
                     activeOpacity={0.8}
@@ -56,22 +65,29 @@ export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps)
                 </TouchableOpacity>
             )}
 
-            <View style={[
-                styles.statCard,
-                isRow && styles.statCardFlex,
-                { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text }
-            ]}>
+            <TouchableOpacity
+                style={[
+                    styles.statCard,
+                    isRow ? styles.statCardRowMode : styles.statCardColumnMode,
+                    { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text }
+                ]}
+                activeOpacity={0.8}
+                onPress={() => {
+                    audioService.playClickSound();
+                    navigation.navigate('Ranking');
+                }}
+            >
                 <FontAwesome5 name="star" size={24} color="#FFD700" solid />
                 <View style={styles.statTextContainer}>
                     <Text style={[styles.statValue, { color: theme.colors.text }]}>{currencies.xp || 0}</Text>
                     <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>{t('nodes.progress.exp')}</Text>
                 </View>
-            </View>
+            </TouchableOpacity>
 
             <TouchableOpacity
                 style={[
                     styles.statCard,
-                    isRow && styles.statCardFlex,
+                    isRow ? styles.statCardRowMode : styles.statCardColumnMode,
                     { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text }
                 ]}
                 activeOpacity={0.8}
@@ -83,6 +99,29 @@ export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps)
                     <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>{t('nodes.progress.coins')}</Text>
                 </View>
             </TouchableOpacity>
+
+            <TouchableOpacity
+                style={[
+                    styles.statCard,
+                    isRow ? styles.statCardRowMode : styles.statCardColumnMode,
+                    { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text }
+                ]}
+                activeOpacity={0.8}
+                onPress={() => {
+                    audioService.playClickSound();
+                    navigation.navigate('Ranking');
+                }}
+            >
+                <FontAwesome5 name="trophy" size={20} color="#CD7F32" />
+                <View style={styles.statTextContainer}>
+                    <Text style={[styles.statValue, { color: theme.colors.text }]}>
+                        {userRank ? `#${userRank}` : '---'}
+                    </Text>
+                    <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+                        {t('nodes.progress.ranking')}
+                    </Text>
+                </View>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -91,7 +130,7 @@ const styles = StyleSheet.create({
     statsRow: {
         flexDirection: 'row',
         paddingHorizontal: 16,
-        gap: 12,
+        gap: 8,
         marginTop: 40,
         marginBottom: 8,
     },
@@ -103,32 +142,39 @@ const styles = StyleSheet.create({
         marginRight: 16,
     },
     statCard: {
-        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
         borderRadius: 16,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 12,
         elevation: 4,
+    },
+    statCardRowMode: {
+        flex: 1,
+        flexDirection: 'column',
+        paddingVertical: 12,
+        paddingHorizontal: 4,
+        gap: 4,
+    },
+    statCardColumnMode: {
+        flexDirection: 'row',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
         gap: 8,
     },
-    statCardFlex: {
-        flex: 1,
-        paddingVertical: 12,
-    },
     statTextContainer: {
-        alignItems: 'flex-start',
+        alignItems: 'center',
     },
     statValue: {
-        fontSize: 18,
-        fontWeight: '900',
-        lineHeight: 22,
+        fontSize: 14,
+        fontFamily: 'Nunito-Bold',
+        fontWeight: '700',
+        lineHeight: 18,
     },
     statLabel: {
-        fontSize: 12,
-        fontWeight: '600',
+        fontSize: 11,
+        fontFamily: 'Nunito-SemiBold',
+        fontWeight: '500',
     }
 });

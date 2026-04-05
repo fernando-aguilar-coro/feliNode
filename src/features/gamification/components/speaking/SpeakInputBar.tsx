@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useAppTheme } from '../../../theme/ThemeContext';
-import { useSpeakStore } from '../../../store/useSpeakStore';
+import { useAppTheme } from '../../../../theme/ThemeContext';
+import { useSpeakStore } from '../../../../store/useSpeakStore';
 
 interface Props {
     onSend: () => void;

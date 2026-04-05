@@ -1,8 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useAppTheme } from '../../../../theme/ThemeContext';
-import Animated, { SlideInDown } from 'react-native-reanimated';
+import Animated, { 
+    SlideInDown, 
+    useSharedValue, 
+    useAnimatedStyle, 
+    withSequence, 
+    withTiming, 
+    withRepeat, 
+    interpolateColor 
+} from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 
 interface ShopItemCardProps {
     name: string;
@@ -31,11 +40,82 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
 }) => {
     const theme = useAppTheme();
     const canAfford = michiCoins >= cost;
+    
+    // Animations for "error" feedback
+    const shakeX = useSharedValue(0);
+    const errorProgress = useSharedValue(0);
+
+    const triggerErrorEffect = () => {
+        // Haptic feedback
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        
+        // Shake sequence
+        shakeX.value = withSequence(
+            withTiming(-8, { duration: 50 }),
+            withRepeat(withTiming(8, { duration: 100 }), 3, true),
+            withTiming(0, { duration: 50 })
+        );
+
+        // Flash red sequence
+        errorProgress.value = withSequence(
+            withTiming(1, { duration: 200 }),
+            withTiming(0, { duration: 800 })
+        );
+    };
+
+    const handlePress = () => {
+        if (buying || disabled) return;
+        
+        if (!canAfford) {
+            triggerErrorEffect();
+            return;
+        }
+        
+        onPress();
+    };
+
+    const animatedCardStyle = useAnimatedStyle(() => {
+        const backgroundColor = interpolateColor(
+            errorProgress.value,
+            [0, 1],
+            [theme.colors.surface || '#FFF', '#FFEBEB']
+        );
+        
+        const borderColor = interpolateColor(
+            errorProgress.value,
+            [0, 1],
+            [theme.colors.border || '#DDD', '#FF3B30']
+        );
+
+        return {
+            transform: [{ translateX: shakeX.value }],
+            backgroundColor,
+            borderColor,
+            borderWidth: 1,
+            borderRadius: 16,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.05,
+            shadowRadius: 6,
+            elevation: 2,
+        };
+    });
+
     const isDisabled = disabled || buying || !canAfford;
 
     return (
-        <Animated.View entering={SlideInDown.delay(delay).springify()}>
-            <View style={[styles.itemCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+        <Animated.View 
+            entering={SlideInDown.delay(delay).springify()}
+            style={animatedCardStyle}
+        >
+            <Pressable 
+                onPress={handlePress}
+                style={({ pressed }) => [
+                    styles.itemCard,
+                    { opacity: pressed && !isDisabled ? 0.9 : 1 }
+                ]}
+            >
                 <View style={[styles.itemIconContainer, { backgroundColor: theme.colors.background }]}>
                     {icon}
                 </View>
@@ -52,13 +132,13 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
                 </View>
                 <TouchableOpacity
                     style={[styles.buyButton, isDisabled && styles.buyButtonDisabled]}
-                    onPress={onPress}
-                    disabled={isDisabled}
+                    onPress={handlePress}
+                    disabled={buying || disabled} 
                 >
                     <FontAwesome5 name="coins" size={12} color="#FFF" />
                     <Text style={styles.buyText}>{cost}</Text>
                 </TouchableOpacity>
-            </View>
+            </Pressable>
         </Animated.View>
     );
 };
@@ -66,16 +146,8 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
 const styles = StyleSheet.create({
     itemCard: {
         flexDirection: 'row',
-        borderRadius: 16,
         padding: 16,
         alignItems: 'center',
-        borderWidth: 1,
-        marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 6,
-        elevation: 2,
     },
     itemIconContainer: {
         width: 56,
@@ -129,3 +201,4 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
 });
+

@@ -14,14 +14,14 @@ export class CurrencyService {
         let wasCoinsBoosted = false;
 
         const inventory = current.inventory || {};
-        
+
         if (xp > 0 && inventory.xp_boost) {
             xpToGrant = xp * 2;
             wasBoosted = true;
             console.log('[CurrencyService] XP Boost active! Doubling XP:', xp, '->', xpToGrant);
             // Consumir el boost
             await userCurrenciesRepository.updateInventory({ xp_boost: false });
-            
+
             // Actualizamos la store
             const { useCurrencyStore } = require('../../../store/CurrencyStore');
             useCurrencyStore.getState().updateInventory({ xp_boost: false });
@@ -34,7 +34,12 @@ export class CurrencyService {
         }
 
         const result = await userCurrenciesRepository.addCurrencies(xpToGrant, coinsToGrant);
-        
+
+        // Registrar log de XP para el ranking seguro
+        if (xpToGrant > 0) {
+            await userCurrenciesRepository.addXpLog(xpToGrant);
+        }
+
         // Recargar las monedas actualizadas en Zustand
         const { useCurrencyStore } = require('../../../store/CurrencyStore');
         useCurrencyStore.getState().loadCurrencies();
@@ -96,16 +101,31 @@ export class CurrencyService {
 
             let userId = user?.id;
 
-            if (isGuest) {
+            if (isGuest || userError || !user || !userId) {
                 return;
             }
 
-            if (userError || !user) {
-                return;
+            // --- 1. Sincronizar Historial de XP (Seguridad) ---
+            const unsyncedLogs = await userCurrenciesRepository.getUnsyncedXpLogs();
+            if (unsyncedLogs.length > 0) {
+                const logsToUpload = unsyncedLogs.map(log => ({
+                    user_id: userId,
+                    xp_amount: log.xp_amount,
+                    earned_at: log.earned_at
+                }));
+
+                const { error: historyError } = await supabase
+                    .from('xp_history')
+                    .insert(logsToUpload);
+
+                if (!historyError) {
+                    await userCurrenciesRepository.markXpLogsAsSynced(unsyncedLogs.map(l => l.id));
+                } else {
+                    console.error('[CurrencySync] Error syncing XP history:', historyError);
+                }
             }
 
-            if (!userId) return;
-
+            // --- 2. Sincronizar Totales (Monedas e Inventario) ---
             const localData = await userCurrenciesRepository.getCurrencies();
 
             const { data: remoteData, error: remoteError } = await supabase
@@ -125,6 +145,7 @@ export class CurrencyService {
                     user_id: userId,
                     xp: localData.xp,
                     michi_coins: localData.michi_coins,
+                    inventory: JSON.stringify(localData.inventory || {}),
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'user_id' });
 
@@ -132,33 +153,33 @@ export class CurrencyService {
                     console.error('[CurrencySync] Error inserting initial remote currencies:', upsertError);
                 }
             } else {
-                // To avoid losing spent coins or duplicating defaults on new device:
-                // If local is default (0 XP, 0 coins) and remote has more XP or different coins, trust remote.
-                let mergedXp = localData.xp;
+                // Determine latest version for coins and inventory
+                let mergedXp = Math.max(localData.xp, remoteData.xp);
                 let mergedCoins = localData.michi_coins;
+                let mergedInventory = localData.inventory || {};
 
-                const isLocalDefault = localData.xp === 0 && localData.michi_coins === 0;
+                const localTime = localData.updated_at ? new Date(localData.updated_at).getTime() : 0;
+                const remoteTime = remoteData.updated_at ? new Date(remoteData.updated_at).getTime() : 0;
 
-                if (isLocalDefault && (remoteData.xp > 0 || remoteData.michi_coins !== 0)) {
-                    mergedXp = remoteData.xp;
+                // For XP, we always take the maximum to avoid losing progress.
+                // For coins and inventory, we trust the side with the latest timestamp.
+                if (remoteTime > localTime) {
+                    // Remote is newer, trust remote coins and inventory
                     mergedCoins = remoteData.michi_coins;
-                } else {
-                    // Normal merge: XP always grows (max), coins should ideally sync by latest action
-                    // But without an action log, taking highest XP and trusting latest timestamps for coins could work.
-                    // Let's use max for XP to never lose progress.
-                    mergedXp = Math.max(localData.xp, remoteData.xp);
-
-                    // For coins, since they can go down, taking the latest updated_at is safer than Math.max
-                    // But we don't have local updated_at in the getCurrencies return yet...
-                    // So we fallback to max, but we'll prioritize keeping coins accurate by checking if XP changed.
-                    mergedCoins = Math.max(localData.michi_coins, remoteData.michi_coins);
+                    mergedInventory = remoteData.inventory ? (typeof remoteData.inventory === 'string' ? JSON.parse(remoteData.inventory) : remoteData.inventory) : {};
+                    // Update local reference to avoid double update in state
+                    localData.inventory = mergedInventory;
+                } else if (localTime === remoteTime && remoteData.michi_coins > localData.michi_coins) {
+                    // Tie-breaker: If timestamps are equal (unlikely but possible), prefer more coins (safer for rewards)
+                    mergedCoins = remoteData.michi_coins;
                 }
 
-                const hasLocalChanged = mergedXp > localData.xp || mergedCoins !== localData.michi_coins;
+                const hasLocalChanged = mergedXp > localData.xp || mergedCoins !== localData.michi_coins || JSON.stringify(localData.inventory) !== JSON.stringify(mergedInventory);
                 if (hasLocalChanged) {
                     await userCurrenciesRepository.updateCurrenciesFromCloud({
                         xp: mergedXp,
-                        michi_coins: mergedCoins
+                        michi_coins: mergedCoins,
+                        inventory: mergedInventory
                     });
                 }
 
@@ -168,7 +189,7 @@ export class CurrencyService {
                         xp: mergedXp,
                         michi_coins: mergedCoins,
                         inventory: JSON.stringify(localData.inventory || {}),
-                        updated_at: new Date().toISOString()
+                        updated_at: localTime > remoteTime ? localData.updated_at : new Date().toISOString()
                     }).eq('user_id', userId);
 
                     if (updateError) {

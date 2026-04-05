@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useAppTheme } from '../../../theme/ThemeContext';
-import { useSpeakStore } from '../../../store/useSpeakStore';
+import { useAppTheme } from '../../../../theme/ThemeContext';
+import { useSpeakStore } from '../../../../store/useSpeakStore';
 
 interface Props {
     onSend: (text?: string) => void;

@@ -46,6 +46,25 @@ const gamification: Translation['gamification'] = {
     protectorsTitle: "Protectores de Racha",
     protectorsDesc: "El protector de racha te salva si olvidas practicar por un día.",
     equipped: "{{count}} / 2 Equipados"
+  },
+  ranking: {
+    title: "Ranking",
+    subtitle: "Clasificación Global • Dominio del Inglés",
+    emptyTitle: "Ranking Vacío",
+    emptySubtitle: "¡Sé el primero en ganar XP y encabezar el ranking!",
+    connectionError: "No se pudo conectar con el ranking. Por favor, revisa tu conexión a internet.",
+    connectionErrorTitle: "Problema de Conexión",
+    tryAgain: "Reintentar",
+    loading: "Cargando Ranking...",
+    yourRank: "Tu Rango",
+    keepItUp: "¡Sigue así!",
+    greatJob: "Estás haciendo un gran trabajo en tu aprendizaje.",
+    notInRanking: "¡Aún no estás en el ranking!",
+    loginToParticipate: "Inicia sesión para participar",
+    earnXpToSeeRank: "Gana XP completando lecciones para ver tu posición.",
+    createAccountToSave: "Crea una cuenta para guardar tu progreso y competir.",
+    anon: "Anon",
+    xp: "XP"
   }
 };
 

@@ -11,6 +11,15 @@ import { AppThemeProvider, useThemeControl, NavLightTheme, NavDarkTheme } from '
 import { navigationRef } from './src/navigation/navigationRef';
 import notifee, { EventType } from '@notifee/react-native';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SILENCE NOISY LOGS (EXGL/THREE.js Incompatibility)
+// ─────────────────────────────────────────────────────────────────────────────
+const originalLog = console.log;
+console.log = (...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('EXGL: gl.pixelStorei()')) return;
+    originalLog(...args);
+};
+
 const AppContent = () => {
     const { isDark } = useThemeControl();
 

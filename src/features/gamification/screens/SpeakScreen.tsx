@@ -16,10 +16,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useSpeakStore } from '../../../store/useSpeakStore';
 import { useSpeakSpeech } from '../hooks/useSpeakSpeech';
-import { SpeakCatCanvas } from '../components/SpeakCatCanvas';
-import { SpeakInputBar } from '../components/SpeakInputBar';
-import { SpeakSuggestions } from '../components/SpeakSuggestions';
-import { SpeakChatBubble } from '../components/SpeakChatBubble';
+import { SpeakCatCanvas } from '../components/speaking/SpeakCatCanvas';
+import { SpeakInputBar } from '../components/speaking/SpeakInputBar';
+import { SpeakSuggestions } from '../components/speaking/SpeakSuggestions';
+import { SpeakChatBubble } from '../components/speaking/SpeakChatBubble';
 import { audioService } from '../../settings/services/audio.service';
 
 

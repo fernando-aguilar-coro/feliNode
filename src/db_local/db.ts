@@ -85,6 +85,13 @@ export const initDatabase = async () => {
             inventory TEXT DEFAULT '{}',
             updated_at TEXT
           );
+
+          CREATE TABLE IF NOT EXISTS xp_history (
+            id TEXT PRIMARY KEY, 
+            xp_amount INTEGER NOT NULL,
+            earned_at TEXT NOT NULL,
+            is_synced BOOLEAN DEFAULT 0
+          );
         `);
 
         // Migration: Add inventory column if it doesn't exist in older databases

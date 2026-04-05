@@ -46,6 +46,25 @@ const gamification: Translation['gamification'] = {
     protectorsTitle: "连续记录保护器",
     protectorsDesc: "如果您忘记练习一天，连续记录保护器可以救你一命。",
     equipped: "已装备 {{count}} / 2"
+  },
+  ranking: {
+    title: "排行榜",
+    subtitle: "全球排名 • 英语精通",
+    emptyTitle: "排行榜是空的",
+    emptySubtitle: "成为第一个获得 XP 并居排行榜首位的人吧!",
+    connectionError: "无法连接到排行榜。请检查您的互联网连接。",
+    connectionErrorTitle: "连接问题",
+    tryAgain: "再试一次",
+    loading: "正在加载排行榜...",
+    yourRank: "您的排名",
+    keepItUp: "保持下去！",
+    greatJob: "你在学习方面做得很好。",
+    notInRanking: "您还没有进入排行榜！",
+    loginToParticipate: "登录参与",
+    earnXpToSeeRank: "通过完成课程赚取 XP 来查看您的排名。",
+    createAccountToSave: "创建一个账户来保存您的进度并参与竞争。",
+    anon: "无名",
+    xp: "XP"
   }
 };
 
