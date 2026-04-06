@@ -35,6 +35,15 @@ const gamification: Translation['gamification'] = {
         name: "सिक्का डब्लर",
         description: "अपने पाठों में अर्जित सिक्कों को स्थायी रूप से दोगुना करें।",
         equipped: "खरीदा गया"
+      },
+      removeAds: {
+        name: "प्रीमियम विज्ञापन हटाएँ",
+        description: "हमेशा के लिए विज्ञापन हटाएँ और उपहार के रूप में 1500 Michi-Coins प्राप्त करें।",
+        purchased: "खरीदा गया"
+      },
+      sardineForNeko: {
+        name: "नेको के लिए सार्डिन",
+        description: "नेको के लिए एक स्वादिष्ट सार्डिन खरीदें। वह आपको धन्यवाद के रूप में 1000 Michi-Coins देगा!"
       }
     }
   },

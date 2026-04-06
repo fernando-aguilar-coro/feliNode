@@ -9,7 +9,8 @@ const nodes: Translation['nodes'] = {
     lessonsCompleted: "已完成 {{total}} 节课中的 {{completed}} 节",
     streak: "连续记录",
     exp: "经验星",
-    coins: "金币"
+    coins: "金币",
+    ranking: "排行榜"
   },
   tree: {
     errorTitle: "错误"

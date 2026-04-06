@@ -35,6 +35,15 @@ const gamification: Translation['gamification'] = {
         name: "Coin Doubler",
         description: "Permanently double the coins earned in your lessons.",
         equipped: "Purchased"
+      },
+      removeAds: {
+        name: "Remove Ads Premium",
+        description: "Remove ads FOREVER and receive 1500 MichiCoins as a gift.",
+        purchased: "Purchased"
+      },
+      sardineForNeko: {
+        name: "Sardine for Neko",
+        description: "Buy a delicious sardine for Neko. He will thank you with 1000 MichiCoins!"
       }
     }
   },

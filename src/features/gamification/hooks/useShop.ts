@@ -76,6 +76,7 @@ export const useShop = () => {
 
     const handleBuyXpBoost = () => handleBuyGenericItem('xp_boost', t('gamification.shop.items.doubleXp.name'), 90, false);
     const handleBuyCoinDoubler = () => handleBuyGenericItem('coin_doubler', t('gamification.shop.items.coinDoubler.name'), 300, false);
+    const handleBuyRemoveAds = () => handleBuyGenericItem('remove_ads', t('gamification.shop.items.removeAds.name', { defaultValue: 'Quitar Anuncios' }), 1000, false);
 
     return {
         currencies,
@@ -91,6 +92,7 @@ export const useShop = () => {
         handleBuyGenericItem,
         handleBuyXpBoost,
         handleBuyCoinDoubler,
+        handleBuyRemoveAds,
         clearError,
         closeModal,
     };

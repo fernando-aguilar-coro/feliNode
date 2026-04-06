@@ -35,6 +35,15 @@ const gamification: Translation['gamification'] = {
         name: "金币翻倍器",
         description: "永久翻倍在课程中获得的金币。",
         equipped: "已购买"
+      },
+      removeAds: {
+        name: "移除高级广告",
+        description: "永久移除广告并获赠 1500 颗猫咪币。",
+        purchased: "已购买"
+      },
+      sardineForNeko: {
+        name: "给 Neko 的沙丁鱼",
+        description: "为 Neko 买一条美味的沙丁鱼。他会送你 1000 颗猫咪币作为感谢！"
       }
     }
   },

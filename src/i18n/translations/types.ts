@@ -46,6 +46,15 @@ export interface Translation {
           description: string;
           equipped: string;
         };
+        removeAds: {
+          name: string;
+          description: string;
+          purchased: string;
+        };
+        sardineForNeko: {
+          name: string;
+          description: string;
+        };
       };
     };
     streak: {

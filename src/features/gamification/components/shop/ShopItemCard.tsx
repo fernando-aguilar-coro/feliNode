@@ -16,7 +16,8 @@ import * as Haptics from 'expo-haptics';
 interface ShopItemCardProps {
     name: string;
     description: string;
-    cost: number;
+    cost?: number;
+    costText?: string;
     icon: React.ReactNode;
     onPress: () => void;
     disabled?: boolean;
@@ -29,7 +30,8 @@ interface ShopItemCardProps {
 export const ShopItemCard: React.FC<ShopItemCardProps> = ({
     name,
     description,
-    cost,
+    cost = 0,
+    costText,
     icon,
     onPress,
     disabled = false,
@@ -39,7 +41,9 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
     statusText
 }) => {
     const theme = useAppTheme();
-    const canAfford = michiCoins >= cost;
+    
+    // If it's an IAP (costText is present), we don't check michiCoins balance for affordability
+    const canAfford = costText ? true : michiCoins >= cost;
     
     // Animations for "error" feedback
     const shakeX = useSharedValue(0);
@@ -102,7 +106,7 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
         };
     });
 
-    const isDisabled = disabled || buying || !canAfford;
+    const isDisabled = disabled || buying; // For IAP, we only care if it's disabled or already buying
 
     return (
         <Animated.View 
@@ -113,7 +117,7 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
                 onPress={handlePress}
                 style={({ pressed }) => [
                     styles.itemCard,
-                    { opacity: pressed && !isDisabled ? 0.9 : 1 }
+                    { opacity: (pressed && !isDisabled && canAfford) ? 0.9 : 1 }
                 ]}
             >
                 <View style={[styles.itemIconContainer, { backgroundColor: theme.colors.background }]}>
@@ -131,12 +135,15 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
                     )}
                 </View>
                 <TouchableOpacity
-                    style={[styles.buyButton, isDisabled && styles.buyButtonDisabled]}
+                    style={[
+                        styles.buyButton, 
+                        (isDisabled || (!costText && !canAfford)) && styles.buyButtonDisabled
+                    ]}
                     onPress={handlePress}
                     disabled={buying || disabled} 
                 >
-                    <FontAwesome5 name="coins" size={12} color="#FFF" />
-                    <Text style={styles.buyText}>{cost}</Text>
+                    {!costText && <FontAwesome5 name="coins" size={12} color="#FFF" />}
+                    <Text style={styles.buyText}>{costText || cost}</Text>
                 </TouchableOpacity>
             </Pressable>
         </Animated.View>
@@ -156,10 +163,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
+        flexShrink: 0,
     },
     itemDetails: {
         flex: 1,
         marginRight: 8,
+        justifyContent: 'center',
     },
     itemName: {
         fontSize: 17,
@@ -179,11 +188,14 @@ const styles = StyleSheet.create({
     buyButton: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: '#FFBA08',
-        paddingHorizontal: 16,
+        paddingHorizontal: 12,
         paddingVertical: 10,
         borderRadius: 24,
-        gap: 6,
+        gap: 4,
+        minWidth: 80,
+        flexShrink: 0,
         shadowColor: '#FFBA08',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
@@ -198,7 +210,7 @@ const styles = StyleSheet.create({
     buyText: {
         color: '#FFF',
         fontFamily: 'Nunito-Bold',
-        fontSize: 15,
+        fontSize: 14,
+        textAlign: 'center',
     },
 });
-

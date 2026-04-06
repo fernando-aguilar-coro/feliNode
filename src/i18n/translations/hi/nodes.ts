@@ -9,7 +9,8 @@ const nodes: Translation['nodes'] = {
     lessonsCompleted: "{{total}} में से {{completed}} पाठ पूर्ण",
     streak: "लगातार दिन",
     exp: "अनुभव",
-    coins: "सिक्के"
+    coins: "सिक्के",
+    ranking: "रैंकिंग"
   },
   tree: {
     errorTitle: "त्रुटि"

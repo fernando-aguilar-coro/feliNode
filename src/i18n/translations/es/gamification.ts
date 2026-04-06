@@ -35,6 +35,15 @@ const gamification: Translation['gamification'] = {
         name: "Duplicador de Monedas",
         description: "Duplica permanentemente las monedas obtenidas en tus lecciones.",
         equipped: "Comprado"
+      },
+      removeAds: {
+        name: "Quitar Anuncios Premium",
+        description: "Elimina anuncios PARA SIEMPRE y recibe 1500 MichiCoins de regalo.",
+        purchased: "Comprado"
+      },
+      sardineForNeko: {
+        name: "Sardina para Neko",
+        description: "Compra una deliciosa sardina para Neko. ¡Él te lo agradecerá con 1000 MichiCoins!"
       }
     }
   },

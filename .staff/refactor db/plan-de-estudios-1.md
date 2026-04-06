@@ -80,15 +80,15 @@ Este documento combina la **didáctica educativa** del currículo mexicano con l
     - 6.7 Must / Have to (Obligación y necesidad)[✅ Ya en DB]
     - 6.8 Consejos y Crítica (Should, ought to, had better)[✅ Ya en DB]
     - 6.9 Modales de Probabilidad y Deducción (May, might, could, must be, can't be)[✅ Ya en DB]
-    - 6.10 Preposiciones de Movimiento (Into, onto, through, across, past)
-    - 6.11 Adjetivo + Preposición (Interested in, proud of, good at)
-    - 6.12 Verbo + Preposición (Listen to, depend on, wait for)
+    - 6.10 Preposiciones de Movimiento (Into, onto, through, across, past)[✅ Ya en DB]
+    - 6.11 Adjetivo + Preposición (Interested in, proud of, good at)[✅ Ya en DB]
+    - 6.12 Verbo + Preposición (Listen to, depend on, wait for, etc)[✅ Ya en DB]
 
 ### **Tercer Año (Nivel A2+ a B1 - Umbral)**
 **Meta**: Conectar experiencias pasadas con el presente y condiciones básicas.
 
 7. **Unidad 7: Experiencias y Resultados (B1)**
-    - 7.1 Been vs. Gone
+    - 7.1 Been vs. Gone[✅ Ya en DB]
     - 7.2 Just, already, yet
     - 7.3 For y Since (Duración)
     - 7.4 Contraste: Presente Perfecto vs. Pasado Simple

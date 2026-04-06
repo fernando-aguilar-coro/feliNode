@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -13,6 +13,8 @@ import { useShop } from '../hooks/useShop';
 import { BalanceHeader } from '../components/shop/BalanceHeader';
 import { ShopItemCard } from '../components/shop/ShopItemCard';
 import { PurchaseSuccessModal } from '../components/shop/PurchaseSuccessModal';
+import { IapService, IAP_SKUS } from '../services/Iap.service';
+import type { Product } from 'react-native-iap';
 
 export const ShopScreen = () => {
     const { t } = useTranslation();
@@ -34,12 +36,37 @@ export const ShopScreen = () => {
         closeModal,
     } = useShop();
 
+    const [iapProducts, setIapProducts] = useState<Product[]>([]);
+
     useFocusEffect(
         useCallback(() => {
             loadCurrencies();
             fetchStreak();
+
+            // Initialize IAP and get products
+            const initIap = async () => {
+                const connected = await IapService.init();
+                if (connected) {
+                    const products = await IapService.getProducts();
+                    setIapProducts(products);
+                }
+            };
+            initIap();
+
+            return () => {
+                IapService.end();
+            };
         }, [loadCurrencies, fetchStreak])
     );
+
+    const handleBuyIap = async (sku: string) => {
+        await IapService.buyItem(sku);
+    };
+
+    const getIapPrice = (sku: string) => {
+        const product = iapProducts.find(p => p.id === sku);
+        return product?.displayPrice;
+    };
 
     if (loading) {
         return (
@@ -100,6 +127,32 @@ export const ShopScreen = () => {
                     michiCoins={currencies.michi_coins}
                     buying={buying}
                     delay={300}
+                />
+
+                {/* 4. Remove Ads (Premium) */}
+                <ShopItemCard
+                    name={t('gamification.shop.items.removeAds.name')}
+                    description={t('gamification.shop.items.removeAds.description')}
+                    costText={getIapPrice(IAP_SKUS.REMOVE_ADS)}
+                    icon={<MaterialCommunityIcons name="advertisements-off" size={32} color="#FF4500" />}
+                    onPress={() => handleBuyIap(IAP_SKUS.REMOVE_ADS)}
+                    disabled={currencies.inventory?.remove_ads}
+                    statusText={currencies.inventory?.remove_ads ? t('gamification.shop.items.removeAds.purchased') : undefined}
+                    michiCoins={currencies.michi_coins}
+                    buying={buying}
+                    delay={400}
+                />
+
+                {/* 5. Sardina para Neko (Consumible) */}
+                <ShopItemCard
+                    name={t('gamification.shop.items.sardineForNeko.name')}
+                    description={t('gamification.shop.items.sardineForNeko.description')}
+                    costText={getIapPrice(IAP_SKUS.SARDINE_FOR_NEKO)}
+                    icon={<MaterialCommunityIcons name="fish" size={32} color="#4FC3F7" />}
+                    onPress={() => handleBuyIap(IAP_SKUS.SARDINE_FOR_NEKO)}
+                    michiCoins={currencies.michi_coins}
+                    buying={buying}
+                    delay={500}
                 />
 
                 <Animated.View entering={FadeIn.delay(500)}>

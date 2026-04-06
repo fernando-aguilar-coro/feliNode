@@ -6,6 +6,7 @@ import {
   BannerAdSize,
   TestIds,
 } from 'react-native-google-mobile-ads';
+import { useCurrencyStore } from '../store/CurrencyStore';
 
 // ------------------------------------------------------------
 // Ad Type definitions
@@ -57,6 +58,13 @@ export const AppAds: React.FC<AppAddProps> = ({
   containerStyle,
   ...bannerProps
 }) => {
+  const inventory = useCurrencyStore((state) => state.currencies.inventory);
+  const removeAds = inventory?.remove_ads === true;
+
+  if (removeAds) {
+    return null;
+  }
+
   const unitId = AD_UNIT_IDS[type];
 
   return (
