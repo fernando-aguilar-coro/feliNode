@@ -20,7 +20,7 @@ export const CurrencyBadge = () => {
     return (
         <TouchableOpacity
             style={styles.container}
-            onPress={() => navigation.navigate('ShopScreen')}
+            onPress={() => navigation.navigate('Main', { screen: 'Shop' })}
         >
             <View style={styles.badgeSection}>
                 <FontAwesome5 name="star" size={16} color="#FFD700" solid />

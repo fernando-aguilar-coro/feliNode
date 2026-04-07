@@ -30,15 +30,44 @@ export const ensureLessons = async (db: SQLite.SQLiteDatabase, moduleId: number,
     }
 };
 
-export const ensureDependencies = async (db: SQLite.SQLiteDatabase, dependencies: SeedDependency[]) => {
+/**
+ * Inserts module-level DAG dependencies into the local `module_dependencies` table.
+ * `dep.child` and `dep.parent` are Supabase module IDs (strings of integers).
+ * Resolution: Supabase module IDs are its `order_index` values (1-based).
+ * We query the local DB to find the matching local integer ID by order_index.
+ */
+export const ensureModuleDependencies = async (db: SQLite.SQLiteDatabase, dependencies: SeedDependency[]) => {
+    // Build a local lookup: order_index -> local id
+    const localModules = await db.getAllAsync<{ id: number; order_index: number }>(
+        'SELECT id, order_index FROM modules'
+    );
+    const orderIndexToLocalId = new Map<number, number>();
+    for (const m of localModules) {
+        orderIndexToLocalId.set(m.order_index, m.id);
+    }
+
     for (const dep of dependencies) {
-        const existing = await db.getFirstAsync<{ count: number }>('SELECT count(*) as count FROM lesson_dependencies WHERE lesson_id = ? AND prerequisite_id = ?', [dep.child, dep.parent]);
+        const supChildId = parseInt(dep.child, 10);
+        const supParentId = parseInt(dep.parent, 10);
+
+        // Supabase module IDs are 1-based order_index values
+        const localChildId = orderIndexToLocalId.get(supChildId);
+        const localParentId = orderIndexToLocalId.get(supParentId);
+
+        if (localChildId === undefined || localParentId === undefined) {
+            console.warn(`[ensureModuleDependencies] Skipping dep sup(${dep.parent} -> ${dep.child}): no local match found.`);
+            continue;
+        }
+
+        const existing = await db.getFirstAsync<{ count: number }>(
+            'SELECT count(*) as count FROM module_dependencies WHERE module_id = ? AND prerequisite_id = ?',
+            [localChildId, localParentId]
+        );
         if (!existing || existing.count === 0) {
             await db.runAsync(
-                'INSERT INTO lesson_dependencies (lesson_id, prerequisite_id) VALUES (?, ?)',
-                [dep.child, dep.parent]
+                'INSERT INTO module_dependencies (module_id, prerequisite_id) VALUES (?, ?)',
+                [localChildId, localParentId]
             );
-
         }
     }
 };

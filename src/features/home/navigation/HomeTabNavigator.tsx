@@ -5,6 +5,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { HomeScreen } from '../screens/HomeScreen';
 import { PracticeLandingScreen } from '../../learning/screens/PracticeLandingScreen';
 import { SettingsScreen } from '../../settings/screens/SettingsScreen';
+import { ShopScreen } from '../../gamification/screens/ShopScreen';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { audioService } from '../../settings/services/audio.service';
@@ -12,6 +13,7 @@ import { audioService } from '../../settings/services/audio.service';
 export type HomeTabParamList = {
     HomeMain: undefined;
     InfinityLanding: undefined;
+    Shop: undefined;
     Settings: undefined;
 };
 
@@ -75,6 +77,16 @@ export const HomeTabNavigator = () => {
                     tabBarLabel: t('home.tabs.practice'),
                     tabBarIcon: ({ color }) => (
                         <Ionicons name="sparkles-outline" size={24} color={color} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Shop"
+                component={ShopScreen}
+                options={{
+                    tabBarLabel: t('home.tabs.shop', 'Shop'),
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="cart-outline" size={24} color={color} />
                     ),
                 }}
             />

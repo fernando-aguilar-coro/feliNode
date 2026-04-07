@@ -91,7 +91,7 @@ export const ModuleStatsCards = ({ orientation = 'row' }: ModuleStatsCardsProps)
                     { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text }
                 ]}
                 activeOpacity={0.8}
-                onPress={() => navigation.navigate('ShopScreen')}
+                onPress={() => navigation.navigate('Main', { screen: 'Shop' })}
             >
                 <FontAwesome5 name="coins" size={24} color="#FFBA08" />
                 <View style={styles.statTextContainer}>

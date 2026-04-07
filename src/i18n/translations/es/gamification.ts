@@ -15,6 +15,7 @@ const gamification: Translation['gamification'] = {
     cancel: "Cancelar",
     confirm: "Confirmar",
     purchaseError: "No se pudo completar la compra.",
+    errorConnection: "Error de conexión",
     comingSoon: "Próximamente",
     buyItemConfirm: "¿Comprar {{name}} por {{cost}} Michi-Coins?\n(Próximamente)",
     itemDisabled: "Este artículo aún no está habilitado.",

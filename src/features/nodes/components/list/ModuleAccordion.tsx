@@ -7,14 +7,16 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ModuleProgress, LessonProgress } from '../../services/ModuleProgress.service';
 import { audioService } from '../../../settings/services/audio.service';
 import { useTranslation } from 'react-i18next';
+import { GenericModal } from '../../../../components/GenericModal';
 
 interface ModuleAccordionProps {
     module: ModuleProgress;
     isExpanded: boolean;
     onToggle: (moduleId: number) => void;
+    onMarkAsCompleted: (lessonId: string) => void;
 }
 
-export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ module, isExpanded, onToggle }) => {
+export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ module, isExpanded, onToggle, onMarkAsCompleted }) => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
     const { t } = useTranslation();
@@ -23,6 +25,8 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
     const progressPercentage = Math.round(progress * 100);
     const isModuleComplete = progress === 1;
     const isSpecialModule = module.order_index === 999;
+    const [confirmVisible, setConfirmVisible] = React.useState(false);
+    const [pendingLessonId, setPendingLessonId] = React.useState<string | null>(null);
 
     const styles = useMemo(() => StyleSheet.create({
         moduleContainer: {
@@ -165,11 +169,32 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
             color: theme.colors.textSecondary,
             marginTop: 2,
         },
+        markDoneButton: {
+            padding: 8,
+            marginLeft: 8,
+            borderRadius: 20,
+            backgroundColor: theme.colors.surface,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
     }), [theme, isModuleComplete, isSpecialModule]);
 
     const handleLessonPress = (lesson: LessonProgress) => {
         audioService.playClickSound();
         navigation.navigate('Lesson', { lessonId: lesson.id });
+    };
+
+    const handleConfirmMarkAsCompleted = () => {
+        if (pendingLessonId) {
+            onMarkAsCompleted(pendingLessonId);
+        }
+        setConfirmVisible(false);
+        setPendingLessonId(null);
+    };
+
+    const requestMarkAsCompleted = (lessonId: string) => {
+        setPendingLessonId(lessonId);
+        setConfirmVisible(true);
     };
 
     const renderLesson = (lesson: LessonProgress, index: number) => {
@@ -200,15 +225,32 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
                     <Text style={isCompleted ? styles.lessonTitleCompleted : styles.lessonTitleAvailable}>
                         {index + 1}. {lesson.title}
                     </Text>
-                    {lesson.description ? (
-                        <Text style={styles.lessonDescription} numberOfLines={2}>
-                            {lesson.description}
-                        </Text>
-                    ) : null}
-                </View>
-            </TouchableOpacity>
-        );
-    };
+                        {lesson.description ? (
+                            <Text style={styles.lessonDescription} numberOfLines={2}>
+                                {lesson.description}
+                            </Text>
+                        ) : null}
+                    </View>
+                    {!isCompleted && (
+                        <TouchableOpacity
+                            style={styles.markDoneButton}
+                            onPress={(e) => {
+                                // Prevent the parent TouchableOpacity's onPress from firing if needed, 
+                                // but here it's fine since we want to allow mark as done without navigating.
+                                requestMarkAsCompleted(lesson.id);
+                            }}
+                            activeOpacity={0.6}
+                        >
+                            <MaterialCommunityIcons
+                                name="check-circle-outline"
+                                size={22}
+                                color={theme.colors.textSecondary}
+                            />
+                        </TouchableOpacity>
+                    )}
+                </TouchableOpacity>
+            );
+        };
 
     return (
         <View style={styles.moduleContainer}>
@@ -266,6 +308,20 @@ export const ModuleAccordion: React.FC<ModuleAccordionProps> = React.memo(({ mod
                     {module.lessons.map((lesson, index) => renderLesson(lesson, index))}
                 </View>
             )}
+
+            <GenericModal
+                visible={confirmVisible}
+                title={t('common.confirm')}
+                description={t('nodes.training.markCompletedConfirm')}
+                primaryButtonText={t('common.confirm')}
+                secondaryButtonText={t('common.cancel')}
+                onPrimaryPress={handleConfirmMarkAsCompleted}
+                onSecondaryPress={() => {
+                    setConfirmVisible(false);
+                    setPendingLessonId(null);
+                }}
+                dismissable={true}
+            />
         </View>
     );
 });

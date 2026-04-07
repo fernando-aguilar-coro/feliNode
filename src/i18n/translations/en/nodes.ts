@@ -13,7 +13,11 @@ const nodes: Translation['nodes'] = {
     ranking: "Top"
   },
   tree: {
-    errorTitle: "Error"
+    errorTitle: "Error",
+    moduleLessonsDescription: "Select a lesson to start practicing this unit."
+  },
+  training: {
+    markCompletedConfirm: "Are you sure you want to mark this lesson as completed? You won't receive experience (XP) for this."
   }
 };
 

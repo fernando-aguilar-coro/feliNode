@@ -4,7 +4,7 @@ import { initDatabase } from '../db';
 import { INITIAL_DATA } from './initial_data';
 import { ensureModule, ensureLessons } from './seed_config';
 import { SeedModule, SeedLesson } from './types';
-import { getAllLessons, getAllDependencies } from '../../api/GetAllLessons';
+import { getAllLessons, getAllModuleDependencies } from '../../api/GetAllLessons';
 let db: SQLite.SQLiteDatabase | null = null;
 
 const init = async () => {
@@ -32,14 +32,23 @@ export const seedDatabase = async () => {
             console.log('[DB_SEED] Lessons mismatch detected, forcing re-sync from Supabase');
             hasSeeded = null;
             await AsyncStorage.removeItem('HAS_SEEDED_DB');
-
-            // Clean up existing modules to avoid duplication (CASCADE will delete lessons + exercises)
-            // But ensureModule checks by title, and ensureLessons uses INSERT OR REPLACE.
-            // So we just need to ensure ensureLessons overwrites, which it already does with INSERT OR REPLACE.
         }
 
         // Only skip if already marked as seeded AND we have at least 5 lessons in local DB
         if (hasSeeded === 'true' && localLessonsCount >= 5 && !needsUpdate) {
+            // Backfill: if module_dependencies is empty (first run after migration), seed it
+            const depCount = await dbInstance.getFirstAsync<{ count: number }>(
+                'SELECT COUNT(*) as count FROM module_dependencies'
+            );
+            if (!depCount || depCount.count === 0) {
+                console.log('[DB_SEED] module_dependencies is empty, backfilling from Supabase...');
+                const moduleDeps = await getAllModuleDependencies();
+                if (moduleDeps.length > 0) {
+                    const { ensureModuleDependencies } = await import('./seed_config');
+                    await ensureModuleDependencies(dbInstance, moduleDeps);
+                    console.log(`[DB_SEED] Backfilled ${moduleDeps.length} module dependencies.`);
+                }
+            }
             return;
         }
 
@@ -89,7 +98,7 @@ export const seedDatabase = async () => {
                 lessonsByModule.get(l.moduleId)?.push(l);
             }
 
-            // Seed each module
+            // Seed each module and register Supabase → local ID mapping. 
             for (const [modId, lessons] of lessonsByModule.entries()) {
                 const info = moduleInfo.get(modId)!;
                 const modData: SeedModule = {
@@ -105,13 +114,12 @@ export const seedDatabase = async () => {
                 }
             }
 
-            // Seed Dependencies
-
-            const dependencies = await getAllDependencies();
-            if (dependencies.length > 0) {
-
-                const { ensureDependencies } = await import('./seed_config');
-                await ensureDependencies(dbInstance, dependencies);
+            // Seed Module Dependencies (DAG)
+            const moduleDeps = await getAllModuleDependencies();
+            if (moduleDeps.length > 0) {
+                const { ensureModuleDependencies } = await import('./seed_config');
+                await ensureModuleDependencies(dbInstance, moduleDeps);
+                console.log(`[DB_SEED] Seeded ${moduleDeps.length} module dependencies.`);
             }
 
             // Successfully fetched and seeded from Supabase

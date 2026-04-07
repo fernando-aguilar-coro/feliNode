@@ -18,7 +18,11 @@ const common: Translation['common'] = {
     "Consistency is the key to learning a new language.",
     "Don't forget to use your XP boosters from the shop!",
     "Listening and repeating aloud helps improve your pronunciation quickly."
-  ]
+  ],
+  close: "Close",
+  cancel: "Cancel",
+  accept: "Accept",
+  confirm: "Confirm"
 };
 
 export default common;

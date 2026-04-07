@@ -5,15 +5,16 @@ import { Text, Button, Card, useTheme, Modal, Portal } from 'react-native-paper'
 export interface GenericModalProps {
     visible: boolean;
     title: string;
-    description: string;
+    description?: string;
     subtitle?: string;
     icon?: ReactNode;
-    primaryButtonText: string;
+    primaryButtonText?: string;
     primaryButtonIcon?: string;
-    onPrimaryPress: () => void;
-    secondaryButtonText: string;
-    onSecondaryPress: () => void;
+    onPrimaryPress?: () => void;
+    secondaryButtonText?: string;
+    onSecondaryPress?: () => void;
     dismissable?: boolean;
+    children?: ReactNode;
 }
 
 export const GenericModal: React.FC<GenericModalProps> = ({
@@ -28,6 +29,7 @@ export const GenericModal: React.FC<GenericModalProps> = ({
     secondaryButtonText,
     onSecondaryPress,
     dismissable = false,
+    children,
 }) => {
     const theme = useTheme();
 
@@ -96,38 +98,52 @@ export const GenericModal: React.FC<GenericModalProps> = ({
                     {title}
                 </Text>
 
-                <Card style={styles.card}>
-                    <Card.Content>
-                        <Text style={styles.description}>
-                            {description}
-                        </Text>
-                        {subtitle && (
-                            <Text style={styles.subtitle}>
-                                {subtitle}
-                            </Text>
-                        )}
-                    </Card.Content>
-                </Card>
+                {children ? (
+                    <View style={{ maxHeight: 400 }}>
+                        {children}
+                    </View>
+                ) : (
+                    description && (
+                        <Card style={styles.card}>
+                            <Card.Content>
+                                <Text style={styles.description}>
+                                    {description}
+                                </Text>
+                                {subtitle && (
+                                    <Text style={styles.subtitle}>
+                                        {subtitle}
+                                    </Text>
+                                )}
+                            </Card.Content>
+                        </Card>
+                    )
+                )}
 
-                <View style={styles.buttonContainer}>
-                    <Button
-                        mode="contained"
-                        onPress={onPrimaryPress}
-                        style={styles.button}
-                        labelStyle={styles.buttonLabel}
-                        icon={primaryButtonIcon}
-                    >
-                        {primaryButtonText}
-                    </Button>
-                    <Button
-                        mode="text"
-                        onPress={onSecondaryPress}
-                        labelStyle={styles.buttonLabel}
-                        textColor={theme.colors.onSurfaceVariant}
-                    >
-                        {secondaryButtonText}
-                    </Button>
-                </View>
+                {(primaryButtonText || secondaryButtonText) && (
+                    <View style={styles.buttonContainer}>
+                        {primaryButtonText && onPrimaryPress && (
+                            <Button
+                                mode="contained"
+                                onPress={onPrimaryPress}
+                                style={styles.button}
+                                labelStyle={styles.buttonLabel}
+                                icon={primaryButtonIcon}
+                            >
+                                {primaryButtonText}
+                            </Button>
+                        )}
+                        {secondaryButtonText && onSecondaryPress && (
+                            <Button
+                                mode="text"
+                                onPress={onSecondaryPress}
+                                labelStyle={styles.buttonLabel}
+                                textColor={theme.colors.onSurfaceVariant}
+                            >
+                                {secondaryButtonText}
+                            </Button>
+                        )}
+                    </View>
+                )}
             </Modal>
         </Portal>
     );

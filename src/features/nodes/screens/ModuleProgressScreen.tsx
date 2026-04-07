@@ -9,7 +9,7 @@ import { ModuleStatsCards } from '../components/progress/ModuleStatsCards';
 
 export const ModuleProgressScreen = () => {
     const theme = useAppTheme();
-    const { modules, isLoading, expandedModules, toggleModule } = useModuleProgress();
+    const { modules, isLoading, expandedModules, toggleModule, markLessonAsCompleted } = useModuleProgress();
 
     const styles = useMemo(() => StyleSheet.create({
         container: {
@@ -61,6 +61,7 @@ export const ModuleProgressScreen = () => {
                         module={item}
                         isExpanded={expandedModules.has(item.id)}
                         onToggle={toggleModule}
+                        onMarkAsCompleted={markLessonAsCompleted}
                     />
                 )}
                 ListHeaderComponent={renderHeader}

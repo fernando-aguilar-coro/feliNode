@@ -7,8 +7,6 @@ import { InfinityExerciseScreen } from '../../learning/screens/InfinityExerciseS
 import { InfinitySelectPairsScreen } from "../../learning/screens/InfinitySelectPairsScreen";
 import { PronunciationAssessmentScreen } from '../../learning/screens/PronunciationAssessmentScreen';
 import { StreakDetailsScreen } from '../../gamification/screens/StreakDetailsScreen';
-import { ShopScreen } from '../../gamification/screens/ShopScreen';
-import { ShopFloatingButton } from '../../gamification/components/ShopFloatingButton';
 import { SpeakScreen } from '../../gamification/screens/SpeakScreen';
 import RankingScreen from '../../gamification/screens/RankingScreen';
 import { View } from 'react-native';
@@ -22,7 +20,6 @@ export type HomeStackParamList = {
     PronunciationAssessment: undefined;
     Settings: undefined;
     StreakDetails: undefined;
-    ShopScreen: undefined;
     Speak: undefined;
     Ranking: undefined;
 };
@@ -39,12 +36,10 @@ export const HomeNavigation = () => {
                 <Stack.Screen name="InfinityExercise" component={InfinityExerciseScreen} />
                 <Stack.Screen name="InfinitySelectPairs" component={InfinitySelectPairsScreen} />
                 <Stack.Screen name="StreakDetails" component={StreakDetailsScreen} />
-                <Stack.Screen name="ShopScreen" component={ShopScreen} />
                 <Stack.Screen name="PronunciationAssessment" component={PronunciationAssessmentScreen} />
                 <Stack.Screen name="Speak" component={SpeakScreen} />
                 <Stack.Screen name="Ranking" component={RankingScreen} />
             </Stack.Navigator>
-            <ShopFloatingButton />
         </View>
     );
 };

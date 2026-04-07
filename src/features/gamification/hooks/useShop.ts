@@ -23,7 +23,7 @@ export const useShop = () => {
     const clearError = useCallback(() => setPurchaseError(''), []);
     const closeModal = useCallback(() => setPurchaseModalVisible(false), []);
 
-    const handleBuyItem = async (itemName: string, cost: number, action: () => Promise<boolean>) => {
+    const handleBuyItem = useCallback(async (itemName: string, cost: number, action: () => Promise<boolean>) => {
         if (currencies.michi_coins < cost) {
             setPurchaseError(t('gamification.shop.notEnoughCoins', { cost }));
             return;
@@ -47,11 +47,11 @@ export const useShop = () => {
         } finally {
             setBuying(false);
         }
-    };
+    }, [currencies.michi_coins, t, loadCurrencies, fetchStreak]);
 
 
 
-    const handleBuyStreakProtector = async () => {
+    const handleBuyStreakProtector = useCallback(async () => {
         if (streak.freezes_available >= 2) {
             setPurchaseError(t('gamification.shop.maxProtectors'));
             return;
@@ -61,18 +61,18 @@ export const useShop = () => {
             60,
             ShopService.buyStreakProtector
         );
-    };
+    }, [streak.freezes_available, t, handleBuyItem]);
 
     /**
      * Generic item purchase handler
      */
-    const handleBuyGenericItem = async (itemId: string, itemName: string, cost: number, isStackable: boolean) => {
+    const handleBuyGenericItem = useCallback(async (itemId: string, itemName: string, cost: number, isStackable: boolean) => {
         await handleBuyItem(
             itemName,
             cost,
             () => ShopService.buyInventoryItem(itemId, cost, isStackable)
         );
-    };
+    }, [handleBuyItem]);
 
     const handleBuyXpBoost = () => handleBuyGenericItem('xp_boost', t('gamification.shop.items.doubleXp.name'), 90, false);
     const handleBuyCoinDoubler = () => handleBuyGenericItem('coin_doubler', t('gamification.shop.items.coinDoubler.name'), 300, false);

@@ -13,7 +13,8 @@ const nodes: Translation['nodes'] = {
     ranking: "排行榜"
   },
   tree: {
-    errorTitle: "错误"
+    errorTitle: "错误",
+    moduleLessonsDescription: "选择一节课开始练习本单元。"
   }
 };
 

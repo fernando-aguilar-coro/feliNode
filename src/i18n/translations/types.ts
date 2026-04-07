@@ -9,6 +9,10 @@ export interface Translation {
     placement: string;
     pairs: string;
     tips: string[];
+    close: string;
+    cancel: string;
+    accept: string;
+    confirm: string;
   };
   gamification: {
     speak: {
@@ -25,6 +29,7 @@ export interface Translation {
       cancel: string;
       confirm: string;
       purchaseError: string;
+      errorConnection: string;
       comingSoon: string;
       buyItemConfirm: string;
       itemDisabled: string;
@@ -155,6 +160,10 @@ export interface Translation {
     };
     tree: {
       errorTitle: string;
+      moduleLessonsDescription: string;
+    };
+    training: {
+      markCompletedConfirm: string;
     };
   };
   settings: {

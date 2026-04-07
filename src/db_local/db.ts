@@ -24,6 +24,14 @@ export const initDatabase = async () => {
             order_index INTEGER
           );
 
+          CREATE TABLE IF NOT EXISTS module_dependencies (
+            module_id INTEGER,
+            prerequisite_id INTEGER,
+            FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE,
+            FOREIGN KEY (prerequisite_id) REFERENCES modules(id) ON DELETE CASCADE,
+            PRIMARY KEY (module_id, prerequisite_id)
+          );
+
           CREATE TABLE IF NOT EXISTS lessons (
             id TEXT PRIMARY KEY,
             module_id INTEGER,

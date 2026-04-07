@@ -18,7 +18,10 @@ const common: Translation['common'] = {
       "坚持是学习新语言的关键。",
       "别忘了在商店使用您的经验值 (XP) 加速器！",
       "大声聆听并重复有助于快速提高您的发音。"
-  ]
+  ],
+  close: "关闭",
+  cancel: "取消",
+  accept: "接受"
 };
 
 export default common;

@@ -41,7 +41,7 @@ export class UserProgressRepository extends BaseRepository {
         return completed.includes(lessonId);
     }
 
-    async saveUserProgress(lessonId: string, score: number) {
+    async saveUserProgress(lessonId: string, score: number, shouldUpdateStreak: boolean = true) {
         const db = await this.db;
 
         if (score >= 80) {
@@ -63,14 +63,14 @@ export class UserProgressRepository extends BaseRepository {
                 } else {
                     await db.runAsync('INSERT INTO user_progress (lessons_completed, updated_at) VALUES (?, ?)', [json, now]);
                 }
-
-                // Code to update dependents from 'locked' to 'available' has been removed
-                // since lessons are no longer 'locked'.
             }
-            try {
-                await this.streakRepo.updateStreak();
-            } catch (e) {
-                console.error('[DB] Error attempting to update streak:', e);
+
+            if (shouldUpdateStreak) {
+                try {
+                    await this.streakRepo.updateStreak();
+                } catch (e) {
+                    console.error('[DB] Error attempting to update streak:', e);
+                }
             }
 
             updateUser(completed).catch(err => {

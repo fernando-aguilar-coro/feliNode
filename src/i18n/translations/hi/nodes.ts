@@ -13,7 +13,8 @@ const nodes: Translation['nodes'] = {
     ranking: "रैंकिंग"
   },
   tree: {
-    errorTitle: "त्रुटि"
+    errorTitle: "त्रुटि",
+    moduleLessonsDescription: "इस इकाई का अभ्यास शुरू करने के लिए एक पाठ चुनें।"
   }
 };
 

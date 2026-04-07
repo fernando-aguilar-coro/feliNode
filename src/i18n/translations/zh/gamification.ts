@@ -15,6 +15,7 @@ const gamification: Translation['gamification'] = {
     cancel: "取消",
     confirm: "确认",
     purchaseError: "无法完成购买。",
+    errorConnection: "连接错误",
     comingSoon: "敬请期待",
     buyItemConfirm: "花费 {{cost}} 颗猫咪币购买 {{name}}？\n（即将推出）",
     itemDisabled: "该物品尚未启用。",

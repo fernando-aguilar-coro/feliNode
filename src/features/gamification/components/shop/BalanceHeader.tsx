@@ -9,7 +9,7 @@ interface BalanceHeaderProps {
     michiCoins: number;
 }
 
-export const BalanceHeader: React.FC<BalanceHeaderProps> = ({ xp, michiCoins }) => {
+export const BalanceHeader = React.memo<BalanceHeaderProps>(({ xp, michiCoins }) => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
 
@@ -29,7 +29,7 @@ export const BalanceHeader: React.FC<BalanceHeaderProps> = ({ xp, michiCoins }) 
             </View>
         </View>
     );
-};
+});
 
 const styles = StyleSheet.create({
     header: {

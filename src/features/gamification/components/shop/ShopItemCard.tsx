@@ -1,15 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useAppTheme } from '../../../../theme/ThemeContext';
-import Animated, { 
-    SlideInDown, 
-    useSharedValue, 
-    useAnimatedStyle, 
-    withSequence, 
-    withTiming, 
-    withRepeat, 
-    interpolateColor 
+import Animated, {
+    SlideInDown,
+    useSharedValue,
+    useAnimatedStyle,
+    withSequence,
+    withTiming,
+    withRepeat,
+    interpolateColor
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
@@ -27,7 +27,7 @@ interface ShopItemCardProps {
     statusText?: string;
 }
 
-export const ShopItemCard: React.FC<ShopItemCardProps> = ({
+export const ShopItemCard = React.memo<ShopItemCardProps>(({
     name,
     description,
     cost = 0,
@@ -41,10 +41,10 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
     statusText
 }) => {
     const theme = useAppTheme();
-    
+
     // If it's an IAP (costText is present), we don't check michiCoins balance for affordability
     const canAfford = costText ? true : michiCoins >= cost;
-    
+
     // Animations for "error" feedback
     const shakeX = useSharedValue(0);
     const errorProgress = useSharedValue(0);
@@ -52,7 +52,7 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
     const triggerErrorEffect = () => {
         // Haptic feedback
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        
+
         // Shake sequence
         shakeX.value = withSequence(
             withTiming(-8, { duration: 50 }),
@@ -69,12 +69,12 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
 
     const handlePress = () => {
         if (buying || disabled) return;
-        
+
         if (!canAfford) {
             triggerErrorEffect();
             return;
         }
-        
+
         onPress();
     };
 
@@ -84,7 +84,7 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
             [0, 1],
             [theme.colors.surface || '#FFF', '#FFEBEB']
         );
-        
+
         const borderColor = interpolateColor(
             errorProgress.value,
             [0, 1],
@@ -109,11 +109,10 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
     const isDisabled = disabled || buying; // For IAP, we only care if it's disabled or already buying
 
     return (
-        <Animated.View 
-            entering={SlideInDown.delay(delay).springify()}
+        <Animated.View
             style={animatedCardStyle}
         >
-            <Pressable 
+            <Pressable
                 onPress={handlePress}
                 style={({ pressed }) => [
                     styles.itemCard,
@@ -136,11 +135,11 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
                 </View>
                 <TouchableOpacity
                     style={[
-                        styles.buyButton, 
+                        styles.buyButton,
                         (isDisabled || (!costText && !canAfford)) && styles.buyButtonDisabled
                     ]}
                     onPress={handlePress}
-                    disabled={buying || disabled} 
+                    disabled={buying || disabled || costText === '...'}
                 >
                     {!costText && <FontAwesome5 name="coins" size={12} color="#FFF" />}
                     <Text style={styles.buyText}>{costText || cost}</Text>
@@ -148,7 +147,7 @@ export const ShopItemCard: React.FC<ShopItemCardProps> = ({
             </Pressable>
         </Animated.View>
     );
-};
+});
 
 const styles = StyleSheet.create({
     itemCard: {

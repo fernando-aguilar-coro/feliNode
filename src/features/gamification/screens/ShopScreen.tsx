@@ -6,7 +6,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { AppAds } from '../../../components';
-import Animated, { FadeIn } from 'react-native-reanimated';
 
 // Hook and modular components
 import { useShop } from '../hooks/useShop';
@@ -16,6 +15,7 @@ import { PurchaseSuccessModal } from '../components/shop/PurchaseSuccessModal';
 import { IapService, IAP_SKUS } from '../services/Iap.service';
 import type { Product } from 'react-native-iap';
 
+// Remove MemoizedAppAds
 export const ShopScreen = () => {
     const { t } = useTranslation();
     const theme = useAppTheme();
@@ -37,25 +37,32 @@ export const ShopScreen = () => {
     } = useShop();
 
     const [iapProducts, setIapProducts] = useState<Product[]>([]);
+    const [iapReady, setIapReady] = useState<boolean | null>(null); // null: loading, true: connected, false: failed
 
+    // 1. Persist IAP interaction (Once per component mount)
+    useEffect(() => {
+        const initIap = async () => {
+            const connected = await IapService.init();
+            if (connected) {
+                const products = await IapService.getProducts();
+                setIapProducts(products);
+                setIapReady(true);
+            } else {
+                setIapReady(false);
+            }
+        };
+        initIap();
+
+        return () => {
+            IapService.end();
+        };
+    }, []);
+
+    // 2. Refresh dynamic data on focus (Currencies can change in other screens)
     useFocusEffect(
         useCallback(() => {
             loadCurrencies();
             fetchStreak();
-
-            // Initialize IAP and get products
-            const initIap = async () => {
-                const connected = await IapService.init();
-                if (connected) {
-                    const products = await IapService.getProducts();
-                    setIapProducts(products);
-                }
-            };
-            initIap();
-
-            return () => {
-                IapService.end();
-            };
         }, [loadCurrencies, fetchStreak])
     );
 
@@ -64,17 +71,13 @@ export const ShopScreen = () => {
     };
 
     const getIapPrice = (sku: string) => {
-        const product = iapProducts.find(p => p.id === sku);
-        return product?.displayPrice;
+        if (iapReady === false) return t('gamification.shop.errorConnection');
+        if (iapReady === null) return '...';
+        const product = iapProducts.find((p) => p.id === sku);
+        return product ? product.displayPrice : t('gamification.shop.errorConnection');
     };
 
-    if (loading) {
-        return (
-            <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-                <Text style={{ color: theme.colors.text }}>{t('gamification.shop.loading')}</Text>
-            </View>
-        );
-    }
+    // Removed complex loading guards
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
@@ -82,9 +85,9 @@ export const ShopScreen = () => {
 
             <ScrollView contentContainerStyle={styles.container}>
                 {purchaseError ? (
-                    <Animated.Text entering={FadeIn} style={styles.errorText}>
+                    <Text style={styles.errorText}>
                         {purchaseError}
-                    </Animated.Text>
+                    </Text>
                 ) : null}
 
                 {/* 1. Streak Protector */}
@@ -155,9 +158,9 @@ export const ShopScreen = () => {
                     delay={500}
                 />
 
-                <Animated.View entering={FadeIn.delay(500)}>
-                    <AppAds type="banner" containerStyle={{ marginTop: 20, marginBottom: 20 }} />
-                </Animated.View>
+                <View style={{ marginTop: 20, marginBottom: 20 }}>
+                    <AppAds type="banner" />
+                </View>
             </ScrollView>
 
             <PurchaseSuccessModal

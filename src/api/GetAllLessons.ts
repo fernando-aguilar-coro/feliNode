@@ -47,26 +47,46 @@ export const getAllLessons = async (): Promise<SeedLesson[]> => {
     }
 };
 
-export const getAllDependencies = async (): Promise<import('../db_local/seed/types').SeedDependency[]> => {
+/** Fetches module-level DAG dependencies from Supabase.
+ *  Returns each edge as { child: child_order_index, parent: parent_order_index } (both as strings).
+ *  Using order_index allows local SQLite resolution without knowing Supabase's internal IDs. */
+export const getAllModuleDependencies = async (): Promise<import('../db_local/seed/types').SeedDependency[]> => {
     try {
+        // We need order_index of both modules, so we fetch all modules and build a lookup
+        const { data: modules, error: modError } = await supabase
+            .from('modules')
+            .select('id, order_index');
+
+        if (modError || !modules) {
+            console.error('[GetAllLessons] Error fetching modules for dependency resolution:', modError);
+            return [];
+        }
+
+        const idToOrderIndex = new Map<number, number>();
+        for (const m of modules) {
+            idToOrderIndex.set(m.id, m.order_index);
+        }
+
         const { data: dependencies, error } = await supabase
-            .from('lesson_dependencies')
-            .select('*');
+            .from('module_dependencies')
+            .select('module_id, prerequisite_id');
 
         if (error) {
-            console.error('Error fetching dependencies:', error);
+            console.error('[GetAllLessons] Error fetching module_dependencies:', error);
             throw error;
         }
 
         if (!dependencies) return [];
 
-        return dependencies.map((d: any) => ({
-            child: d.lesson_id,
-            parent: d.prerequisite_id
-        }));
+        return dependencies
+            .map((d: any) => ({
+                child: String(idToOrderIndex.get(d.module_id) ?? -1),
+                parent: String(idToOrderIndex.get(d.prerequisite_id) ?? -1)
+            }))
+            .filter(dep => dep.child !== '-1' && dep.parent !== '-1');
 
     } catch (err) {
-        console.error('Unexpected error in getAllDependencies:', err);
+        console.error('[GetAllLessons] Unexpected error in getAllModuleDependencies:', err);
         return [];
     }
 };

@@ -3,6 +3,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { useNodesStore } from '../../../store/NodesStore';
 import { getModuleProgressView } from '../services/ModuleProgress.service';
 import { audioService } from '../../settings/services/audio.service';
+import { LessonService } from '../../learning/services/Lesson.service';
 
 export const useModuleProgress = () => {
     const isFocused = useIsFocused();
@@ -54,11 +55,21 @@ export const useModuleProgress = () => {
         });
     }, []);
 
+    const markLessonAsCompleted = useCallback(async (lessonId: string) => {
+        try {
+            await LessonService.markAsCompletedManually(lessonId);
+            await loadData();
+        } catch (error) {
+            console.error('Failed to mark lesson as completed', error);
+        }
+    }, [loadData]);
+
     return {
         modules,
         isLoading,
         expandedModules,
         toggleModule,
+        markLessonAsCompleted,
         refresh: loadData
     };
 };
