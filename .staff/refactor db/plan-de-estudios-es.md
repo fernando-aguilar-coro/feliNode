@@ -89,9 +89,9 @@ Este documento combina la **didáctica educativa** del currículo mexicano con l
 
 7. **Unidad 7: Experiencias y Resultados (B1)**
     - 7.1 Been vs. Gone[✅ Ya en DB]
-    - 7.2 Just, already, yet
-    - 7.3 For y Since (Duración)
-    - 7.4 Contraste: Presente Perfecto vs. Pasado Simple
+    - 7.2 Just, already, yet[✅ Ya en DB]
+    - 7.3 For y Since (Duración)[✅ Ya en DB]
+    - 7.4 Contraste: Presente Perfecto vs. Pasado Simple[✅ Ya en DB]
     - 7.5 Presente Perfecto [✅ Ya en DB]
 
 8. **Unidad 8: Estructuras Avanzadas de Secundaria (B1)**

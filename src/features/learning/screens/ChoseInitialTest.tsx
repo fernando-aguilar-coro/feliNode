@@ -43,24 +43,40 @@ export const ChoseInitialTest = () => {
                 <Spacer height={theme.spacing.md} />
 
                 <AppButton
-                    title={t('learning.choseInitialTest.basicLevel')}
-                    onPress={() => handleSelectTest('placement_test_basic')}
+                    title={t('learning.choseInitialTest.levelA1')}
+                    onPress={() => handleSelectTest('placement_test_a1')}
                     variant="outline"
                     style={styles.button}
                 />
                 <Spacer height={theme.spacing.md} />
 
                 <AppButton
-                    title={t('learning.choseInitialTest.intermediateLevel')}
-                    onPress={() => handleSelectTest('placement_test_intermediate')}
+                    title={t('learning.choseInitialTest.levelA2')}
+                    onPress={() => handleSelectTest('placement_test_a2')}
                     variant="outline"
                     style={styles.button}
                 />
                 <Spacer height={theme.spacing.md} />
 
                 <AppButton
-                    title={t('learning.choseInitialTest.advancedLevel')}
-                    onPress={() => handleSelectTest('placement_test_advanced')}
+                    title={t('learning.choseInitialTest.levelB1')}
+                    onPress={() => handleSelectTest('placement_test_b1')}
+                    variant="outline"
+                    style={styles.button}
+                />
+                <Spacer height={theme.spacing.md} />
+
+                <AppButton
+                    title={t('learning.choseInitialTest.levelB2')}
+                    onPress={() => handleSelectTest('placement_test_b2')}
+                    variant="outline"
+                    style={styles.button}
+                />
+                <Spacer height={theme.spacing.md} />
+
+                <AppButton
+                    title={t('learning.choseInitialTest.levelC1')}
+                    onPress={() => handleSelectTest('placement_test_c1')}
                     variant="outline"
                     style={styles.button}
                 />

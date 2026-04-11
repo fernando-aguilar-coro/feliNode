@@ -106,4 +106,4 @@ export const App = () => {
             </AppThemeProvider>
         </GestureHandlerRootView>
     );
-}
+};

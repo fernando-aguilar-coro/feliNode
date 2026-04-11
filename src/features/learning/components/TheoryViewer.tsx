@@ -71,16 +71,16 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
 
         // Usamos franc para detectar el idioma del texto exacto que se está mostrando.
         const detected = franc(displayContent);
-        
+
         let voiceLang = 'en-US';
         if (detected === 'spa') {
             voiceLang = 'es-ES';
         } else if (detected === 'cmn' || detected === 'zho') {
             // TODO: Soporte para voces nativas de Chino
-            voiceLang = 'en-US'; 
+            voiceLang = 'en-US';
         } else if (detected === 'hin') {
             // TODO: Soporte para voces nativas de Hindi
-            voiceLang = 'en-US'; 
+            voiceLang = 'en-US';
         } else if (detected === 'eng') {
             voiceLang = 'en-US';
         } else {
@@ -125,7 +125,8 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
         header: {
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
+            width: '100%',
             marginBottom: theme.spacing.sm,
         },
         controls: {
@@ -153,9 +154,6 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.header}>
-                    <AppText variant="xxl" weight="bold" style={styles.title}>
-                        {t('learning.theory.title')}
-                    </AppText>
                     <View style={styles.controls}>
                         <TouchableOpacity onPress={handlePlay} style={styles.controlButton}>
                             <MaterialCommunityIcons name="volume-high" size={38} color={theme.colors.primary} />
@@ -175,14 +173,14 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
                                 </TouchableOpacity>
                             </>
                         )}
-                        <AppButton
-                            title={t('learning.theory.skip')}
-                            onPress={onContinue}
-                            variant="ghost"
-                            style={styles.skipButton}
-                            textColor={theme.colors.primary}
-                        />
                     </View>
+                    <AppButton
+                        title={t('learning.theory.goToExam')}
+                        onPress={onContinue}
+                        variant="ghost"
+                        style={styles.skipButton}
+                        textColor={theme.colors.primary}
+                    />
                 </View>
                 <Spacer height={theme.spacing.lg} />
 

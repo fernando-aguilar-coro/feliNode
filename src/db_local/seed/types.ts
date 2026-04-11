@@ -57,5 +57,4 @@ export interface SeedModule {
 
 export interface SeedData {
     modules: SeedModule[];
-    placement_tests?: SeedLesson[]; // Array of placement tests
 }

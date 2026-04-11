@@ -21,13 +21,18 @@ const minCount = 1;
 
 
 export const Navigation = () => {
-    const { isAuthenticated, checkSession } = useUserStore();
+    const { isAuthenticated, isGuest, checkSession } = useUserStore();
     const { hasDecidedPlacementTest } = useSettingsStore();
     const netInfo = useNetInfo();
     const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
     const [isLoadingLessons, setIsLoadingLessons] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
     const [hasSync, setHasSync] = useState(false);
+
+    useEffect(() => {
+        // Al cambiar isGuest de true a false, forzamos que se vuelva a sincronizar
+        setHasSync(false);
+    }, [isGuest]);
 
     useEffect(() => {
         checkSession();
@@ -76,13 +81,13 @@ export const Navigation = () => {
     }
     if (!netInfo.isConnected) {
         return (
-            <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
+            <Stack.Navigator id="main_stack" key={isGuest ? 'guest' : 'user'} screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Home" component={HomeNavigation} />
             </Stack.Navigator>
         );
     }
     return (
-        <Stack.Navigator id="main_stack" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator id="main_stack" key={isGuest ? 'guest' : 'user'} screenOptions={{ headerShown: false }}>
             <Stack.Group>
                 {completedLessonsCount <= minCount && !hasDecidedPlacementTest ? (
                     <>

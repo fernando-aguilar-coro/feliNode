@@ -22,9 +22,11 @@ const learning: Translation['learning'] = {
     subtitle: "選擇最適合您的測試。",
     startFromZero: "從零開始",
     orTakeLevelTest: "或參加分級測試：",
-    basicLevel: "初級",
-    intermediateLevel: "中級",
-    advancedLevel: "高級",
+    levelA1: "A1级别 (初学者)",
+    levelA2: "A2级别 (基础)",
+    levelB1: "B1级别 (中级)",
+    levelB2: "B2级别 (中高级)",
+    levelC1: "C1级别 (高级)",
   },
   infinity: {
     modeName: "無限模式",
@@ -64,6 +66,7 @@ const learning: Translation['learning'] = {
     cancel: "取消",
     start: "開始",
   },
+
   theory: {
     title: "理論",
     skip: "跳過",

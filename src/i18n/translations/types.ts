@@ -235,9 +235,14 @@ export interface Translation {
       subtitle: string;
       startFromZero: string;
       orTakeLevelTest: string;
-      basicLevel: string;
-      intermediateLevel: string;
-      advancedLevel: string;
+      basicLevel?: string;
+      intermediateLevel?: string;
+      advancedLevel?: string;
+      levelA1: string;
+      levelA2: string;
+      levelB1: string;
+      levelB2: string;
+      levelC1: string;
     };
     infinity: {
       generating: string;
@@ -277,6 +282,7 @@ export interface Translation {
       cancel: string;
       start: string;
     };
+
     theory: {
       title: string;
       skip: string;

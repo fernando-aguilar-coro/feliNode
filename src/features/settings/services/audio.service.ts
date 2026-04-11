@@ -10,9 +10,25 @@ class AudioService {
     private shouldPlayBgm: boolean = false;
     private isBgmLoading: boolean = false;
 
+    private sfxCache: { [key: string]: Audio.Sound } = {};
+
     private constructor() {
         AppState.addEventListener('change', this.handleAppStateChange);
+        this.preloadSfx();
     }
+
+    private preloadSfx = async () => {
+        try {
+            // Cargar el sonido del clic primero para que sea instantáneo
+            const { sound } = await Audio.Sound.createAsync(
+                require('../../../../assets/audio/click.mp3'),
+                { volume: 0.5 }
+            );
+            this.sfxCache['click'] = sound;
+        } catch (error) {
+            console.warn('[AudioService] Failed to preload click sound', error);
+        }
+    };
 
     private handleAppStateChange = async (nextAppState: AppStateStatus) => {
         if (nextAppState.match(/inactive|background/)) {
@@ -46,17 +62,29 @@ class AudioService {
         }
 
         try {
-            const { sound } = await Audio.Sound.createAsync(
-                asset,
-                { volume }
-            );
-            await sound.playAsync();
-            sound.setOnPlaybackStatusUpdate((status) => {
-                if ('didJustFinish' in status && status.didJustFinish) {
-                    sound.unloadAsync();
-                }
-            });
-        } catch (error) {
+            let sound = this.sfxCache[description];
+
+            if (!sound) {
+                const { sound: newSound } = await Audio.Sound.createAsync(
+                    asset,
+                    { volume }
+                );
+                sound = newSound;
+                this.sfxCache[description] = sound;
+            } else {
+                await sound.setVolumeAsync(volume);
+            }
+
+            if (AppState.currentState !== 'active') {
+                return;
+            }
+
+            await sound.replayAsync();
+        } catch (error: any) {
+            if (error?.message?.includes('AudioFocusNotAcquiredException') || error?.message?.includes('background')) {
+                // Ignore focus exceptions silently when the app was sent to background midway
+                return;
+            }
             console.error(`Failed to play ${description} sound`, error);
         }
     };
@@ -74,8 +102,9 @@ class AudioService {
             require('../../../../assets/audio/incorrect.wav'),
             require('../../../../assets/audio/incorrect_1.wav')
         ];
-        const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
-        this.playSfx(randomSound, 'incorrect');
+        const randomIndex = Math.floor(Math.random() * sounds.length);
+        const randomSound = sounds[randomIndex];
+        this.playSfx(randomSound, `incorrect_${randomIndex}`);
     };
 
     public playSuccessSound = () => {

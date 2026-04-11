@@ -22,9 +22,11 @@ const learning: Translation['learning'] = {
     subtitle: "Selecciona la prueba que mejor se adapte a ti.",
     startFromZero: "Empezar de 0",
     orTakeLevelTest: "O toma una prueba de nivel:",
-    basicLevel: "Nivel Básico",
-    intermediateLevel: "Nivel Intermedio",
-    advancedLevel: "Nivel Avanzado"
+    levelA1: "Nivel A1 (Principiante)",
+    levelA2: "Nivel A2 (Básico)",
+    levelB1: "Nivel B1 (Intermedio)",
+    levelB2: "Nivel B2 (Intermedio Alto)",
+    levelC1: "Nivel C1 (Avanzado)"
   },
   infinity: {
     generating: "Generando ejercicios infinitos...",
@@ -64,6 +66,7 @@ const learning: Translation['learning'] = {
     cancel: "Cancelar",
     start: "Empezar"
   },
+
   theory: {
     title: "Teoría",
     skip: "Saltar",

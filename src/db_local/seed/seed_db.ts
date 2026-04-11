@@ -1,7 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initDatabase } from '../db';
-import { INITIAL_DATA } from './initial_data';
 import { ensureModule, ensureLessons } from './seed_config';
 import { SeedModule, SeedLesson } from './types';
 import { getAllLessons, getAllModuleDependencies } from '../../api/GetAllLessons';
@@ -64,19 +63,6 @@ export const seedDatabase = async () => {
             retryCount++;
         }
 
-        // Seed Placement Tests
-        if (INITIAL_DATA.placement_tests && INITIAL_DATA.placement_tests.length > 0) {
-            const fallbackModule: SeedModule = {
-                title: 'Examenes',
-                order_index: 999,
-                lessons: [],
-                dependencies: []
-            };
-            const newId = await ensureModule(dbInstance, fallbackModule);
-            if (newId) {
-                await ensureLessons(dbInstance, newId, INITIAL_DATA.placement_tests);
-            }
-        }
 
         if (supabaseLessons.length > 0) {
 

@@ -45,8 +45,8 @@ export class ModuleRepository extends BaseRepository {
             // Simple status calculation:
             // Check if all lessons in this module are completed
             const moduleLessons = allLessons.filter(l => l.module_id === row.id);
-            const isCompleted = moduleLessons.length > 0 && 
-                                moduleLessons.every(l => completedLessonIds.includes(l.id));
+            const isCompleted = moduleLessons.length > 0 &&
+                moduleLessons.every(l => completedLessonIds.includes(l.id));
 
             return {
                 id: row.id.toString(),

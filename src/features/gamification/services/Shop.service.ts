@@ -60,7 +60,7 @@ export class ShopService {
             const newInventoryState = { [itemId]: newValue };
             await userCurrenciesRepository.updateInventory(newInventoryState);
             useCurrencyStore.getState().updateInventory(newInventoryState);
-            await CurrencyService.syncCurrencies();
+            CurrencyService.syncCurrencies().catch(err => console.error('[CurrencySync] background sync failed:', err));
             return true;
         }
         return false;

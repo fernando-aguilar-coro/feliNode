@@ -28,7 +28,7 @@ export const LessonService = {
      * Marks a lesson as completed without giving rewards.
      */
     markAsCompletedManually: async (lessonId: string) => {
-        await userProgressRepository.saveUserProgress(lessonId, 100, false);
+        await userProgressRepository.saveUserProgress(lessonId, 100, true);
     },
 
     /**

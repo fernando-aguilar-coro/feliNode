@@ -22,9 +22,11 @@ const learning: Translation['learning'] = {
     subtitle: "वह परीक्षण चुनें जो आपके लिए सबसे उपयुक्त हो।",
     startFromZero: "शून्य से शुरू करें",
     orTakeLevelTest: "या स्तर परीक्षण लें:",
-    basicLevel: "बुनियादी स्तर",
-    intermediateLevel: "मध्यम स्तर",
-    advancedLevel: "उन्नत स्तर",
+    levelA1: "स्तर A1 (शुरुआती)",
+    levelA2: "स्तर A2 (बुनियादी)",
+    levelB1: "स्तर B1 (मध्यवर्ती)",
+    levelB2: "स्तर B2 (उच्च मध्यवर्ती)",
+    levelC1: "स्तर C1 (उन्नत)",
   },
   infinity: {
     modeName: "इन्फिनिटी मोड",
@@ -64,6 +66,7 @@ const learning: Translation['learning'] = {
     cancel: "रद्द करें",
     start: "शुरू करें",
   },
+
   theory: {
     title: "सिद्धांत",
     skip: "छोड़ें",

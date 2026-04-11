@@ -39,7 +39,6 @@ export const GenericModal: React.FC<GenericModalProps> = ({
             padding: 24,
             margin: 20,
             borderRadius: 16,
-            elevation: 5,
         },
         iconContainer: {
             alignSelf: 'center',
@@ -54,7 +53,6 @@ export const GenericModal: React.FC<GenericModalProps> = ({
         },
         card: {
             marginBottom: 32,
-            elevation: 2,
         },
         description: {
             textAlign: 'center',

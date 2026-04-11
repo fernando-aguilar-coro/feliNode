@@ -141,8 +141,14 @@ export const ShopItemCard = React.memo<ShopItemCardProps>(({
                     onPress={handlePress}
                     disabled={buying || disabled || costText === '...'}
                 >
-                    {!costText && <FontAwesome5 name="coins" size={12} color="#FFF" />}
-                    <Text style={styles.buyText}>{costText || cost}</Text>
+                    {buying ? (
+                        <ActivityIndicator color="#FFF" size="small" />
+                    ) : (
+                        <>
+                            {!costText && <FontAwesome5 name="coins" size={12} color="#FFF" />}
+                            <Text style={styles.buyText}>{costText || cost}</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
             </Pressable>
         </Animated.View>

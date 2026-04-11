@@ -44,14 +44,14 @@ export class CurrencyService {
         const { useCurrencyStore } = require('../../../store/CurrencyStore');
         useCurrencyStore.getState().loadCurrencies();
 
-        await this.syncCurrencies();
+        this.syncCurrencies().catch(err => console.error('[CurrencySync] background sync failed:', err));
         return { result, xpGained: xpToGrant, coinsGained: coinsToGrant, wasBoosted, wasCoinsBoosted };
     }
 
     static async spendCoins(amount: number) {
         const success = await userCurrenciesRepository.spendCoins(amount);
         if (success) {
-            await this.syncCurrencies();
+            this.syncCurrencies().catch(err => console.error('[CurrencySync] background sync failed:', err));
         }
         return success;
     }
