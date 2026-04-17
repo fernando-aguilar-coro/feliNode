@@ -9,7 +9,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { useInfinityPairs, InfinityPairItem } from '../hooks/useInfinityPairs';
 import { audioService } from '../../settings/services/audio.service';
-import { infinityProgressRepository } from '../../../db_local/repositories';
+import { infinityProgressRepository, streakRepository } from '../../../db_local/repositories';
 import { TtsService } from '../../learning/services/Tts.service';
 import * as Haptics from 'expo-haptics';
 
@@ -79,7 +79,9 @@ export const InfinitySelectPairsScreen = () => {
         if (isGameOver) {
             if (score > 0) audioService.playSuccessSound();
             const targetId = lessonId?.trim() ? `Pairs: ${lessonId.trim()}` : 'General Pairs';
-            infinityProgressRepository.saveInfinityScore(targetId, score).catch(e => {
+            infinityProgressRepository.saveInfinityScore(targetId, score).then(() => {
+                streakRepository.updateStreak().catch(e => console.error('[Streak] Update error:', e));
+            }).catch(e => {
                 console.error('[InfinityPairs] Error saving score:', e);
             });
         }

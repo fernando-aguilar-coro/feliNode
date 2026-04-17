@@ -14,7 +14,7 @@ const home: Translation['home'] = {
   modals: {
     kokoro: {
       title: "改善发音",
-      description: "nekoEnglish 可以使用先进的语音模型 (Kokoro TTS) 来提供更自然的英语发音，无需联网。",
+      description: "neko 可以使用先进的语音模型 (Kokoro TTS) 来提供更自然的英语发音，无需联网。",
       subtitle: "仅需下载一次语音模型（约 300MB）。",
       accept: "下载并改善音频",
       decline: "使用原生语音（不下载）"

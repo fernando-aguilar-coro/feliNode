@@ -21,6 +21,7 @@ import { SpeakInputBar } from '../components/speaking/SpeakInputBar';
 import { SpeakSuggestions } from '../components/speaking/SpeakSuggestions';
 import { SpeakChatBubble } from '../components/speaking/SpeakChatBubble';
 import { audioService } from '../../settings/services/audio.service';
+import { streakRepository } from '../../../db_local/repositories';
 
 
 export const SpeakScreen = () => {
@@ -73,9 +74,14 @@ export const SpeakScreen = () => {
         }
     }, [isCallActive, pulseAnim]);
 
-    // ── Auto-scroll ──────────────────────────────────────────────────────────
+    // ── Auto-scroll and Streak tracking ──────────────────────────────────────────────────────────
     useEffect(() => {
         setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+        
+        const userMessages = messages.filter(m => m.role === 'user');
+        if (userMessages.length > 0) {
+            streakRepository.updateStreak().catch(e => console.error('[Streak] Update error:', e));
+        }
     }, [messages]);
 
     return (

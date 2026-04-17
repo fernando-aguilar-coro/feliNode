@@ -147,7 +147,7 @@ export const ListeningExercise = ({ exercise, onAnswer, userAnswer }: Props) => 
 
                     <View style={styles.controlItem}>
                         <TouchableOpacity
-                            onPress={() => TtsService.speak(exercise.phrase, { rate: 0.7 })}
+                            onPress={() => TtsService.speak(exercise.phrase, { rate: 0.4 })}
                             style={[styles.playButton, styles.slowButton]}
                             activeOpacity={0.7}
                         >

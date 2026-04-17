@@ -30,6 +30,69 @@ export class LessonRepository extends BaseRepository {
         return 'available';
     }
 
+    /**
+     * Returns the lesson with the highest `order_index` among those the user
+     * has already completed.  The row includes `module_title` for display.
+     * Returns `null` when the user has no completed lessons yet.
+     */
+    async getHighestCompletedLesson(): Promise<{
+        id: string;
+        title: string;
+        description: string;
+        order_index: number;
+        module_id: number;
+        module_title: string;
+    } | null> {
+        const completedIds = await this.userProgressRepo.getCompletedLessons();
+        if (completedIds.length === 0) return null;
+
+        const db = await this.db;
+        const placeholders = completedIds.map(() => '?').join(',');
+        const row: any = await db.getFirstAsync(
+            `SELECT l.id, l.title, l.description, l.order_index, l.module_id,
+                    m.title AS module_title
+             FROM lessons l
+             JOIN modules m ON m.id = l.module_id
+             WHERE l.id IN (${placeholders})
+               AND l.id NOT LIKE 'placement_test%'
+             ORDER BY l.order_index DESC
+             LIMIT 1`,
+            completedIds
+        );
+        return row ?? null;
+    }
+
+    /**
+     * Returns the next uncompleted lesson immediately after the highest
+     * completed one (by `order_index`).  Falls back to the very first lesson
+     * if the user has never completed anything.
+     */
+    async getNextLesson(): Promise<{
+        id: string;
+        title: string;
+        description: string;
+        order_index: number;
+        module_id: number;
+        module_title: string;
+    } | null> {
+        const db = await this.db;
+        const highest = await this.getHighestCompletedLesson();
+        const afterIndex = highest ? highest.order_index : -1;
+
+        const row: any = await db.getFirstAsync(
+            `SELECT l.id, l.title, l.description, l.order_index, l.module_id,
+                    m.title AS module_title
+             FROM lessons l
+             JOIN modules m ON m.id = l.module_id
+             WHERE l.order_index > ?
+               AND l.id NOT LIKE 'placement_test%'
+             ORDER BY l.order_index ASC
+             LIMIT 1`,
+            [afterIndex]
+        );
+        return row ?? null;
+    }
+
     async getLessonNodes(): Promise<LessonNode[]> {
         const db = await this.db;
 

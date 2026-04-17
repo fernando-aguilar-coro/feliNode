@@ -32,7 +32,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         return Array.isArray(tTips) ? tTips : [];
     }, [t]);
 
-    const [currentTipIndex, setCurrentTipIndex] = useState(() => 
+    const [currentTipIndex, setCurrentTipIndex] = useState(() =>
         tips.length > 0 ? Math.floor(Math.random() * tips.length) : 0
     );
 

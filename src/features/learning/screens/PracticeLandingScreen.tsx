@@ -1,85 +1,153 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Modal, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { Screen, AppText, AppTextArea } from '../../../components';
+import { Screen, AppText } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 import { infinityProgressRepository } from '../../../db_local/repositories';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeIn, Easing, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { RecommendTopicButton } from '../components/RecommendTopicButton';
+import { PracticeCard } from '../components/practice/PracticeCard';
+import { PracticeTopicModal, PracticeMode } from '../components/practice/PracticeTopicModal';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
-type PracticeLandingNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
-
-const { width } = Dimensions.get('window');
-
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+type NavProp = NativeStackNavigationProp<HomeStackParamList>;
 
 export const PracticeLandingScreen = () => {
     const theme = useAppTheme();
-    const navigation = useNavigation<PracticeLandingNavigationProp>();
+    const navigation = useNavigation<NavProp>();
     const { t } = useTranslation();
+
     const [maxScore, setMaxScore] = useState(0);
     const [maxPairsScore, setMaxPairsScore] = useState(0);
 
-    // Modal State
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [selectedMode, setSelectedMode] = useState<'combined' | 'pairs' | null>(null);
-    const [modalTopic, setModalTopic] = useState('');
+    // Modal state
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalMode, setModalMode] = useState<PracticeMode | null>(null);
 
-    const fetchCombinedScore = useCallback(async () => {
+    const fetchScores = useCallback(async () => {
         try {
-            const score = await infinityProgressRepository.getInfinityScore('General English');
-            setMaxScore(score);
-        } catch (error) {
-            console.error('Failed to fetch combined score', error);
-        }
-    }, []);
-
-    const fetchPairsScore = useCallback(async () => {
-        try {
-            const score = await infinityProgressRepository.getInfinityScore('General Pairs');
-            setMaxPairsScore(score);
-        } catch (error) {
-            console.error('Failed to fetch pairs score', error);
+            const [combined, pairs] = await Promise.all([
+                infinityProgressRepository.getInfinityScore('General English'),
+                infinityProgressRepository.getInfinityScore('General Pairs'),
+            ]);
+            setMaxScore(combined);
+            setMaxPairsScore(pairs);
+        } catch (e) {
+            console.error('[PracticeLandingScreen] Failed to fetch scores', e);
         }
     }, []);
 
     useFocusEffect(
         useCallback(() => {
-            fetchCombinedScore();
-            fetchPairsScore();
-        }, [fetchCombinedScore, fetchPairsScore])
+            fetchScores();
+        }, [fetchScores])
     );
 
-    const openModal = (mode: 'combined' | 'pairs') => {
-        setSelectedMode(mode);
-        setModalTopic('');
+    const openModal = (mode: PracticeMode) => {
+        setModalMode(mode);
         setModalVisible(true);
     };
 
-    const handleStartExercise = () => {
-        setModalVisible(false);
-        if (selectedMode === 'combined') {
-            navigation.navigate('InfinityExercise', { lessonId: modalTopic.trim() });
-        } else if (selectedMode === 'pairs') {
-            navigation.navigate('InfinitySelectPairs', { lessonId: modalTopic.trim() });
-        }
-    };
+    const styles = makeStyles(theme);
 
-    const handleStartPronunciation = () => {
-        // Asumiendo que esta pantalla existe y no requiere params.
-        navigation.navigate('PronunciationAssessment');
-    };
+    return (
+        <Screen style={styles.screen}>
+            <LinearGradient
+                colors={[theme.colors.primary + '15', 'transparent']}
+                style={StyleSheet.absoluteFill}
+            />
+            
+            <SafeAreaView style={styles.safeArea} edges={['top']}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <Animated.View entering={FadeInDown.duration(800).springify()} style={styles.header}>
+                        <View style={styles.headerTitleRow}>
+                            <View style={[styles.headerIconBg, { backgroundColor: theme.colors.primary }]}>
+                                <Ionicons name="rocket" size={24} color="#FFF" />
+                            </View>
+                            <View>
+                                <AppText style={styles.welcomeText}>{t('learning.practice.title', 'Zona de Práctica')}</AppText>
+                                <AppText style={[styles.subtitleText, { color: theme.colors.textSecondary }]}>
+                                    {t('learning.practice.subtitle', 'Perfecciona tus habilidades')}
+                                </AppText>
+                            </View>
+                        </View>
+                    </Animated.View>
 
-    const handleStartSpeak = () => {
-        navigation.navigate('Speak');
-    };
+                    <View style={styles.cardsGap}>
+                        {/* Ejercicios Combinados */}
+                        <PracticeCard
+                            iconName="infinite-outline"
+                            title={t('learning.practice.infinityChallenge')}
+                            description={t('learning.practice.infinityDesc')}
+                            score={maxScore}
+                            scoreLabel={t('learning.practice.record', { score: maxScore })}
+                            onPress={() => openModal('combined')}
+                            animDelay={150}
+                        />
 
-    const styles = StyleSheet.create({
+                        {/* Pares */}
+                        <PracticeCard
+                            iconName="duplicate-outline"
+                            iconColor="#FFBA08"
+                            iconBgColor="#FFBA0815"
+                            title={t('learning.practice.matching')}
+                            description={t('learning.practice.matchingDesc')}
+                            score={maxPairsScore}
+                            scoreLabel={t('learning.practice.record', { score: maxPairsScore })}
+                            onPress={() => openModal('pairs')}
+                            animDelay={300}
+                        />
+
+                        {/* Pronunciación */}
+                        <PracticeCard
+                            iconName="mic-outline"
+                            iconColor="#4CC9F0"
+                            iconBgColor="#4CC9F015"
+                            title={t('learning.practice.voiceAssessment')}
+                            description={t('learning.practice.voiceDesc')}
+                            onPress={() => navigation.navigate('PronunciationAssessment')}
+                            animDelay={450}
+                        />
+
+                        {/* Conversación Libre / Speak */}
+                        <PracticeCard
+                            iconName="chatbubbles-outline"
+                            iconColor="#7209B7"
+                            iconBgColor="#7209B715"
+                            title={t('learning.practice.freeConversation')}
+                            description={t('learning.practice.freeConvDesc')}
+                            onPress={() => navigation.navigate('Speak')}
+                            animDelay={600}
+                        />
+                    </View>
+                    
+                    <View style={styles.footerInfo}>
+                        <Ionicons name="information-circle-outline" size={16} color={theme.colors.textSecondary} />
+                        <AppText style={[styles.footerText, { color: theme.colors.textSecondary }]}>
+                            {t('learning.practice.footerInfo', 'Practicar diariamente mejora tu retención en un 40%')}
+                        </AppText>
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
+
+            <PracticeTopicModal
+                visible={modalVisible}
+                mode={modalMode}
+                onClose={() => setModalVisible(false)}
+            />
+        </Screen>
+    );
+};
+
+const makeStyles = (theme: ReturnType<typeof import('../../../theme/ThemeContext').useAppTheme>) =>
+    StyleSheet.create({
         screen: {
             flex: 1,
             backgroundColor: theme.colors.background,
@@ -90,296 +158,54 @@ export const PracticeLandingScreen = () => {
         scrollContainer: {
             flexGrow: 1,
             paddingHorizontal: theme.spacing.lg,
-            paddingBottom: theme.spacing.xs
+            paddingBottom: theme.spacing.xl,
+            paddingTop: theme.spacing.md,
         },
-        headerContainer: {
-            marginTop: theme.spacing.xl,
-            marginBottom: theme.spacing.xl,
+        header: {
+            marginBottom: 28,
+            marginTop: 10,
+        },
+        headerTitleRow: {
+            flexDirection: 'row',
             alignItems: 'center',
+            gap: 16,
         },
-        topIconContainer: {
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: 'transparent',
+        headerIconBg: {
+            width: 52,
+            height: 52,
+            borderRadius: 16,
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: theme.spacing.md,
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-            shadowColor: theme.colors.primary,
+            elevation: 4,
+            shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
+            shadowOpacity: 0.2,
             shadowRadius: 8,
         },
-        title: {
-            fontSize: 28,
-            fontWeight: '900',
-            color: theme.colors.text,
-            textAlign: 'center',
-            letterSpacing: 0.5,
-        },
-        subtitle: {
-            marginTop: theme.spacing.sm,
-            fontSize: 15,
-            color: theme.colors.textSecondary,
-            textAlign: 'center',
-            lineHeight: 22,
-            paddingHorizontal: theme.spacing.md,
-        },
-        modalOverlay: {
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'center',
-            padding: theme.spacing.lg,
-        },
-        modalContent: {
-            backgroundColor: theme.colors.background,
-            borderRadius: 24,
-            padding: theme.spacing.xl,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 10 },
-            shadowOpacity: 0.2,
-            shadowRadius: 20,
-            elevation: 10,
-        },
-        modalTitle: {
-            fontSize: 22,
+        welcomeText: {
+            fontSize: 24,
+            fontFamily: 'Nunito-Bold',
             fontWeight: 'bold',
             color: theme.colors.text,
-            marginBottom: theme.spacing.sm,
-            textAlign: 'center',
         },
-        modalSubtitle: {
+        subtitleText: {
             fontSize: 14,
-            color: theme.colors.textSecondary,
-            marginBottom: theme.spacing.lg,
-            textAlign: 'center',
-            lineHeight: 20,
-        },
-        modalButtons: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: theme.spacing.xl,
-            gap: theme.spacing.md,
-        },
-        modalButton: {
-            flex: 1,
-            paddingVertical: theme.spacing.md,
-            borderRadius: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        modalButtonText: {
-            fontSize: 16,
-            fontWeight: 'bold',
+            fontFamily: 'Nunito-Regular',
         },
         cardsGap: {
-            gap: theme.spacing.lg,
+            gap: 16,
         },
-        card: {
-            backgroundColor: theme.colors.surface,
-            borderRadius: 24,
-            padding: theme.spacing.lg,
+        footerInfo: {
             flexDirection: 'row',
             alignItems: 'center',
-            shadowColor: theme.colors.text,
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.08,
-            shadowRadius: 16,
-            elevation: 6,
-            overflow: 'hidden',
-        },
-        cardIconBg: {
-            width: 64,
-            height: 64,
-            borderRadius: 32,
-            alignItems: 'center',
             justifyContent: 'center',
-            marginRight: theme.spacing.md,
-            backgroundColor: theme.colors.primary + '15',
-            borderWidth: 1,
-            borderColor: theme.colors.primary + '30'
+            marginTop: 40,
+            gap: 8,
+            opacity: 0.7,
         },
-        cardContent: {
-            flex: 1,
+        footerText: {
+            fontSize: 12,
+            fontFamily: 'Nunito-SemiBold',
+            fontStyle: 'italic',
         },
-        cardTitle: {
-            fontSize: 18,
-            fontWeight: 'bold',
-            color: theme.colors.text,
-            marginBottom: 4,
-        },
-        cardDesc: {
-            fontSize: 13,
-            color: theme.colors.textSecondary,
-            marginBottom: 8,
-        },
-        scoreContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 4,
-        },
-        scoreText: {
-            fontSize: 13,
-            fontWeight: 'bold',
-            color: theme.colors.warning,
-        },
-        playIconWrapper: {
-            width: 44,
-            height: 44,
-            borderRadius: 22,
-            backgroundColor: theme.colors.primary + '10',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginLeft: theme.spacing.sm,
-        }
     });
-
-    return (
-        <Screen style={styles.screen}>
-            <SafeAreaView style={styles.safeArea}>
-                <ScrollView
-                    contentContainerStyle={styles.scrollContainer}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <View style={styles.cardsGap}>
-                        {/* Ejercicios Combinados */}
-                        <AnimatedTouchable
-                            entering={FadeInDown.delay(150).duration(600).springify()}
-                            style={[styles.card, { borderWidth: 1, borderColor: theme.colors.border }]}
-                            activeOpacity={0.8}
-                            onPress={() => openModal('combined')}
-                        >
-                            <View style={styles.cardIconBg}>
-                                <Ionicons name="infinite-outline" size={32} color={theme.colors.primary} />
-                            </View>
-                            <View style={styles.cardContent}>
-                                <AppText style={styles.cardTitle}>{t('learning.practice.infinityChallenge')}</AppText>
-                                <AppText style={styles.cardDesc}>{t('learning.practice.infinityDesc')}</AppText>
-                                <View style={styles.scoreContainer}>
-                                    <Ionicons name="trophy" size={14} color={theme.colors.warning} />
-                                    <AppText style={styles.scoreText}>{t('learning.practice.record', { score: maxScore })}</AppText>
-                                </View>
-                            </View>
-                            <View style={styles.playIconWrapper}>
-                                <Ionicons name="play" size={20} color={theme.colors.primary} />
-                            </View>
-                        </AnimatedTouchable>
-
-                        {/* Pares */}
-                        <AnimatedTouchable
-                            entering={FadeInDown.delay(300).duration(600).springify()}
-                            style={[styles.card, { borderWidth: 1, borderColor: theme.colors.border }]}
-                            activeOpacity={0.8}
-                            onPress={() => openModal('pairs')}
-                        >
-                            <View style={styles.cardIconBg}>
-                                <Ionicons name="duplicate-outline" size={32} color={theme.colors.primary} />
-                            </View>
-                            <View style={styles.cardContent}>
-                                <AppText style={styles.cardTitle}>{t('learning.practice.matching')}</AppText>
-                                <AppText style={styles.cardDesc}>{t('learning.practice.matchingDesc')}</AppText>
-                                <View style={styles.scoreContainer}>
-                                    <Ionicons name="trophy" size={14} color={theme.colors.warning} />
-                                    <AppText style={styles.scoreText}>{t('learning.practice.record', { score: maxPairsScore })}</AppText>
-                                </View>
-                            </View>
-                            <View style={styles.playIconWrapper}>
-                                <Ionicons name="play" size={20} color={theme.colors.primary} />
-                            </View>
-                        </AnimatedTouchable>
-
-                        {/* Pronunciación */}
-                        <AnimatedTouchable
-                            entering={FadeInDown.delay(600).duration(600).springify()}
-                            style={[styles.card, { borderWidth: 1, borderColor: theme.colors.border }]}
-                            activeOpacity={0.8}
-                            onPress={handleStartPronunciation}
-                        >
-                            <View style={styles.cardIconBg}>
-                                <Ionicons name="mic-outline" size={32} color={theme.colors.primary} />
-                            </View>
-                            <View style={styles.cardContent}>
-                                <AppText style={styles.cardTitle}>{t('learning.practice.voiceAssessment')}</AppText>
-                                <AppText style={styles.cardDesc}>{t('learning.practice.voiceDesc')}</AppText>
-                            </View>
-                            <View style={styles.playIconWrapper}>
-                                <Ionicons name="play" size={20} color={theme.colors.primary} />
-                            </View>
-                        </AnimatedTouchable>
-
-                        {/* Conversación Libre / Speak */}
-                        <AnimatedTouchable
-                            entering={FadeInDown.delay(750).duration(600).springify()}
-                            style={[styles.card, { borderWidth: 1, borderColor: theme.colors.border }]}
-                            activeOpacity={0.8}
-                            onPress={handleStartSpeak}
-                        >
-                            <View style={styles.cardIconBg}>
-                                <Ionicons name="chatbubbles-outline" size={32} color={theme.colors.primary} />
-                            </View>
-                            <View style={styles.cardContent}>
-                                <AppText style={styles.cardTitle}>{t('learning.practice.freeConversation')}</AppText>
-                                <AppText style={styles.cardDesc}>{t('learning.practice.freeConvDesc')}</AppText>
-                            </View>
-                            <View style={styles.playIconWrapper}>
-                                <Ionicons name="play" size={20} color={theme.colors.primary} />
-                            </View>
-                        </AnimatedTouchable>
-
-
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
-
-            <Modal
-                visible={isModalVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <KeyboardAvoidingView
-                    style={styles.modalOverlay}
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                >
-                    <View style={styles.modalContent}>
-                        <AppText style={styles.modalTitle}>
-                            {selectedMode === 'combined' ? t('learning.practice.infinityChallenge') : t('learning.practice.matching')}
-                        </AppText>
-                        <AppText style={styles.modalSubtitle}>
-                            {t('learning.practice.chooseFocus')}
-                        </AppText>
-
-                        <AppTextArea
-                            label={t('learning.practice.focusLabel')}
-                            placeholder={t('learning.practice.focusPlaceholder')}
-                            value={modalTopic}
-                            onChangeText={setModalTopic}
-                            numberOfLines={4}
-                        />
-                        <View style={{ marginTop: 12 }}>
-                            <RecommendTopicButton onTopicReceived={setModalTopic} />
-                        </View>
-
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.modalButton, { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border }]}
-                                onPress={() => setModalVisible(false)}
-                            >
-                                <AppText style={[styles.modalButtonText, { color: theme.colors.textSecondary }]}>{t('learning.practice.cancel')}</AppText>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
-                                onPress={handleStartExercise}
-                            >
-                                <AppText style={[styles.modalButtonText, { color: '#FFF' }]}>{t('learning.practice.start')}</AppText>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </KeyboardAvoidingView>
-            </Modal>
-        </Screen>
-    );
-};

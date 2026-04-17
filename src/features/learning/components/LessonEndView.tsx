@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppText, AppButton, Spacer } from '../../../components';
+import { AppText, AppButton, Spacer, AppAds } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { MissedExercise } from '../hooks/useExercises';
 
@@ -152,6 +152,11 @@ export const LessonEndView: React.FC<LessonEndViewProps> = ({
             {onInfinity && (
                 <AppButton title="Más ejercicios (Infinito)" variant="outline" onPress={onInfinity} style={{ width: '85%' }} />
             )}
+            
+            <View style={{ width: '100%', alignItems: 'center', marginTop: 20 }}>
+                <AppAds type="banner" />
+            </View>
+
             <Spacer height={16} />
         </ScrollView>
     );

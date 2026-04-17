@@ -21,7 +21,7 @@ export const checkLessonsUpdate = async (): Promise<boolean> => {
         if (!supabaseLessons) return false;
 
         // Compare count
-        if (localLessons.length !== (supabaseLessons.length + 3)) {
+        if (localLessons.length !== supabaseLessons.length) {
             console.log(`[SYNC] Lessons count changed. Local: ${localLessons.length}, Supabase: ${supabaseLessons.length}`);
             return true;
         }

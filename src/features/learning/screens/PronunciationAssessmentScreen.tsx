@@ -7,7 +7,7 @@ import { PronunciationExercise } from '../components/exercises/PronunciationExer
 import { ExerciseType, PronunciationExercise as PronunciationExerciseType } from '../types/exercise';
 import { RecommendationButton } from '../components/RecommendationButton';
 import { useEffect } from 'react';
-import { userProgressRepository, lessonRepository } from '../../../db_local/repositories';
+import { userProgressRepository, lessonRepository, streakRepository } from '../../../db_local/repositories';
 
 export const PronunciationAssessmentScreen = () => {
     const theme = useAppTheme();
@@ -48,6 +48,7 @@ export const PronunciationAssessmentScreen = () => {
     };
 
     const handleAnswer = (score: string) => {
+        streakRepository.updateStreak().catch(e => console.error('[Streak] Update error:', e));
     };
 
     const handleReset = () => {

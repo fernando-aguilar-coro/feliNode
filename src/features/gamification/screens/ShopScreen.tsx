@@ -5,7 +5,6 @@ import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { AppAds } from '../../../components';
 
 // Hook and modular components
 import { useShop } from '../hooks/useShop';
@@ -157,10 +156,6 @@ export const ShopScreen = () => {
                     buying={buying}
                     delay={500}
                 />
-
-                <View style={{ marginTop: 20, marginBottom: 20 }}>
-                    <AppAds type="banner" />
-                </View>
             </ScrollView>
 
             <PurchaseSuccessModal

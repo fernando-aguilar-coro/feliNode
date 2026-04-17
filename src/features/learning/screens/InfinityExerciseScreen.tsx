@@ -7,7 +7,7 @@ import { useAppTheme } from '../../../theme/ThemeContext';
 import { useExercises } from '../hooks/useExercises';
 import { ExerciseContainer } from '../components/exercises/ExerciseContainer';
 import { InfinityService } from '../services/Infinity.service';
-import { infinityProgressRepository } from '../../../db_local/repositories';
+import { infinityProgressRepository, streakRepository } from '../../../db_local/repositories';
 import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { Exercise } from '../types/exercise';
 import { audioService } from '../../settings/services/audio.service';
@@ -139,7 +139,7 @@ export const InfinityExerciseScreen = () => {
                     audioService.playSuccessSound();
                     const targetId = lessonId || 'General English';
                     infinityProgressRepository.saveInfinityScore(targetId, completedCount).then(() => {
-
+                        streakRepository.updateStreak().catch(e => console.error('[Streak] Update error:', e));
                         syncInfinityStats(); // Sync after saving new score
                     });
                 }

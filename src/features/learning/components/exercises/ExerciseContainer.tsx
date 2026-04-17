@@ -165,7 +165,9 @@ export const ExerciseContainer = ({ exercise, onCheck, onNext, lastResult, lesso
 
                     <Spacer height={theme.spacing.sm} />
 
-                    {(exercise.type !== ExerciseType.PRONUNCIATION && exercise.type !== ExerciseType.LISTENING) && (
+                    {(exercise.type !== ExerciseType.PRONUNCIATION && 
+                      exercise.type !== ExerciseType.LISTENING && 
+                      exercise.type !== ExerciseType.SELECT_PAIRS) && (
                         <AiExplainButton
                             userAnswer={userAnswer}
                             question={exercise.question}

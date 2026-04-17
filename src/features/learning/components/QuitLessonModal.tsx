@@ -31,11 +31,11 @@ export const QuitLessonModal: React.FC<QuitLessonModalProps> = ({
                     style={[styles.card, { backgroundColor: theme.colors.background }]}
                     onPress={() => {/* stop propagation */ }}
                 >
-                    <Text style={[styles.title, { color: theme.colors.background }]}>
+                    <Text style={[styles.title, { color: theme.colors.text }]}>
                         {t('learning.quitLesson.title')}
                     </Text>
 
-                    <Text style={[styles.description, { color: theme.colors.surface }]}>
+                    <Text style={[styles.description, { color: theme.colors.textSecondary }]}>
                         {t('learning.quitLesson.description')}
                     </Text>
 
@@ -52,7 +52,7 @@ export const QuitLessonModal: React.FC<QuitLessonModalProps> = ({
                         <Button
                             mode="text"
                             onPress={onConfirm}
-                            labelStyle={[styles.label, { color: theme.colors.surface }]}
+                            labelStyle={[styles.label, { color: theme.colors.textSecondary }]}
                         >
                             {t('learning.quitLesson.confirm')}
                         </Button>

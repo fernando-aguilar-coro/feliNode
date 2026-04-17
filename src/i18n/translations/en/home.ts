@@ -14,7 +14,7 @@ const home: Translation['home'] = {
   modals: {
     kokoro: {
       title: "Improve Pronunciation",
-      description: "nekoEnglish can use an advanced voice model (Kokoro TTS) to offer a more natural English pronunciation, without the need for an internet connection.",
+      description: "neko can use an advanced voice model (Kokoro TTS) to offer a more natural English pronunciation, without the need for an internet connection.",
       subtitle: "Requires downloading a voice model (approx. 300MB) only once.",
       accept: "Download and improve audio",
       decline: "Use Native voice (No download)"
