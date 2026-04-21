@@ -128,9 +128,6 @@ export class IapService {
         }
     }
 
-    /**
-     * Restore non-consumable purchases and verify/claim via Edge Function
-     */
     static async restorePurchases(): Promise<void> {
         try {
             console.log('[IAP] Attempting to restore purchases...');
@@ -138,22 +135,10 @@ export class IapService {
             
             for (const purchase of purchases) {
                 // Focus on non-consumables (Premium)
-                if (purchase.productId === IAP_SKUS.REMOVE_ADS && purchase.purchaseToken) {
-                    const { data, error } = await supabase.functions.invoke('verify-and-claim-purchase', {
-                        body: { purchaseToken: purchase.purchaseToken, productId: purchase.productId }
-                    });
-
-                    if (error) {
-                        console.error('[IAP] Edge function error during restore:', error);
-                        continue;
-                    }
-
-                    if (data && data.success) {
-                        await this.handleRemoveAdsPurchase();
-                        console.log('[IAP] Purchase restored successfully:', purchase.productId);
-                    } else if (data && data.error) {
-                       console.warn('[IAP] Purchase could not be claimed:', data.error);
-                    }
+                if (purchase.productId === IAP_SKUS.REMOVE_ADS) {
+                    // Validar por dispositivo, no nos importa backend ni cuentas anteriores:
+                    await this.handleRemoveAdsPurchase();
+                    console.log('[IAP] Purchase restored successfully (Local Device):', purchase.productId);
                 }
             }
         } catch (err) {

@@ -4,7 +4,7 @@ import { useUserStore } from '../../../store/UserStore';
 import { Screen, Spacer, AppText, AppButton } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { LoginHeader, LoginForm, SocialLogin, LanguagePicker } from '../components';
+import { LoginHeader, LoginForm, SocialLogin, LanguagePicker, UiLanguagePicker } from '../components';
 
 export default function LoginScreen() {
     const theme = useAppTheme();
@@ -111,6 +111,8 @@ export default function LoginScreen() {
 
                     <Spacer height={theme.spacing.xl} />
                     <LanguagePicker />
+                    <Spacer height={theme.spacing.sm} />
+                    <UiLanguagePicker />
                     <Spacer height={theme.spacing.lg} />
                 </ScrollView>
             </KeyboardAvoidingView>

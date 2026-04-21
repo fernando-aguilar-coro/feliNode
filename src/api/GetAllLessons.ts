@@ -1,18 +1,19 @@
 import { supabase } from './supabaseClient';
 import { SeedLesson } from '../db_local/seed/types';
 
-export const getAllLessons = async (): Promise<SeedLesson[]> => {
+export const getAllLessons = async (languageCode: string = 'es'): Promise<SeedLesson[]> => {
     try {
         const { data: lessons, error } = await supabase
             .from('lessons')
             .select(`
         *,
         exercises (*),
-        modules (
+        modules!inner (
             title,
             order_index
         )
       `)
+            .eq('modules.language_code', languageCode)
             .order('order_index', { ascending: true });
 
         if (error) {
@@ -50,12 +51,13 @@ export const getAllLessons = async (): Promise<SeedLesson[]> => {
 /** Fetches module-level DAG dependencies from Supabase.
  *  Returns each edge as { child: child_order_index, parent: parent_order_index } (both as strings).
  *  Using order_index allows local SQLite resolution without knowing Supabase's internal IDs. */
-export const getAllModuleDependencies = async (): Promise<import('../db_local/seed/types').SeedDependency[]> => {
+export const getAllModuleDependencies = async (languageCode: string = 'es'): Promise<import('../db_local/seed/types').SeedDependency[]> => {
     try {
         // We need order_index of both modules, so we fetch all modules and build a lookup
         const { data: modules, error: modError } = await supabase
             .from('modules')
-            .select('id, order_index');
+            .select('id, order_index')
+            .eq('language_code', languageCode);
 
         if (modError || !modules) {
             console.error('[GetAllLessons] Error fetching modules for dependency resolution:', modError);

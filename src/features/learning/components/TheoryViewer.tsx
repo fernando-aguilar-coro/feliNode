@@ -10,7 +10,6 @@ import { TtsService } from '../services/Tts.service';
 import { getMarkdownStyles } from '../styles/md.style';
 import { TranslationFab } from './TranslationFab';
 import { useSettingsStore } from '../../../store/SettingsStore';
-import { franc } from 'franc';
 
 const renderRules = {
     table: (node: any, children: any, styles: any) => (
@@ -33,7 +32,7 @@ interface TheoryViewerProps {
 
 export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue }) => {
     const theme = useAppTheme();
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const { language: nativeLanguage } = useSettingsStore();
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -69,31 +68,13 @@ export const TheoryViewer: React.FC<TheoryViewerProps> = ({ content, onContinue 
         setIsPlaying(true);
         setIsPaused(false);
 
-        // Usamos franc para detectar el idioma del texto exacto que se está mostrando.
-        const detected = franc(displayContent);
+        // Determinamos el idioma nativo para la voz TTS
+        let originalVoiceLang = 'es-ES';
+        if (nativeLanguage === 'zh') originalVoiceLang = 'zh-CN';
+        if (nativeLanguage === 'hi') originalVoiceLang = 'hi-IN';
 
-        let voiceLang = 'en-US';
-        if (detected === 'spa') {
-            voiceLang = 'es-ES';
-        } else if (detected === 'cmn' || detected === 'zho') {
-            // TODO: Soporte para voces nativas de Chino
-            voiceLang = 'en-US';
-        } else if (detected === 'hin') {
-            // TODO: Soporte para voces nativas de Hindi
-            voiceLang = 'en-US';
-        } else if (detected === 'eng') {
-            voiceLang = 'en-US';
-        } else {
-            // Fallback en caso de que el texto sea muy corto para franc
-            // Usamos la lógica basada en isTranslated como respaldo seguro
-            if (nativeLanguage === 'en') {
-                // Para ingleses: si traducen, es a español. Si no, su original ya era español.
-                voiceLang = 'es-ES';
-            } else {
-                // Para hispanos/otros: si traducen, es a inglés. Si no, su original era español u otro.
-                voiceLang = isTranslated ? 'en-US' : 'es-ES';
-            }
-        }
+        // Si está traducido, la voz es inglés, de lo contrario es el idioma original.
+        const voiceLang = isTranslated ? 'en-US' : originalVoiceLang;
 
         TtsService.speakLongText(displayContent, voiceLang);
     };

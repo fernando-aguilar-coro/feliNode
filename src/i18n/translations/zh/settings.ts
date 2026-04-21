@@ -8,7 +8,12 @@ const settings: Translation['settings'] = {
     lightMode: "浅色模式",
     tapToChangeTheme: "点击更改主题",
     language: "语言",
-    tapToChangeLanguage: "点击更改语言"
+    tapToChangeLanguage: "点击更改语言",
+    nativeLanguage: "母语",
+    tapToChangeNativeLanguage: "您目前讲的语言",
+    appLanguage: "应用语言",
+    appLangNative: "原生",
+    appLangEn: "英语",
   },
   notifications: {
     title: "通知",

@@ -175,6 +175,11 @@ export interface Translation {
       tapToChangeTheme: string;
       language: string;
       tapToChangeLanguage: string;
+      nativeLanguage: string;
+      tapToChangeNativeLanguage: string;
+      appLanguage: string;
+      appLangNative: string;
+      appLangEn: string;
     };
     notifications: {
       title: string;

@@ -8,7 +8,12 @@ const settings: Translation['settings'] = {
     lightMode: "Light Mode",
     tapToChangeTheme: "Tap to change theme",
     language: "Language",
-    tapToChangeLanguage: "Tap to change language"
+    tapToChangeLanguage: "Tap to change language",
+    nativeLanguage: "Native Language",
+    tapToChangeNativeLanguage: "The language you currently speak",
+    appLanguage: "App Language",
+    appLangNative: "Native",
+    appLangEn: "English",
   },
   notifications: {
     title: "Notifications",

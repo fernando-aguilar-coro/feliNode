@@ -8,7 +8,12 @@ const settings: Translation['settings'] = {
     lightMode: "लाइट मोड",
     tapToChangeTheme: "थीम बदलने के लिए टैप करें",
     language: "भाषा",
-    tapToChangeLanguage: "भाषा बदलने के लिए टैप करें"
+    tapToChangeLanguage: "भाषा बदलने के लिए टैप करें",
+    nativeLanguage: "मातृभाषा",
+    tapToChangeNativeLanguage: "वह भाषा जिसे आप वर्तमान में बोलते हैं",
+    appLanguage: "ऐप की भाषा",
+    appLangNative: "देशी",
+    appLangEn: "अंग्रेज़ी",
   },
   notifications: {
     title: "सूचनाएं",

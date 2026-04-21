@@ -22,17 +22,26 @@ const minCount = 1;
 
 export const Navigation = () => {
     const { isAuthenticated, isGuest, checkSession } = useUserStore();
-    const { hasDecidedPlacementTest } = useSettingsStore();
+    const { hasDecidedPlacementTest, language } = useSettingsStore();
     const netInfo = useNetInfo();
     const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
     const [isLoadingLessons, setIsLoadingLessons] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
     const [hasSync, setHasSync] = useState(false);
+    const [prevLanguage, setPrevLanguage] = useState(language);
 
     useEffect(() => {
         // Al cambiar isGuest de true a false, forzamos que se vuelva a sincronizar
         setHasSync(false);
     }, [isGuest]);
+
+    // Forzar resincronización si el idioma cambia
+    useEffect(() => {
+        if (language !== prevLanguage) {
+            setHasSync(false);
+            setPrevLanguage(language);
+        }
+    }, [language, prevLanguage]);
 
     useEffect(() => {
         checkSession();

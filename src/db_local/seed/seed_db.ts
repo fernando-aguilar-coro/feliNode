@@ -1,9 +1,10 @@
 import * as SQLite from 'expo-sqlite';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initDatabase } from '../db';
+import { initDatabase, clearContentDatabase } from '../db';
 import { ensureModule, ensureLessons } from './seed_config';
 import { SeedModule, SeedLesson } from './types';
 import { getAllLessons, getAllModuleDependencies } from '../../api/GetAllLessons';
+import { useSettingsStore } from '../../store/SettingsStore';
 let db: SQLite.SQLiteDatabase | null = null;
 
 const init = async () => {
@@ -22,13 +23,26 @@ export const seedDatabase = async () => {
         const localLessonsCount = result[0]?.count || 0;
 
         let hasSeeded = await AsyncStorage.getItem('HAS_SEEDED_DB');
+        let seededLanguage = await AsyncStorage.getItem('SEEDED_LANGUAGE');
+        
+        const languageCode = useSettingsStore.getState().language || 'es';
+
+        // Check if language changed
+        if (hasSeeded === 'true' && seededLanguage && seededLanguage !== languageCode) {
+            console.log(`[DB_SEED] Language changed from ${seededLanguage} to ${languageCode}. Wiping content.`);
+            await clearContentDatabase();
+            hasSeeded = null;
+            await AsyncStorage.removeItem('HAS_SEEDED_DB');
+        }
 
         // Check if lessons count in Supabase differs from local
         const { checkLessonsUpdate } = await import('../../api/checkLessonsUpdate');
-        const needsUpdate = await checkLessonsUpdate();
+        const needsUpdate = await checkLessonsUpdate(languageCode);
 
-        if (needsUpdate) {
+        // If not already wiped by language change, check for mismatch
+        if (hasSeeded === 'true' && needsUpdate) {
             console.log('[DB_SEED] Lessons mismatch detected, forcing re-sync from Supabase');
+            await clearContentDatabase();
             hasSeeded = null;
             await AsyncStorage.removeItem('HAS_SEEDED_DB');
         }
@@ -41,7 +55,7 @@ export const seedDatabase = async () => {
             );
             if (!depCount || depCount.count === 0) {
                 console.log('[DB_SEED] module_dependencies is empty, backfilling from Supabase...');
-                const moduleDeps = await getAllModuleDependencies();
+                const moduleDeps = await getAllModuleDependencies(languageCode);
                 if (moduleDeps.length > 0) {
                     const { ensureModuleDependencies } = await import('./seed_config');
                     await ensureModuleDependencies(dbInstance, moduleDeps);
@@ -52,14 +66,14 @@ export const seedDatabase = async () => {
         }
 
         // Seed from Supabase
-        let supabaseLessons = await getAllLessons();
+        let supabaseLessons = await getAllLessons(languageCode);
 
         let retryCount = 0;
         const MAX_RETRIES = 3;
         while (supabaseLessons.length === 0 && localLessonsCount < 5 && retryCount < MAX_RETRIES) {
             console.log(`[DB_SEED] No lessons fetched, retrying getAllLessons... (${retryCount + 1}/${MAX_RETRIES})`);
             await new Promise(resolve => setTimeout(resolve, 3000)); // wait 3 seconds
-            supabaseLessons = await getAllLessons();
+            supabaseLessons = await getAllLessons(languageCode);
             retryCount++;
         }
 
@@ -101,7 +115,7 @@ export const seedDatabase = async () => {
             }
 
             // Seed Module Dependencies (DAG)
-            const moduleDeps = await getAllModuleDependencies();
+            const moduleDeps = await getAllModuleDependencies(languageCode);
             if (moduleDeps.length > 0) {
                 const { ensureModuleDependencies } = await import('./seed_config');
                 await ensureModuleDependencies(dbInstance, moduleDeps);
@@ -110,6 +124,7 @@ export const seedDatabase = async () => {
 
             // Successfully fetched and seeded from Supabase
             await AsyncStorage.setItem('HAS_SEEDED_DB', 'true');
+            await AsyncStorage.setItem('SEEDED_LANGUAGE', languageCode);
         } else {
             // Supabase lessons array is empty (possibly due to network error)
             // If we already have lessons locally, we can mark as seeded

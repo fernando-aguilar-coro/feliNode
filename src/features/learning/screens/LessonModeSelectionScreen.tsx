@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { Screen, AppText, AppButton, Spacer } from '../../../components';
+import { Screen, AppText, AppButton, Spacer, AppAds } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -85,6 +85,8 @@ export const LessonModeSelectionScreen = () => {
             </View>
 
             <Spacer height={theme.spacing.xl} />
+            <AppAds type="banner" />
+            <Spacer height={theme.spacing.md} />
             <AppButton
                 title={t('learning.modeSelection.back')}
                 onPress={() => navigation.goBack()}

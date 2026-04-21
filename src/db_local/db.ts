@@ -21,7 +21,8 @@ export const initDatabase = async () => {
           CREATE TABLE IF NOT EXISTS modules (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
-            order_index INTEGER
+            order_index INTEGER,
+            language_code TEXT DEFAULT 'es'
           );
 
           CREATE TABLE IF NOT EXISTS module_dependencies (
@@ -105,9 +106,12 @@ export const initDatabase = async () => {
         // Migration: Add inventory column if it doesn't exist in older databases
         try {
           await db.execAsync("ALTER TABLE user_currencies ADD COLUMN inventory TEXT DEFAULT '{}';");
-        } catch (e) {
-          // Column likely already exists, ignore
-        }
+        } catch (e) {}
+
+        // Migration: Add language_code to modules
+        try {
+          await db.execAsync("ALTER TABLE modules ADD COLUMN language_code TEXT DEFAULT 'es';");
+        } catch (e) {}
 
         dbInstance = db;
         return db;
@@ -119,4 +123,16 @@ export const initDatabase = async () => {
   }
 
   return initPromise;
+};
+
+export const clearContentDatabase = async () => {
+    const db = await initDatabase();
+    await db.execAsync(`
+        DELETE FROM exercises;
+        DELETE FROM lesson_dependencies;
+        DELETE FROM lessons;
+        DELETE FROM module_dependencies;
+        DELETE FROM modules;
+    `);
+    console.log('[DB] Course content wiped locally.');
 };

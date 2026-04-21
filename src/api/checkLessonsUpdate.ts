@@ -1,7 +1,7 @@
 import { supabase } from './supabaseClient';
 import { initDatabase } from '../db_local/db';
 
-export const checkLessonsUpdate = async (): Promise<boolean> => {
+export const checkLessonsUpdate = async (languageCode: string = 'es'): Promise<boolean> => {
     try {
         const db = await initDatabase();
 
@@ -11,7 +11,8 @@ export const checkLessonsUpdate = async (): Promise<boolean> => {
         // Get supabase lessons data
         const { data: supabaseLessons, error } = await supabase
             .from('lessons')
-            .select('id, theory, order_index, module_id');
+            .select('id, theory, order_index, module_id, modules!inner(language_code)')
+            .eq('modules.language_code', languageCode);
 
         if (error) {
             console.error('Error fetching Supabase lessons:', error);

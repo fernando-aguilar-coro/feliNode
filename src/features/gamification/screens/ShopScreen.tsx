@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -67,6 +67,11 @@ export const ShopScreen = () => {
 
     const handleBuyIap = async (sku: string) => {
         await IapService.buyItem(sku);
+    };
+
+    const handleRestorePurchases = async () => {
+        await IapService.restorePurchases();
+        loadCurrencies();
     };
 
     const getIapPrice = (sku: string) => {
@@ -156,6 +161,11 @@ export const ShopScreen = () => {
                     buying={buying}
                     delay={500}
                 />
+
+                {/* Botón de Restaurar Compras */}
+                <TouchableOpacity style={styles.restoreButton} onPress={handleRestorePurchases}>
+                    <Text style={styles.restoreButtonText}>{t('gamification.shop.restorePurchases', 'Restaurar Compras')}</Text>
+                </TouchableOpacity>
             </ScrollView>
 
             <PurchaseSuccessModal
@@ -189,5 +199,16 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         marginLeft: 4,
         fontSize: 14,
+    },
+    restoreButton: {
+        marginTop: 24,
+        padding: 16,
+        alignItems: 'center',
+    },
+    restoreButtonText: {
+        color: '#00BFFF',
+        fontFamily: 'Nunito-Bold',
+        fontSize: 14,
+        textDecorationLine: 'underline',
     },
 });

@@ -31,6 +31,8 @@ interface SettingsState {
     setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
     language: string | null;
     setLanguage: (lang: string) => void;
+    uiLanguage: null | 'en';
+    setUiLanguage: (lang: null | 'en') => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -62,6 +64,8 @@ export const useSettingsStore = create<SettingsState>()(
             setThemeMode: (mode: 'light' | 'dark' | 'system') => set({ themeMode: mode }),
             language: null,
             setLanguage: (lang: string) => set({ language: lang }),
+            uiLanguage: null,
+            setUiLanguage: (lang: null | 'en') => set({ uiLanguage: lang }),
         }),
         {
             name: 'settings-storage',
@@ -69,3 +73,9 @@ export const useSettingsStore = create<SettingsState>()(
         }
     )
 );
+
+/** Selector: devuelve el idioma efectivo para i18n — override 'en' o el idioma nativo del usuario */
+export const getEffectiveUiLanguage = (): string => {
+    const { uiLanguage, language } = useSettingsStore.getState();
+    return uiLanguage ?? language ?? 'es';
+};

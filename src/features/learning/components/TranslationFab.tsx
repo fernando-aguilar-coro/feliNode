@@ -48,15 +48,11 @@ export const TranslationFab: React.FC<TranslationFabProps> = ({ originalText, on
 
     setLoading(true);
     try {
-      // El texto original está en el idioma nativo del usuario
+      // El idioma original según los ajustes del usuario
       const sourceLang = mapI18nToTranslateLanguage(nativeLanguage);
       
-      // Lógica de destino:
-      // - Si el usuario habla inglés, traducimos a español (caso especial).
-      // - Para todos los demás idiomas (es, zh, hi), traducimos a inglés para practicar.
-      const targetLang = (nativeLanguage === 'en') 
-        ? TranslateLanguage.SPANISH 
-        : TranslateLanguage.ENGLISH;
+      // Siempre traducimos a inglés para practicar.
+      const targetLang = TranslateLanguage.ENGLISH;
 
       const result = await translateMd(originalText, targetLang, sourceLang);
       setTranslatedTextCache(result);
