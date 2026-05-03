@@ -1,9 +1,8 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { List } from 'react-native-paper';
+import { List, Modal, Portal, Card, Text as PaperText, Button as PaperButton, useTheme as usePaperTheme } from 'react-native-paper';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { LessonProgress } from '../services/ModuleProgress.service';
-import { GenericModal } from '../../../components/GenericModal';
 import { useTranslation } from 'react-i18next';
 import { TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -20,6 +19,7 @@ interface ModuleLessonsListProps {
  */
 export const ModuleLessonsList: React.FC<ModuleLessonsListProps> = ({ lessons, onLessonPress, onMarkAsCompleted }) => {
     const theme = useAppTheme();
+    const paperTheme = usePaperTheme();
     const { t } = useTranslation();
     const [confirmVisible, setConfirmVisible] = React.useState(false);
     const [pendingLessonId, setPendingLessonId] = React.useState<string | null>(null);
@@ -80,19 +80,65 @@ export const ModuleLessonsList: React.FC<ModuleLessonsListProps> = ({ lessons, o
                     />
                 );
             })}
-            <GenericModal
-                visible={confirmVisible}
-                title={t('common.confirm')}
-                description={t('nodes.training.markCompletedConfirm')}
-                primaryButtonText={t('common.confirm')}
-                secondaryButtonText={t('common.cancel')}
-                onPrimaryPress={handleConfirm}
-                onSecondaryPress={() => {
-                    setConfirmVisible(false);
-                    setPendingLessonId(null);
-                }}
-                dismissable={true}
-            />
+            <Portal>
+                <Modal
+                    visible={confirmVisible}
+                    onDismiss={() => {
+                        setConfirmVisible(false);
+                        setPendingLessonId(null);
+                    }}
+                    contentContainerStyle={{
+                        backgroundColor: theme.colors.background,
+                        padding: 24,
+                        margin: 20,
+                        borderRadius: 16,
+                    }}
+                >
+                    <PaperText style={{
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        marginBottom: 24,
+                        fontSize: 24,
+                        color: theme.colors.text,
+                    }}>
+                        {t('common.confirm')}
+                    </PaperText>
+                    
+                    <Card style={{ marginBottom: 32 }}>
+                        <Card.Content>
+                            <PaperText style={{
+                                textAlign: 'center',
+                                color: theme.colors.text,
+                                lineHeight: 22,
+                            }}>
+                                {t('nodes.training.markCompletedConfirm')}
+                            </PaperText>
+                        </Card.Content>
+                    </Card>
+
+                    <View style={{ marginTop: 24, gap: 12 }}>
+                        <PaperButton
+                            mode="contained"
+                            onPress={handleConfirm}
+                            style={{ paddingVertical: 6 }}
+                            labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+                        >
+                            {t('common.confirm')}
+                        </PaperButton>
+                        <PaperButton
+                            mode="text"
+                            onPress={() => {
+                                setConfirmVisible(false);
+                                setPendingLessonId(null);
+                            }}
+                            labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+                            textColor={theme.colors.textSecondary}
+                        >
+                            {t('common.cancel')}
+                        </PaperButton>
+                    </View>
+                </Modal>
+            </Portal>
         </ScrollView>
     );
 };

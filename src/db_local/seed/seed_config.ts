@@ -19,8 +19,8 @@ export const ensureLessons = async (db: SQLite.SQLiteDatabase, moduleId: number,
     for (const l of lessons) {
         // Overwrite or update: delete existing lesson and its children to re-seed fresh content
         await db.runAsync(
-            'INSERT OR REPLACE INTO lessons (id, module_id, title, description, theory, status, order_index) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [l.id, moduleId, l.title, l.desc, l.theory || '', l.status, l.order]
+            'INSERT OR REPLACE INTO lessons (id, module_id, title, description, theory, status, order_index, youtube_id, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [l.id, moduleId, l.title, l.desc, l.theory || '', l.status, l.order, l.youtubeId || null, l.updated_at || null]
         );
 
 

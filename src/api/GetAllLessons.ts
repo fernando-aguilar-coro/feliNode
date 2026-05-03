@@ -34,6 +34,8 @@ export const getAllLessons = async (languageCode: string = 'es'): Promise<SeedLe
             moduleId: l.module_id,
             moduleTitle: l.modules?.title,
             moduleOrder: l.modules?.order_index,
+            youtubeId: l.youtube_id,
+            updated_at: l.updated_at,
             exercises: (l.exercises || [])
                 .map((e: any) => ({
                     type: e.type,

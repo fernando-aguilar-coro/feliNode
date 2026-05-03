@@ -41,6 +41,8 @@ export interface SeedLesson {
     moduleId?: number;
     moduleTitle?: string;
     moduleOrder?: number;
+    youtubeId?: string | null;
+    updated_at?: string;
 }
 
 export interface SeedDependency {

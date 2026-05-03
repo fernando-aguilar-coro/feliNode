@@ -42,6 +42,7 @@ export class LessonRepository extends BaseRepository {
         order_index: number;
         module_id: number;
         module_title: string;
+        module_order_index: number;
     } | null> {
         const completedIds = await this.userProgressRepo.getCompletedLessons();
         if (completedIds.length === 0) return null;
@@ -50,12 +51,13 @@ export class LessonRepository extends BaseRepository {
         const placeholders = completedIds.map(() => '?').join(',');
         const row: any = await db.getFirstAsync(
             `SELECT l.id, l.title, l.description, l.order_index, l.module_id,
-                    m.title AS module_title
+                    m.title AS module_title,
+                    m.order_index AS module_order_index
              FROM lessons l
              JOIN modules m ON m.id = l.module_id
              WHERE l.id IN (${placeholders})
                AND l.id NOT LIKE 'placement_test%'
-             ORDER BY l.order_index DESC
+             ORDER BY m.order_index DESC, l.order_index DESC
              LIMIT 1`,
             completedIds
         );
@@ -74,21 +76,30 @@ export class LessonRepository extends BaseRepository {
         order_index: number;
         module_id: number;
         module_title: string;
+        module_order_index: number;
+        local_lesson_index: number;
     } | null> {
         const db = await this.db;
         const highest = await this.getHighestCompletedLesson();
-        const afterIndex = highest ? highest.order_index : -1;
+        const afterLessonIndex = highest ? highest.order_index : -1;
+        const afterModuleIndex = highest ? highest.module_order_index : -1;
 
         const row: any = await db.getFirstAsync(
             `SELECT l.id, l.title, l.description, l.order_index, l.module_id,
-                    m.title AS module_title
+                    m.title AS module_title,
+                    m.order_index AS module_order_index,
+                    (SELECT COUNT(*) FROM lessons l2 WHERE l2.module_id = l.module_id AND l2.order_index <= l.order_index AND l2.id NOT LIKE 'placement_test%') AS local_lesson_index
              FROM lessons l
              JOIN modules m ON m.id = l.module_id
-             WHERE l.order_index > ?
-               AND l.id NOT LIKE 'placement_test%'
-             ORDER BY l.order_index ASC
+             WHERE l.id NOT LIKE 'placement_test%'
+               AND (
+                 (m.order_index = ? AND l.order_index > ?)
+                 OR
+                 (m.order_index > ?)
+               )
+             ORDER BY m.order_index ASC, l.order_index ASC
              LIMIT 1`,
-            [afterIndex]
+            [afterModuleIndex, afterLessonIndex, afterModuleIndex]
         );
         return row ?? null;
     }

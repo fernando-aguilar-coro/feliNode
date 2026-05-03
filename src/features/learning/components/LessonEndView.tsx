@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppText, AppButton, Spacer, AppAds } from '../../../components';
+import { AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { MissedExercise } from '../hooks/useExercises';
 
@@ -24,6 +24,10 @@ interface LessonEndViewProps {
     onInfinity?: () => void;
     /** Information about the rewards earned. */
     rewardsInfo?: { xpGained: number, wasBoosted: boolean, coinsGained: number, wasCoinsBoosted?: boolean } | null;
+    /** Action to request doubling rewards via ad */
+    onDoubleRewardsRequested?: () => void;
+    /** Is the ad loaded? */
+    isAdLoaded?: boolean;
 }
 
 export const LessonEndView: React.FC<LessonEndViewProps> = ({
@@ -35,7 +39,9 @@ export const LessonEndView: React.FC<LessonEndViewProps> = ({
     missedExercises,
     onContinue,
     onInfinity,
-    rewardsInfo
+    rewardsInfo,
+    onDoubleRewardsRequested,
+    isAdLoaded
 }) => {
     const theme = useAppTheme();
 
@@ -45,6 +51,8 @@ export const LessonEndView: React.FC<LessonEndViewProps> = ({
     const subtitle = success
         ? '¡Buen trabajo! Has dominado esta lección.'
         : 'Te quedaste sin vidas. ¡Inténtalo de nuevo!';
+
+    const canDoubleRewards = success && rewardsInfo && !rewardsInfo.wasCoinsBoosted && isAdLoaded;
 
     return (
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -148,14 +156,18 @@ export const LessonEndView: React.FC<LessonEndViewProps> = ({
             )}
 
             <Spacer height={28} />
+            {canDoubleRewards && (
+                <AppButton 
+                    title="¡Duplicar Recompensas! 🎥" 
+                    onPress={onDoubleRewardsRequested} 
+                    style={{ width: '85%', marginBottom: 10, backgroundColor: '#FFD700' }} 
+                    textColor="#000"
+                />
+            )}
             <AppButton title="Continuar" onPress={onContinue} style={{ width: '85%', marginBottom: 10 }} />
             {onInfinity && (
                 <AppButton title="Más ejercicios (Infinito)" variant="outline" onPress={onInfinity} style={{ width: '85%' }} />
             )}
-            
-            <View style={{ width: '100%', alignItems: 'center', marginTop: 20 }}>
-                <AppAds type="banner" />
-            </View>
 
             <Spacer height={16} />
         </ScrollView>

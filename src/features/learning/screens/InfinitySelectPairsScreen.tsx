@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { ProgressBar } from 'react-native-paper';
+import { ProgressBar, Modal, Portal, Card, Text as PaperText, Button as PaperButton } from 'react-native-paper';
 import { Screen, AppText, Spacer, LoadingScreen } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { useInfinityPairs, InfinityPairItem } from '../hooks/useInfinityPairs';
 import { audioService } from '../../settings/services/audio.service';
 import { infinityProgressRepository, streakRepository } from '../../../db_local/repositories';
 import { TtsService } from '../../learning/services/Tts.service';
+import { useAppRewardedAd } from '../../../hooks/useAppRewardedAd';
 import * as Haptics from 'expo-haptics';
 
 // Extracted sub-components
@@ -49,6 +50,7 @@ export const InfinitySelectPairsScreen = () => {
         triggerErrorHaptic,
         handlePress,
         restartGame,
+        reviveGame,
     } = useInfinityPairs({
         lessonId,
         visibleCount: 7,
@@ -71,12 +73,44 @@ export const InfinitySelectPairsScreen = () => {
     }, [errorIds]);
 
 
-    React.useEffect(() => {
-        if (timeLeft === 10 && !isGameOver) audioService.playTimerSound();
-    }, [timeLeft, isGameOver]);
+    // ── Ad Logic & Game Over Interception ───────────────────────────────────
+    const { isLoaded: isAdLoaded, showAd } = useAppRewardedAd();
+    const [showReviveModal, setShowReviveModal] = React.useState(false);
+    const [actuallyGameOver, setActuallyGameOver] = React.useState(false);
 
     React.useEffect(() => {
-        if (isGameOver) {
+        if (isGameOver && !actuallyGameOver) {
+            if (isAdLoaded) {
+                setShowReviveModal(true);
+            } else {
+                setActuallyGameOver(true);
+            }
+        }
+    }, [isGameOver, isAdLoaded, actuallyGameOver]);
+
+    const handleRevive = async () => {
+        setShowReviveModal(false);
+        const success = await showAd();
+        if (success) {
+            reviveGame();
+        } else {
+            setActuallyGameOver(true);
+        }
+    };
+
+    const handleDeclineRevive = () => {
+        setShowReviveModal(false);
+        setActuallyGameOver(true);
+    };
+
+    const handleRestartWrap = () => {
+        setActuallyGameOver(false);
+        setShowReviveModal(false);
+        restartGame();
+    };
+
+    React.useEffect(() => {
+        if (actuallyGameOver) {
             if (score > 0) audioService.playSuccessSound();
             const targetId = lessonId?.trim() ? `Pairs: ${lessonId.trim()}` : 'General Pairs';
             infinityProgressRepository.saveInfinityScore(targetId, score).then(() => {
@@ -85,7 +119,7 @@ export const InfinitySelectPairsScreen = () => {
                 console.error('[InfinityPairs] Error saving score:', e);
             });
         }
-    }, [isGameOver, score, lessonId]);
+    }, [actuallyGameOver, score, lessonId]);
 
     const handleExit = () => navigation.goBack();
 
@@ -102,7 +136,7 @@ export const InfinitySelectPairsScreen = () => {
     }
 
     // ── Game Over ───────────────────────────────────────────────────────────
-    if (isGameOver) {
+    if (actuallyGameOver) {
         return (
             <Screen>
                 <PairsGameOverView
@@ -110,7 +144,7 @@ export const InfinitySelectPairsScreen = () => {
                     score={score}
                     roundNum={roundNum}
                     missedPairs={missedPairs}
-                    onRestart={restartGame}
+                    onRestart={handleRestartWrap}
                     onExit={handleExit}
                 />
             </Screen>
@@ -186,6 +220,57 @@ export const InfinitySelectPairsScreen = () => {
                 {/* Combo overlay — centered on grid, doesn't block touches */}
                 <PairsComboChip combo={combo} color={theme.colors.primary} />
             </View>
+
+            <Portal>
+                <Modal
+                    visible={showReviveModal}
+                    onDismiss={handleDeclineRevive}
+                    contentContainerStyle={{
+                        backgroundColor: theme.colors.background,
+                        padding: 24,
+                        margin: 20,
+                        borderRadius: 16,
+                    }}
+                >
+                    <PaperText style={{
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        marginBottom: 24,
+                        fontSize: 24,
+                        color: theme.colors.text,
+                    }}>
+                        ¿Fin del juego?
+                    </PaperText>
+                    <Card style={{ marginBottom: 32 }}>
+                        <Card.Content>
+                            <PaperText style={{
+                                textAlign: 'center',
+                                color: theme.colors.text,
+                                lineHeight: 22,
+                            }}>
+                                Mira un corto video para recuperar 1 vida, obtener 30 segundos y continuar.
+                            </PaperText>
+                        </Card.Content>
+                    </Card>
+                    <View style={{ marginTop: 24, gap: 12 }}>
+                        <PaperButton
+                            mode="contained"
+                            onPress={handleRevive}
+                            style={{ paddingVertical: 6 }}
+                            labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+                        >
+                            Ver Video 🎥
+                        </PaperButton>
+                        <PaperButton
+                            mode="text"
+                            onPress={handleDeclineRevive}
+                            labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+                        >
+                            No gracias, terminar
+                        </PaperButton>
+                    </View>
+                </Modal>
+            </Portal>
         </Screen>
     );
 };

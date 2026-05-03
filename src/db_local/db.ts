@@ -41,6 +41,8 @@ export const initDatabase = async () => {
             theory TEXT, -- Markdown content
             status TEXT DEFAULT 'available',
             order_index INTEGER,
+            youtube_id TEXT,
+            updated_at TEXT,
             FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
           );
 
@@ -111,6 +113,16 @@ export const initDatabase = async () => {
         // Migration: Add language_code to modules
         try {
           await db.execAsync("ALTER TABLE modules ADD COLUMN language_code TEXT DEFAULT 'es';");
+        } catch (e) {}
+
+        // Migration: Add youtube_id to lessons
+        try {
+          await db.execAsync("ALTER TABLE lessons ADD COLUMN youtube_id TEXT;");
+        } catch (e) {}
+
+        // Migration: Add updated_at to lessons
+        try {
+          await db.execAsync("ALTER TABLE lessons ADD COLUMN updated_at TEXT;");
         } catch (e) {}
 
         dbInstance = db;

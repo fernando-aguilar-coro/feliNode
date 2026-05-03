@@ -18,6 +18,15 @@ const nodes: Translation['nodes'] = {
   },
   training: {
     markCompletedConfirm: "¿Estás seguro de que deseas marcar esta lección como completada? No recibirás experiencia (XP) por esto."
+  },
+  continueWhereLeftOff: {
+    title: "Continuar",
+    allDone: "¡Todo listo! 🎓",
+    lesson: "Lección",
+    practiceInfinite: "Infinito",
+    practicePairs: "Pares",
+    practiceVoice: "Voz",
+    practiceSpeak: "Hablar"
   }
 };
 

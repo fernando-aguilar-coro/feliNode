@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl, ActivityIndicator, Animated as RNAnimated, TouchableOpacity } from 'react-native';
-import { Text, FAB } from 'react-native-paper';
+import { Text, FAB, Portal, Modal, Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -11,7 +11,6 @@ import RankingItem from '../components/ranking/RankingItem';
 import RankingHeader from '../components/ranking/RankingHeader';
 import { Screen } from '../../../components/Screen';
 import { useAppTheme } from '../../../theme/ThemeContext';
-import { GenericModal } from '../../../components/GenericModal';
 import { SocialLogin } from '../../auth/components/SocialLogin';
 import { useUserStore } from '../../../store/UserStore';
 
@@ -203,21 +202,49 @@ const RankingScreen: React.FC = () => {
         </View>
       </Animated.View>
 
-      <GenericModal
-        visible={showLoginModal}
-        title={t('gamification.ranking.loginToParticipate')}
-        description={t('gamification.ranking.createAccountToSave')}
-        onSecondaryPress={() => setShowLoginModal(false)}
-        secondaryButtonText={t('common.cancel')}
-        dismissable={true}
-      >
-        <View style={styles.modalContent}>
-          <SocialLogin
-            loading={authLoading}
-            onError={(msg) => console.error('[RankingScreen] Login error:', msg)}
-          />
-        </View>
-      </GenericModal>
+      <Portal>
+        <Modal
+          visible={showLoginModal}
+          dismissable={true}
+          onDismiss={() => setShowLoginModal(false)}
+          contentContainerStyle={{
+            backgroundColor: theme.colors.background,
+            padding: 24,
+            margin: 20,
+            borderRadius: 16,
+          }}
+        >
+          <Text style={{
+            textAlign: 'center',
+            fontWeight: 'bold',
+            marginBottom: 24,
+            fontSize: 24,
+            color: theme.colors.text,
+          }}>
+            {t('gamification.ranking.loginToParticipate')}
+          </Text>
+
+          <View style={{ maxHeight: 400 }}>
+            <View style={styles.modalContent}>
+              <SocialLogin
+                loading={authLoading}
+                onError={(msg) => console.error('[RankingScreen] Login error:', msg)}
+              />
+            </View>
+          </View>
+
+          <View style={{ marginTop: 24, gap: 12 }}>
+            <Button
+              mode="text"
+              onPress={() => setShowLoginModal(false)}
+              labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+              textColor={theme.colors.textSecondary}
+            >
+              {t('common.cancel')}
+            </Button>
+          </View>
+        </Modal>
+      </Portal>
     </Screen>
   );
 };

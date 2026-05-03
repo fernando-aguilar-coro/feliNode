@@ -8,14 +8,14 @@ import {
 } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppTheme } from '../../../../theme/ThemeContext';
 import { lessonRepository } from '../../../../db_local/repositories';
 import { HomeStackParamList } from '../../../home/navigation/HomeNavigation';
-import { PracticeCard } from '../../../learning/components/practice/PracticeCard';
 import { PracticeTopicModal, PracticeMode } from '../../../learning/components/practice/PracticeTopicModal';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 
 type NavProp = NativeStackNavigationProp<HomeStackParamList>;
 
@@ -26,6 +26,8 @@ interface LessonSummary {
     title: string;
     order_index: number;
     module_title: string;
+    module_order_index: number;
+    local_lesson_index: number;
 }
 
 /**
@@ -37,6 +39,7 @@ interface LessonSummary {
 export const ContinueWhereLeftOff = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<NavProp>();
+    const { t } = useTranslation();
 
     const [nextLesson, setNextLesson] = useState<LessonSummary | null>(null);
     const [loading, setLoading] = useState(true);
@@ -76,13 +79,13 @@ export const ContinueWhereLeftOff = () => {
     const styles = makeStyles(theme);
 
     return (
-        <Animated.View 
+        <Animated.View
             entering={FadeInUp.duration(600)}
             style={styles.wrapper}
         >
             <View style={styles.headerRow}>
                 <Text style={[styles.sectionLabel, { color: theme.colors.textSecondary }]}>
-                    Continuar
+                    {t('nodes.continueWhereLeftOff.title')}
                 </Text>
             </View>
 
@@ -113,7 +116,9 @@ export const ContinueWhereLeftOff = () => {
                         </View>
                         {nextLesson && (
                             <View style={[styles.badge, { backgroundColor: theme.colors.primary }]}>
-                                <Text style={styles.badgeText}>{nextLesson.order_index}</Text>
+                                <Text style={styles.badgeText}>
+                                    {nextLesson.module_order_index}.{nextLesson.local_lesson_index}
+                                </Text>
                             </View>
                         )}
                     </View>
@@ -141,13 +146,13 @@ export const ContinueWhereLeftOff = () => {
                         </View>
                     ) : (
                         <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary }]}>
-                            ¡Todo listo! 🎓
+                            {t('nodes.continueWhereLeftOff.allDone')}
                         </Text>
                     )}
 
                     <View style={[styles.ctaChip, { backgroundColor: theme.colors.primary }]}>
                         <Ionicons name="play" size={12} color="#fff" />
-                        <Text style={styles.ctaText}>Lección</Text>
+                        <Text style={styles.ctaText}>{t('nodes.continueWhereLeftOff.lesson')}</Text>
                     </View>
                 </TouchableOpacity>
 
@@ -157,28 +162,28 @@ export const ContinueWhereLeftOff = () => {
                         iconName="infinite-outline"
                         color={theme.colors.primary}
                         onPress={() => openPracticeModal('combined')}
-                        title="Infinito"
+                        title={t('nodes.continueWhereLeftOff.practiceInfinite')}
                         styles={styles}
                     />
                     <MiniPracticeCard
                         iconName="duplicate-outline"
                         color="#FFBA08"
                         onPress={() => openPracticeModal('pairs')}
-                        title="Pares"
+                        title={t('nodes.continueWhereLeftOff.practicePairs')}
                         styles={styles}
                     />
                     <MiniPracticeCard
                         iconName="mic-outline"
                         color="#4CC9F0"
                         onPress={() => navigation.navigate('PronunciationAssessment')}
-                        title="Voz"
+                        title={t('nodes.continueWhereLeftOff.practiceVoice')}
                         styles={styles}
                     />
                     <MiniPracticeCard
                         iconName="chatbubbles-outline"
                         color="#7209B7"
                         onPress={() => navigation.navigate('Speak')}
-                        title="Hablar"
+                        title={t('nodes.continueWhereLeftOff.practiceSpeak')}
                         styles={styles}
                     />
                 </View>
@@ -201,7 +206,7 @@ const MiniPracticeCard = ({ iconName, color, onPress, title, styles }: any) => {
             activeOpacity={0.7}
             style={[
                 styles.miniCardRow,
-                { 
+                {
                     backgroundColor: theme.colors.surface,
                     borderColor: theme.colors.border,
                 }

@@ -275,6 +275,7 @@ export const useInfinityPairs = ({
     };
 
     // ── Restart ─────────────────────────────────────────────────────────────
+    // ── Restart ─────────────────────────────────────────────────────────────
     const restartGame = useCallback(() => {
         InfinityPairsService.resetUsedPairs();
         setPairBuffer([]);
@@ -298,6 +299,15 @@ export const useInfinityPairs = ({
         fetchPairs(true);
     }, [visibleCount, batchSize, initialLives, initialTime, fetchPairs]);
 
+    // ── Revive ─────────────────────────────────────────────────────────────
+    const reviveGame = useCallback(() => {
+        setLives(1);
+        setTimeLeft(prev => Math.max(prev, 30)); // Give at least 30 seconds
+        setIsGameOver(false);
+        setCombo(0);
+        setDisplayCombo(0);
+    }, []);
+
     return {
         leftItems,
         rightItems,
@@ -318,5 +328,6 @@ export const useInfinityPairs = ({
         triggerErrorHaptic,
         handlePress,
         restartGame,
+        reviveGame,
     };
 };

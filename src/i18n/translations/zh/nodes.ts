@@ -15,6 +15,18 @@ const nodes: Translation['nodes'] = {
   tree: {
     errorTitle: "错误",
     moduleLessonsDescription: "选择一节课开始练习本单元。"
+  },
+  training: {
+    markCompletedConfirm: "您确定要将本课标记为已完成吗？您将不会获得经验值（XP）。"
+  },
+  continueWhereLeftOff: {
+    title: "继续",
+    allDone: "大功告成！🎓",
+    lesson: "课程",
+    practiceInfinite: "无限",
+    practicePairs: "配对",
+    practiceVoice: "语音",
+    practiceSpeak: "口语"
   }
 };
 

@@ -78,6 +78,25 @@ export const useShop = () => {
     const handleBuyCoinDoubler = () => handleBuyGenericItem('coin_doubler', t('gamification.shop.items.coinDoubler.name'), 300, false);
     const handleBuyRemoveAds = () => handleBuyGenericItem('remove_ads', t('gamification.shop.items.removeAds.name', { defaultValue: 'Quitar Anuncios' }), 1000, false);
 
+    const handleGetFreeCoins = useCallback(async (amount: number = 50) => {
+        setBuying(true);
+        try {
+            // Note: Currently ShopService doesn't have a direct "add coins without purchase" method, 
+            // but we can assume CurrencyService.addRewards handles it.
+            // Wait, CurrencyService has `addRewards(xp, coins)`.
+            const { CurrencyService } = require('../../gamification/services/Currency.service');
+            await CurrencyService.addRewards(0, amount);
+            setPurchasedItemName(t('gamification.shop.items.freeCoins.name', { defaultValue: 'Monedas Gratis' }));
+            setPurchaseModalVisible(true);
+            loadCurrencies();
+        } catch (error) {
+            console.error('[Shop] Error getting free coins:', error);
+            setPurchaseError(t('gamification.shop.purchaseError'));
+        } finally {
+            setBuying(false);
+        }
+    }, [loadCurrencies, t]);
+
     return {
         currencies,
         streak,
@@ -93,6 +112,7 @@ export const useShop = () => {
         handleBuyXpBoost,
         handleBuyCoinDoubler,
         handleBuyRemoveAds,
+        handleGetFreeCoins,
         clearError,
         closeModal,
     };

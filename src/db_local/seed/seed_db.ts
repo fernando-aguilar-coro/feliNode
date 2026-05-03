@@ -14,6 +14,18 @@ const init = async () => {
     return db;
 };
 
+export const hasMinimumData = async (): Promise<boolean> => {
+    try {
+        const dbInstance = await init();
+        const result = await dbInstance.getAllAsync<{ count: number }>('SELECT COUNT(*) as count FROM lessons');
+        const localLessonsCount = result[0]?.count || 0;
+        return localLessonsCount >= 5;
+    } catch (e) {
+        return false;
+    }
+};
+
+
 export const seedDatabase = async () => {
     try {
         const dbInstance = await init();
@@ -99,20 +111,22 @@ export const seedDatabase = async () => {
             }
 
             // Seed each module and register Supabase → local ID mapping. 
-            for (const [modId, lessons] of lessonsByModule.entries()) {
-                const info = moduleInfo.get(modId)!;
-                const modData: SeedModule = {
-                    title: info.title,
-                    order_index: info.order,
-                    lessons: lessons,
-                    dependencies: []
-                };
+            await dbInstance.withTransactionAsync(async () => {
+                for (const [modId, lessons] of lessonsByModule.entries()) {
+                    const info = moduleInfo.get(modId)!;
+                    const modData: SeedModule = {
+                        title: info.title,
+                        order_index: info.order,
+                        lessons: lessons,
+                        dependencies: []
+                    };
 
-                const dbModId = await ensureModule(dbInstance, modData);
-                if (dbModId) {
-                    await ensureLessons(dbInstance, dbModId, lessons);
+                    const dbModId = await ensureModule(dbInstance, modData);
+                    if (dbModId) {
+                        await ensureLessons(dbInstance, dbModId, lessons);
+                    }
                 }
-            }
+            });
 
             // Seed Module Dependencies (DAG)
             const moduleDeps = await getAllModuleDependencies(languageCode);

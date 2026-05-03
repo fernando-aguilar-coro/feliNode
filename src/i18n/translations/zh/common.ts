@@ -21,7 +21,8 @@ const common: Translation['common'] = {
   ],
   close: "关闭",
   cancel: "取消",
-  accept: "接受"
+  accept: "接受",
+  confirm: "确认"
 };
 
 export default common;

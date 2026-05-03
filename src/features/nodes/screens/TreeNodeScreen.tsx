@@ -12,9 +12,9 @@ import { PannableCanvasRef } from '../components/PannableCanvas';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { audioService } from '../../settings/services/audio.service';
 import { ModuleStatsCards } from '../components/progress/ModuleStatsCards';
-import { GenericModal } from '../../../components/GenericModal';
 import { getModuleProgressView, ModuleProgress } from '../services/ModuleProgress.service';
 import { ModuleLessonsList } from '../components/ModuleLessonsList';
+import { Modal, Portal, Button } from 'react-native-paper';
 
 export const TreeNodeScreen = () => {
     const theme = useAppTheme();
@@ -148,21 +148,48 @@ export const TreeNodeScreen = () => {
             </TouchableOpacity>
 
             {/* Lessons Modal */}
-            <GenericModal
-                visible={isModalVisible}
-                title={selectedModule ? t('nodes.progress.module', { index: selectedModule.order_index, title: selectedModule.title }) : ''}
-                description={t('nodes.tree.moduleLessonsDescription')}
-                primaryButtonText={t('common.close')}
-                onPrimaryPress={() => setIsModalVisible(false)}
-                dismissable={true}
-            >
-                {selectedModule && (
-                    <ModuleLessonsList
-                        lessons={selectedModule.lessons}
-                        onLessonPress={handleLessonPress}
-                    />
-                )}
-            </GenericModal>
+            <Portal>
+                <Modal
+                    visible={isModalVisible}
+                    onDismiss={() => setIsModalVisible(false)}
+                    contentContainerStyle={{
+                        backgroundColor: theme.colors.background,
+                        padding: 24,
+                        margin: 20,
+                        borderRadius: 16,
+                    }}
+                >
+                    <Text style={{
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        marginBottom: 24,
+                        fontSize: 24,
+                        color: theme.colors.text,
+                    }}>
+                        {selectedModule ? t('nodes.progress.module', { index: selectedModule.order_index, title: selectedModule.title }) : ''}
+                    </Text>
+
+                    <View style={{ maxHeight: 400 }}>
+                        {selectedModule && (
+                            <ModuleLessonsList
+                                lessons={selectedModule.lessons}
+                                onLessonPress={handleLessonPress}
+                            />
+                        )}
+                    </View>
+
+                    <View style={{ marginTop: 24, gap: 12 }}>
+                        <Button
+                            mode="contained"
+                            onPress={() => setIsModalVisible(false)}
+                            style={{ paddingVertical: 6 }}
+                            labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+                        >
+                            {t('common.close')}
+                        </Button>
+                    </View>
+                </Modal>
+            </Portal>
         </View>
     );
 };

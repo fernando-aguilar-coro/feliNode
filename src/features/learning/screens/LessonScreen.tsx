@@ -14,6 +14,8 @@ import { Screen, AppText } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { audioService } from '../../settings/services/audio.service';
+import { useAppRewardedAd } from '../../../hooks/useAppRewardedAd';
+import { Text as PaperText, Button as PaperButton, Card, Modal, Portal } from 'react-native-paper';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'LessonSession'>;
 
@@ -31,11 +33,15 @@ export const LessonScreen = () => {
         exercises,
         startExercises,
         completeLesson,
+        doubleRewards,
         lesson,
         rewardsInfo
     } = useLessonSession(lessonId);
 
     const isExam = lessonId?.includes('placement_test') || false;
+
+    const { isLoaded: isAdLoaded, showAd } = useAppRewardedAd();
+    const [isReviveModalVisible, setReviveModalVisible] = useState(false);
 
     // Inner hook for exercises (only active when we have exercises)
     const {
@@ -52,6 +58,7 @@ export const LessonScreen = () => {
         combo,
         maxCombo,
         missedExercises,
+        revive,
     } = useExercises(exercises, isExam);
 
     // Effect to bridge the "finished exercises" state to "completeLesson"
@@ -66,9 +73,35 @@ export const LessonScreen = () => {
     useEffect(() => {
         if (isGameOver && status === 'exercises') {
             audioService.playIncorrectSound();
+            if (isAdLoaded) {
+                setReviveModalVisible(true);
+            } else {
+                completeLesson();
+            }
+        }
+    }, [isGameOver, status, completeLesson, isAdLoaded]);
+
+    const handleReviveWithAd = async () => {
+        setReviveModalVisible(false);
+        const success = await showAd();
+        if (success) {
+            revive();
+        } else {
             completeLesson();
         }
-    }, [isGameOver, status, completeLesson]);
+    };
+
+    const handleDeclineRevive = () => {
+        setReviveModalVisible(false);
+        completeLesson();
+    };
+
+    const handleDoubleRewards = async () => {
+        const success = await showAd();
+        if (success) {
+            doubleRewards();
+        }
+    };
 
     // Effect to handle mode-specific logic
     useEffect(() => {
@@ -110,6 +143,38 @@ export const LessonScreen = () => {
         header: {
             paddingVertical: theme.spacing.xs,
         },
+        modalContainer: {
+            backgroundColor: theme.colors.background,
+            padding: 24,
+            margin: 20,
+            borderRadius: 16,
+        },
+        modalTitle: {
+            textAlign: 'center',
+            fontWeight: 'bold',
+            marginBottom: 24,
+            fontSize: 24,
+            color: theme.colors.text || '#000',
+        },
+        modalCard: {
+            marginBottom: 32,
+        },
+        modalDescription: {
+            textAlign: 'center',
+            color: theme.colors.text || '#000',
+            lineHeight: 22,
+        },
+        modalButtonContainer: {
+            marginTop: 24,
+            gap: 12,
+        },
+        modalButton: {
+            paddingVertical: 6,
+        },
+        modalButtonLabel: {
+            fontSize: 16,
+            fontWeight: 'bold',
+        },
     }), [theme]);
 
     if (status === 'loading') {
@@ -129,6 +194,8 @@ export const LessonScreen = () => {
                     onContinue={onExit}
                     onInfinity={() => navigation.navigate('InfinityExercise', { lessonId })}
                     rewardsInfo={rewardsInfo}
+                    onDoubleRewardsRequested={handleDoubleRewards}
+                    isAdLoaded={isAdLoaded}
                 />
             </Screen>
         );
@@ -182,6 +249,40 @@ export const LessonScreen = () => {
                     onExit();
                 }}
             />
+
+            <Portal>
+                <Modal
+                    visible={isReviveModalVisible}
+                    onDismiss={handleDeclineRevive}
+                    contentContainerStyle={styles.modalContainer}
+                >
+                    <PaperText style={styles.modalTitle}>¿Te quedaste sin vidas?</PaperText>
+                    <Card style={styles.modalCard}>
+                        <Card.Content>
+                            <PaperText style={styles.modalDescription}>
+                                Mira un corto video para recuperar 1 vida y continuar tu lección sin perder tu progreso.
+                            </PaperText>
+                        </Card.Content>
+                    </Card>
+                    <View style={styles.modalButtonContainer}>
+                        <PaperButton
+                            mode="contained"
+                            onPress={handleReviveWithAd}
+                            style={styles.modalButton}
+                            labelStyle={styles.modalButtonLabel}
+                        >
+                            Ver Video 🎥
+                        </PaperButton>
+                        <PaperButton
+                            mode="text"
+                            onPress={handleDeclineRevive}
+                            labelStyle={styles.modalButtonLabel}
+                        >
+                            No gracias, terminar lección
+                        </PaperButton>
+                    </View>
+                </Modal>
+            </Portal>
         </Screen>
     );
 };

@@ -187,6 +187,14 @@ export const useExercises = (
     }, [exercises, currentIndex, initialExercises.length, maxLives]);
 
     /**
+     * Revive the user with 1 life and resume the game.
+     */
+    const revive = useCallback(() => {
+        setLives(1);
+        setIsGameOver(false);
+    }, []);
+
+    /**
      * Adds new exercises to the current list.
      * Useful for infinite scrolling / continuous learning.
      */
@@ -207,6 +215,7 @@ export const useExercises = (
         lastResult,
         overrideResult,
         addExercises,
+        revive,
         exercises,
         // ── Game state ──
         lives,

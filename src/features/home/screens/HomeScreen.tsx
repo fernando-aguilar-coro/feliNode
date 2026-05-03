@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
@@ -8,14 +8,9 @@ import { ModuleProgressScreen } from '../../nodes/screens/ModuleProgressScreen';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { audioService } from '../../settings/services/audio.service';
-import { syncInfinityStats } from '../../../api/syncInfinityStats';
-import { StreakCloudService } from '../../gamification/services/StreakCloud.service';
-import { CurrencyService } from '../../gamification/services/Currency.service';
 import { useSettingsStore } from '../../../store/SettingsStore';
-import { useCurrencyStore } from '../../../store/CurrencyStore';
 import { KokoroDisclaimerModal } from '../components/KokoroDisclaimerModal';
 import { FirstPracticeModal } from '../components/FirstPracticeModal';
-
 export const HomeScreen = () => {
     const { t } = useTranslation();
     const netInfo = useNetInfo();
@@ -23,24 +18,6 @@ export const HomeScreen = () => {
     const homeViewMode = useSettingsStore(state => state.homeViewMode);
     const setHomeViewMode = useSettingsStore(state => state.setHomeViewMode);
 
-    const hasSyncedOnStart = useRef(false);
-    useEffect(() => {
-        if (netInfo.isConnected && !hasSyncedOnStart.current) {
-            hasSyncedOnStart.current = true;
-
-
-            // Sync asynchronously Without blocking
-            Promise.all([
-                StreakCloudService.syncWithLocal(),
-                syncInfinityStats(),
-                CurrencyService.syncCurrencies()
-            ]).then(() => {
-                useCurrencyStore.getState().loadCurrencies();
-            }).catch(e => {
-                console.error('[HomeScreen] Error in initial sync:', e);
-            });
-        }
-    }, [netInfo.isConnected]);
 
     const toggleViewMode = () => {
         audioService.playClickSound();

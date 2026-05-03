@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { Modal, Portal, Card, Text as PaperText, Button as PaperButton } from 'react-native-paper';
 import { Screen, AppText, AppButton, Spacer, LoadingScreen } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { useExercises } from '../hooks/useExercises';
@@ -11,6 +12,7 @@ import { infinityProgressRepository, streakRepository } from '../../../db_local/
 import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { Exercise } from '../types/exercise';
 import { audioService } from '../../settings/services/audio.service';
+import { useAppRewardedAd } from '../../../hooks/useAppRewardedAd';
 
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 
@@ -21,6 +23,9 @@ export const InfinityExerciseScreen = () => {
     const navigation = useNavigation();
     const route = useRoute<InfinityExerciseRouteProp>();
     const { t } = useTranslation();
+
+    const { isLoaded: isAdLoaded, showAd } = useAppRewardedAd();
+    const [isReviveModalVisible, setReviveModalVisible] = useState(false);
 
     // Default to 'General English' if no lessonId is passed, or handle it in the service
     const { lessonId } = route.params || {};
@@ -122,31 +127,50 @@ export const InfinityExerciseScreen = () => {
         }
     };
 
+    const triggerGameOver = () => {
+        setGameOver(true);
+        audioService.playIncorrectSound(); // Better to play incorrect sound on death instead of success
+        const targetId = lessonId || 'General English';
+        infinityProgressRepository.saveInfinityScore(targetId, completedCount).then(() => {
+            streakRepository.updateStreak().catch(e => console.error('[Streak] Update error:', e));
+            syncInfinityStats(); // Sync after saving new score
+        });
+    };
+
     const handleCheckAnswer = (answer: string) => {
         if (gameOver) return false;
 
         const isCorrect = originalCheckAnswer(answer);
 
-        if (!isCorrect) { // originalCheckAnswer returns boolean based on internal logic
-            // But wait, useExercises' checkAnswer logic returns boolean?
-            // Looking at useExercises.ts: returns isCorrect.
-            // If incorrect, it re-adds the exercise to the end.
-            // We want to decrement lives.
+        if (!isCorrect) { 
             setLives(prev => {
                 const newLives = prev - 1;
                 if (newLives <= 0) {
-                    setGameOver(true);
-                    audioService.playSuccessSound();
-                    const targetId = lessonId || 'General English';
-                    infinityProgressRepository.saveInfinityScore(targetId, completedCount).then(() => {
-                        streakRepository.updateStreak().catch(e => console.error('[Streak] Update error:', e));
-                        syncInfinityStats(); // Sync after saving new score
-                    });
+                    if (isAdLoaded) {
+                        setReviveModalVisible(true);
+                    } else {
+                        triggerGameOver();
+                    }
                 }
                 return newLives;
             });
         }
         return isCorrect;
+    };
+
+    const handleReviveWithAd = async () => {
+        setReviveModalVisible(false);
+        const success = await showAd();
+        if (success) {
+            setLives(1); // Revive with 1 life
+        } else {
+            triggerGameOver();
+        }
+    };
+
+    const handleDeclineRevive = () => {
+        setReviveModalVisible(false);
+        triggerGameOver();
     };
 
     const handleNextExercise = () => {
@@ -227,6 +251,57 @@ export const InfinityExerciseScreen = () => {
                     <AppText variant="sm">{t('learning.infinity.loadingMore')}</AppText>
                 </View>
             )}
+
+            <Portal>
+                <Modal
+                    visible={isReviveModalVisible}
+                    onDismiss={handleDeclineRevive}
+                    contentContainerStyle={{
+                        backgroundColor: theme.colors.background,
+                        padding: 24,
+                        margin: 20,
+                        borderRadius: 16,
+                    }}
+                >
+                    <PaperText style={{
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        marginBottom: 24,
+                        fontSize: 24,
+                        color: theme.colors.text,
+                    }}>
+                        ¿Te quedaste sin vidas?
+                    </PaperText>
+                    <Card style={{ marginBottom: 32 }}>
+                        <Card.Content>
+                            <PaperText style={{
+                                textAlign: 'center',
+                                color: theme.colors.text,
+                                lineHeight: 22,
+                            }}>
+                                Mira un corto video para recuperar 1 vida y continuar tu racha de práctica.
+                            </PaperText>
+                        </Card.Content>
+                    </Card>
+                    <View style={{ marginTop: 24, gap: 12 }}>
+                        <PaperButton
+                            mode="contained"
+                            onPress={handleReviveWithAd}
+                            style={{ paddingVertical: 6 }}
+                            labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+                        >
+                            Ver Video 🎥
+                        </PaperButton>
+                        <PaperButton
+                            mode="text"
+                            onPress={handleDeclineRevive}
+                            labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+                        >
+                            No gracias, terminar práctica
+                        </PaperButton>
+                    </View>
+                </Modal>
+            </Portal>
         </Screen>
     );
 };

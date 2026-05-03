@@ -15,6 +15,18 @@ const nodes: Translation['nodes'] = {
   tree: {
     errorTitle: "त्रुटि",
     moduleLessonsDescription: "इस इकाई का अभ्यास शुरू करने के लिए एक पाठ चुनें।"
+  },
+  training: {
+    markCompletedConfirm: "क्या आप वाकई इस पाठ को पूर्ण के रूप में चिह्नित करना चाहते हैं? आपको इसके लिए अनुभव (XP) नहीं मिलेगा।"
+  },
+  continueWhereLeftOff: {
+    title: "जारी रखें",
+    allDone: "सब तैयार है! 🎓",
+    lesson: "पाठ",
+    practiceInfinite: "अनंत",
+    practicePairs: "जोड़े",
+    practiceVoice: "आवाज़",
+    practiceSpeak: "बोलें"
   }
 };
 

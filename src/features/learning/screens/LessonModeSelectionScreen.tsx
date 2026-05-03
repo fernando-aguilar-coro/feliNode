@@ -2,7 +2,8 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { Screen, AppText, AppButton, Spacer, AppAds } from '../../../components';
+import YoutubeIframe from 'react-native-youtube-iframe';
+import { Screen, AppText, AppButton, Spacer } from '../../../components';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { HomeStackParamList } from '../../home/navigation/HomeNavigation';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,13 +19,15 @@ export const LessonModeSelectionScreen = () => {
     const { t } = useTranslation();
     const { lessonId } = route.params || { lessonId: 'lesson_verbs_intro' }; // Default for testing
     const [lessonTitle, setLessonTitle] = useState<string>('');
+    const [youtubeId, setYoutubeId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchLesson = async () => {
             try {
                 const lesson: any = await lessonRepository.getLessonById(lessonId);
-                if (lesson && lesson.title) {
-                    setLessonTitle(lesson.title);
+                if (lesson) {
+                    if (lesson.title) setLessonTitle(lesson.title);
+                    if (lesson.youtube_id) setYoutubeId(lesson.youtube_id);
                 }
             } catch (error) {
                 console.error('Failed to fetch lesson:', error);
@@ -43,6 +46,18 @@ export const LessonModeSelectionScreen = () => {
             width: '100%',
             gap: theme.spacing.md,
         },
+        videoContainer: {
+            width: '100%',
+            borderRadius: 8,
+            overflow: 'hidden',
+            marginBottom: theme.spacing.xl,
+            backgroundColor: theme.colors.surface,
+            elevation: 4,
+            shadowColor: theme.colors.text,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+        }
     }), [theme]);
 
     const handleSelectMode = (mode: 'theory' | 'practice' | 'infinity') => {
@@ -66,6 +81,15 @@ export const LessonModeSelectionScreen = () => {
             </AppText>
             <Spacer height={theme.spacing.xl} />
 
+            {youtubeId && (
+                <View style={styles.videoContainer}>
+                    <YoutubeIframe
+                        height={200}
+                        videoId={youtubeId}
+                    />
+                </View>
+            )}
+
             <View style={styles.buttonContainer}>
                 <AppButton
                     title={t('learning.modeSelection.theory')}
@@ -83,10 +107,6 @@ export const LessonModeSelectionScreen = () => {
                     variant="outline"
                 />
             </View>
-
-            <Spacer height={theme.spacing.xl} />
-            <AppAds type="banner" />
-            <Spacer height={theme.spacing.md} />
             <AppButton
                 title={t('learning.modeSelection.back')}
                 onPress={() => navigation.goBack()}

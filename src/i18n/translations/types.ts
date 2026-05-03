@@ -165,6 +165,15 @@ export interface Translation {
     training: {
       markCompletedConfirm: string;
     };
+    continueWhereLeftOff: {
+      title: string;
+      allDone: string;
+      lesson: string;
+      practiceInfinite: string;
+      practicePairs: string;
+      practiceVoice: string;
+      practiceSpeak: string;
+    };
   };
   settings: {
     title: string;

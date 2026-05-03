@@ -8,6 +8,8 @@ import es from './translations/es';
 import zh from './translations/zh';
 import hi from './translations/hi';
 import fr from './translations/fr';
+import it from './translations/it';
+import pt from './translations/pt';
 
 const resources = {
   en: { translation: en },
@@ -15,6 +17,8 @@ const resources = {
   zh: { translation: zh },
   hi: { translation: hi },
   fr: { translation: fr },
+  it: { translation: it },
+  pt: { translation: pt },
 };
 
 const languageDetector: any = {
@@ -43,7 +47,7 @@ const languageDetector: any = {
     const locales = Localization.getLocales();
     if (locales && locales.length > 0) {
       let lang = locales[0].languageTag.split('-')[0];
-      if (!['en', 'es', 'zh', 'hi', 'fr'].includes(lang)) {
+      if (!['en', 'es', 'zh', 'hi', 'fr', 'it', 'pt'].includes(lang)) {
         lang = 'es'; // fallback to Spanish if not supported
       }
       cb(lang);

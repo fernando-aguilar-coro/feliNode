@@ -4,10 +4,8 @@ import { TestScreen } from '../features/learning/components/TestScreen';
 import { ChoseInitialTest } from '../features/learning/screens/ChoseInitialTest';
 
 import { LoadingScreen } from '../components';
-import { syncUserProgress } from '../api/syncUserProgress';
 import { useNetInfo } from '@react-native-community/netinfo';
-import { seedDatabase } from '../db_local/seed/seed_db';
-
+import { hasMinimumData } from '../db_local/seed/seed_db';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
@@ -19,82 +17,71 @@ import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
 const Stack = createNativeStackNavigator();
 const minCount = 1;
 
-
 export const Navigation = () => {
     const { isAuthenticated, isGuest, checkSession } = useUserStore();
-    const { hasDecidedPlacementTest, language } = useSettingsStore();
+    const { hasDecidedPlacementTest } = useSettingsStore();
     const netInfo = useNetInfo();
+    
     const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
-    const [isLoadingLessons, setIsLoadingLessons] = useState(false);
-    const [isSyncing, setIsSyncing] = useState(false);
-    const [hasSync, setHasSync] = useState(false);
-    const [prevLanguage, setPrevLanguage] = useState(language);
-
-    useEffect(() => {
-        // Al cambiar isGuest de true a false, forzamos que se vuelva a sincronizar
-        setHasSync(false);
-    }, [isGuest]);
-
-    // Forzar resincronización si el idioma cambia
-    useEffect(() => {
-        if (language !== prevLanguage) {
-            setHasSync(false);
-            setPrevLanguage(language);
-        }
-    }, [language, prevLanguage]);
+    const [isCheckingData, setIsCheckingData] = useState(true);
+    const [hasData, setHasData] = useState(false);
 
     useEffect(() => {
         checkSession();
     }, [checkSession]);
 
-    // Sync progress
+    // Quick local data check
     useEffect(() => {
         if (!isAuthenticated) {
-            setHasSync(false);
-            setCompletedLessonsCount(0);
+            setIsCheckingData(false);
             return;
         }
 
-        const syncData = async () => {
-            if (netInfo.isConnected && !isSyncing && !hasSync) {
-                try {
-                    setIsSyncing(true);
-                    setHasSync(true);
-                    await syncUserProgress();
-                    await seedDatabase();
-                    const count = await getUserCompletedLessons();
-                    setCompletedLessonsCount(count);
-                } catch (error) {
-                    console.error('Error syncing progress in HomeScreen:', error);
-                    setHasSync(false); // Permite reintentar si falla
-                } finally {
-                    setIsSyncing(false);
-                    setIsLoadingLessons(false);
-                }
+        const checkInitialData = async () => {
+            setIsCheckingData(true);
+            try {
+                const [dataReady, count] = await Promise.all([
+                    hasMinimumData(),
+                    getUserCompletedLessons()
+                ]);
+                setHasData(dataReady);
+                setCompletedLessonsCount(count);
+            } catch (error) {
+                console.error('Error checking initial data:', error);
+                setHasData(false);
+            } finally {
+                setIsCheckingData(false);
             }
         };
-        syncData();
-    }, [netInfo.isConnected, isAuthenticated, isSyncing, hasSync]);
-    if (!isAuthenticated) {
-        return (<Stack.Navigator id="login_stack" screenOptions={{ headerShown: false }}>
-            <Stack.Screen
-                name="Login"
-                component={LoginScreen}
-                options={{ title: 'Login' }}
-            />
-        </Stack.Navigator>)
-    }
 
-    if (isSyncing || (isAuthenticated && isLoadingLessons)) {
-        return <LoadingScreen type={isSyncing ? 'syncing' : 'progress'} />;
-    }
-    if (!netInfo.isConnected) {
+        checkInitialData();
+    }, [isAuthenticated]);
+
+    if (!isAuthenticated) {
         return (
-            <Stack.Navigator id="main_stack" key={isGuest ? 'guest' : 'user'} screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Home" component={HomeNavigation} />
+            <Stack.Navigator id="login_stack" screenOptions={{ headerShown: false }}>
+                <Stack.Screen
+                    name="Login"
+                    component={LoginScreen}
+                    options={{ title: 'Login' }}
+                />
             </Stack.Navigator>
         );
     }
+
+    // Only block if we are absolutely sure there is NO data and we are checking
+    // If there is data, or if we are offline but have data, proceed.
+    // If there is NO data and we are online, we should probably still proceed and let Home handle the "Downloading" state,
+    // but for now, we can show a brief "Initializing" screen.
+    if (isCheckingData || (!hasData && netInfo.isConnected !== false)) {
+        // If we don't have data, we stay in LoadingScreen until the background sync (handled by Home or App) 
+        // seeds the database. BUT wait, if Navigation blocks here, Home is never mounted, so useAppSync never runs!
+        // To fix this, we should let it pass to Home even if !hasData, and let Home show skeletons.
+        if (isCheckingData) {
+            return <LoadingScreen type='progress' />;
+        }
+    }
+
     return (
         <Stack.Navigator id="main_stack" key={isGuest ? 'guest' : 'user'} screenOptions={{ headerShown: false }}>
             <Stack.Group>
@@ -118,3 +105,4 @@ export const Navigation = () => {
         </Stack.Navigator>
     );
 }
+

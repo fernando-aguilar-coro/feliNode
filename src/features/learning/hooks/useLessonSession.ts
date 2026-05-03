@@ -64,12 +64,31 @@ export const useLessonSession = (lessonId: string) => {
         }
     }, [lessonId]);
 
+    const doubleRewards = useCallback(async () => {
+        if (!rewardsInfo || rewardsInfo.wasCoinsBoosted) return; // Prevent double doubling
+
+        try {
+            // Assume we add the same amount again
+            const doubleResult = await CurrencyService.addRewards(rewardsInfo.xpGained, rewardsInfo.coinsGained);
+            
+            setRewardsInfo({
+                xpGained: rewardsInfo.xpGained + doubleResult.xpGained,
+                coinsGained: rewardsInfo.coinsGained + doubleResult.coinsGained,
+                wasBoosted: true, // We can say it's boosted now
+                wasCoinsBoosted: true
+            });
+        } catch (error) {
+            console.error('Failed to double rewards:', error);
+        }
+    }, [rewardsInfo]);
+
     return {
         status,
         theoryContent,
         exercises,
         startExercises,
         completeLesson,
+        doubleRewards,
         lesson,
         rewardsInfo
     };

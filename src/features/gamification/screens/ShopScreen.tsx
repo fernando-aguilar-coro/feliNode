@@ -13,6 +13,7 @@ import { ShopItemCard } from '../components/shop/ShopItemCard';
 import { PurchaseSuccessModal } from '../components/shop/PurchaseSuccessModal';
 import { IapService, IAP_SKUS } from '../services/Iap.service';
 import type { Product } from 'react-native-iap';
+import { useAppRewardedAd } from '../../../hooks/useAppRewardedAd';
 
 // Remove MemoizedAppAds
 export const ShopScreen = () => {
@@ -31,12 +32,15 @@ export const ShopScreen = () => {
         handleBuyStreakProtector,
         handleBuyXpBoost,
         handleBuyCoinDoubler,
+        handleGetFreeCoins,
         clearError,
         closeModal,
     } = useShop();
 
     const [iapProducts, setIapProducts] = useState<Product[]>([]);
     const [iapReady, setIapReady] = useState<boolean | null>(null); // null: loading, true: connected, false: failed
+    
+    const { isLoaded: isAdLoaded, showAd } = useAppRewardedAd();
 
     // 1. Persist IAP interaction (Once per component mount)
     useEffect(() => {
@@ -81,6 +85,13 @@ export const ShopScreen = () => {
         return product ? product.displayPrice : t('gamification.shop.errorConnection');
     };
 
+    const handleWatchAdForCoins = async () => {
+        const success = await showAd();
+        if (success) {
+            handleGetFreeCoins(50);
+        }
+    };
+
     // Removed complex loading guards
 
     return (
@@ -93,6 +104,20 @@ export const ShopScreen = () => {
                         {purchaseError}
                     </Text>
                 ) : null}
+
+                {/* 0. Free Coins */}
+                {isAdLoaded && (
+                    <ShopItemCard
+                        name={t('gamification.shop.items.freeCoins.name', { defaultValue: 'Monedas Gratis' })}
+                        description={t('gamification.shop.items.freeCoins.description', { defaultValue: 'Mira un anuncio corto para obtener 50 MichiCoins.' })}
+                        costText="Gratis 🎥"
+                        icon={<FontAwesome5 name="play-circle" size={28} color="#FF4500" />}
+                        onPress={handleWatchAdForCoins}
+                        michiCoins={currencies.michi_coins}
+                        buying={buying}
+                        delay={50}
+                    />
+                )}
 
                 {/* 1. Streak Protector */}
                 <ShopItemCard
