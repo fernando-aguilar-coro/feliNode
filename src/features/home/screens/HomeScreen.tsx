@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TreeNodeScreen } from '../../nodes/screens/TreeNodeScreen';
+import { CoursePathScreen } from '../../nodes/screens/CoursePathScreen';
 import { ModuleProgressScreen } from '../../nodes/screens/ModuleProgressScreen';
 import { useAppTheme } from '../../../theme/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -21,7 +21,7 @@ export const HomeScreen = () => {
 
     const toggleViewMode = () => {
         audioService.playClickSound();
-        setHomeViewMode(homeViewMode === 'list' ? 'tree' : 'list');
+        setHomeViewMode(homeViewMode === 'list' ? 'node' : 'list');
     };
 
     const styles = useMemo(() => StyleSheet.create({
@@ -92,7 +92,7 @@ export const HomeScreen = () => {
                         color={theme.colors.white}
                     />
                     <Text style={styles.bannerText}>
-                        {homeViewMode === 'list' ? t('home.viewModes.tree') : t('home.viewModes.list')}
+                        {homeViewMode === 'list' ? t('home.viewModes.node') : t('home.viewModes.list')}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -101,7 +101,7 @@ export const HomeScreen = () => {
                 {homeViewMode === 'list' ? (
                     <ModuleProgressScreen />
                 ) : (
-                    <TreeNodeScreen />
+                    <CoursePathScreen />
                 )}
             </View>
 

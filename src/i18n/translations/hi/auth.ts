@@ -25,7 +25,12 @@ const auth: Translation['auth'] = {
     changeEmail: "ईमेल बदलें",
     googleSignInError: "Google साइन इन में त्रुटि",
     continueWithGoogle: "Google के साथ जारी रखें"
-  }
+  },
+  nativeLanguage: "आपकी मातृभाषा",
+  nativeLanguageHint: "वह भाषा जो आप अभी बोलते हैं",
+  uiLanguage: "ऐप की भाषा",
+  uiLangNative: "मातृभाषा",
+  uiLangEn: "अंग्रेज़ी"
 };
 
 export default auth;

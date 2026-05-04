@@ -8,7 +8,7 @@ const home: Translation['home'] = {
   },
   offline: "Internet connection unavailable, some features may not work",
   viewModes: {
-    tree: "Switch to Tree Map",
+    node: "Switch to Tree Map",
     list: "Switch to List View"
   },
   modals: {

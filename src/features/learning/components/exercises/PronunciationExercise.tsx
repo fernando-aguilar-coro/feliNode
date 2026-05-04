@@ -41,7 +41,6 @@ export const PronunciationExercise = ({ exercise, onAnswer }: Props) => {
             onAnswer(data.overallScore.toString());
             setStatus('result');
         } catch (error) {
-            Alert.alert(t('learning.pronunciation.error'), t('learning.pronunciation.errorAssess'));
             onAnswer("");
             setStatus('idle');
         }

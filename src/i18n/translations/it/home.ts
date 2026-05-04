@@ -8,7 +8,7 @@ const home: Translation['home'] = {
   },
   offline: "Connessione internet non disponibile, alcune funzioni non saranno disponibili",
   viewModes: {
-    tree: "Passa alla Mappa dei Nodi",
+    node: "Passa alla Mappa dei Nodi",
     list: "Passa alla Vista Elenco"
   },
   modals: {

@@ -10,7 +10,8 @@ const nodes: Translation['nodes'] = {
     streak: "Streak",
     exp: "Exp",
     coins: "Coins",
-    ranking: "Top"
+    ranking: "Top",
+    unit: "UNIT {{index}}"
   },
   tree: {
     errorTitle: "Error",

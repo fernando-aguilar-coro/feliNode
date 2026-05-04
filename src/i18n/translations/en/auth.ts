@@ -23,9 +23,14 @@ const auth: Translation['auth'] = {
     verifyAndLogin: "Verify and Log In",
     goBack: "Go back",
     changeEmail: "Change email",
-    googleSignInError: "Error with Google Sign In",
+    googleSignInError: "Google Sign In Error",
     continueWithGoogle: "Continue with Google"
-  }
+  },
+  nativeLanguage: "Your Native Language",
+  nativeLanguageHint: "The language you currently speak",
+  uiLanguage: "App Language",
+  uiLangNative: "Native",
+  uiLangEn: "English"
 };
 
 export default auth;

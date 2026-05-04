@@ -22,9 +22,7 @@ export const getModuleProgressView = async (): Promise<ModuleProgress[]> => {
     const modules: any[] = await moduleRepository.getModules();
     const completedLessons = await userProgressRepository.getCompletedLessons();
 
-    const result: ModuleProgress[] = [];
-
-    for (const mod of modules) {
+    const result: ModuleProgress[] = await Promise.all(modules.map(async (mod) => {
         const lessons: any[] = await lessonRepository.getLessonsByModuleId(mod.id);
         
         let completedCount = 0;
@@ -44,7 +42,7 @@ export const getModuleProgressView = async (): Promise<ModuleProgress[]> => {
             };
         });
 
-        result.push({
+        return {
             id: mod.id,
             title: mod.title,
             description: mod.description,
@@ -52,8 +50,8 @@ export const getModuleProgressView = async (): Promise<ModuleProgress[]> => {
             lessons: mappedLessons,
             completedLessonsCount: completedCount,
             totalLessonsCount: lessons.length
-        });
-    }
+        };
+    }));
 
     return result;
 };

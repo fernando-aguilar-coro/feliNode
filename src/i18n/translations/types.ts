@@ -99,7 +99,7 @@ export interface Translation {
     };
     offline: string;
     viewModes: {
-      tree: string;
+      node: string;
       list: string;
     };
     modals: {
@@ -145,6 +145,11 @@ export interface Translation {
       googleSignInError: string;
       continueWithGoogle: string;
     };
+    nativeLanguage: string;
+    nativeLanguageHint: string;
+    uiLanguage: string;
+    uiLangNative: string;
+    uiLangEn: string;
   };
   nodes: {
     progress: {
@@ -157,6 +162,7 @@ export interface Translation {
       exp: string;
       coins: string;
       ranking: string;
+      unit: string;
     };
     tree: {
       errorTitle: string;

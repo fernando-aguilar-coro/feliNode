@@ -25,7 +25,12 @@ const auth: Translation['auth'] = {
     changeEmail: "Changer d'email",
     googleSignInError: "Erreur lors de la connexion avec Google",
     continueWithGoogle: "Continuer avec Google"
-  }
+  },
+  nativeLanguage: "Votre langue maternelle",
+  nativeLanguageHint: "La langue que vous parlez actuellement",
+  uiLanguage: "Langue de l'application",
+  uiLangNative: "Native",
+  uiLangEn: "Anglais"
 };
 
 export default auth;

@@ -48,7 +48,7 @@ export const PronunciationAssessmentScreen = () => {
     };
 
     const handleAnswer = (score: string) => {
-        streakRepository.updateStreak().catch(e => console.error('[Streak] Update error:', e));
+        streakRepository.updateStreak().catch(() => {});
     };
 
     const handleReset = () => {

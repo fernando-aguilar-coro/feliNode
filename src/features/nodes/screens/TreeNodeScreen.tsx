@@ -16,6 +16,7 @@ import { getModuleProgressView, ModuleProgress } from '../services/ModuleProgres
 import { ModuleLessonsList } from '../components/ModuleLessonsList';
 import { Modal, Portal, Button } from 'react-native-paper';
 
+
 export const TreeNodeScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();

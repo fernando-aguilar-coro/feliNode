@@ -8,7 +8,7 @@ const home: Translation['home'] = {
   },
   offline: "Connexion internet indisponible, certaines fonctionnalités peuvent ne pas fonctionner",
   viewModes: {
-    tree: "Passer à la carte arborescente",
+    node: "Passer à la carte arborescente",
     list: "Passer à la vue en liste"
   },
   modals: {

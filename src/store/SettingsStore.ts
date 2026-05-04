@@ -25,8 +25,8 @@ interface SettingsState {
     setShowStreak: (show: boolean) => void;
     setHasDecidedPlacementTest: (decided: boolean) => void;
     setHasSeenFirstPracticeModal: (seen: boolean) => void;
-    homeViewMode: 'tree' | 'list';
-    setHomeViewMode: (mode: 'tree' | 'list') => void;
+    homeViewMode: 'node' | 'list';
+    setHomeViewMode: (mode: 'node' | 'list') => void;
     themeMode: 'light' | 'dark' | 'system';
     setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
     language: string | null;
@@ -58,8 +58,8 @@ export const useSettingsStore = create<SettingsState>()(
             setShowStreak: (show: boolean) => set({ showStreak: show }),
             setHasDecidedPlacementTest: (decided: boolean) => set({ hasDecidedPlacementTest: decided }),
             setHasSeenFirstPracticeModal: (seen: boolean) => set({ hasSeenFirstPracticeModal: seen }),
-            homeViewMode: 'list',
-            setHomeViewMode: (mode: 'tree' | 'list') => set({ homeViewMode: mode }),
+            homeViewMode: 'node',
+            setHomeViewMode: (mode: 'node' | 'list') => set({ homeViewMode: mode }),
             themeMode: 'light',
             setThemeMode: (mode: 'light' | 'dark' | 'system') => set({ themeMode: mode }),
             language: null,

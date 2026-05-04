@@ -127,15 +127,27 @@ export const PronunciationService = {
                 }),
             });
 
-            if (!response.ok) throw new Error(`Backend Error (${response.status}): ${await response.text()}`);
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => 'Unknown error');
+                throw new Error(`${response.status}: ${errorText}`);
+            }
 
             const text = await response.text();
-
-            const parsed: BackendResponse = JSON.parse(text);
+            let parsed: BackendResponse;
+            try {
+                parsed = JSON.parse(text);
+            } catch (e) {
+                throw new Error(`Invalid JSON response from server: ${text.substring(0, 100)}`);
+            }
 
 
             const data = parsed.azure_analysis;
-            const geminiFeedback = parsed.gemini_feedback;
+            let geminiFeedback = parsed.gemini_feedback;
+
+            // Suppress Gemini error messages if they contain 403 or look like server errors
+            if (geminiFeedback && (geminiFeedback.includes('403') || geminiFeedback.toLowerCase().includes('forbidden'))) {
+                geminiFeedback = '';
+            }
 
             // Check for success (API can return string "Success" or enum 0)
             const isSuccess = data.RecognitionStatus === 'Success' || data.RecognitionStatus === 0;
@@ -181,8 +193,10 @@ export const PronunciationService = {
                 })),
                 geminiFeedback: geminiFeedback
             };
-        } catch (error) {
-            console.error('Pronunciation Assessment Error:', error);
+        } catch (error: any) {
+            if (error.message !== '403') {
+                console.error('Pronunciation Assessment Error:', error);
+            }
             throw error;
         }
     },

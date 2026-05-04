@@ -10,7 +10,8 @@ const nodes: Translation['nodes'] = {
     streak: "连续记录",
     exp: "经验星",
     coins: "金币",
-    ranking: "排行榜"
+    ranking: "排行榜",
+    unit: "第 {{index}} 单元"
   },
   tree: {
     errorTitle: "错误",

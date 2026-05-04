@@ -8,7 +8,7 @@ const home: Translation['home'] = {
   },
   offline: "网络连接不可用，某些功能将无法使用",
   viewModes: {
-    tree: "切换到节点地图",
+    node: "切换到节点地图",
     list: "切换到列表视图"
   },
   modals: {

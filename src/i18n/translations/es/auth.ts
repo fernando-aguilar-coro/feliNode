@@ -23,9 +23,14 @@ const auth: Translation['auth'] = {
     verifyAndLogin: "Verificar e Ingresar",
     goBack: "Volver",
     changeEmail: "Cambiar correo",
-    googleSignInError: "Error con Google Sign In",
+    googleSignInError: "Error al iniciar sesión con Google",
     continueWithGoogle: "Continuar con Google"
-  }
+  },
+  nativeLanguage: "Tu idioma nativo",
+  nativeLanguageHint: "El idioma que hablas actualmente",
+  uiLanguage: "Idioma de la app",
+  uiLangNative: "Nativo",
+  uiLangEn: "Inglés"
 };
 
 export default auth;

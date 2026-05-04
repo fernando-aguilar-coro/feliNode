@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     View,
     Text,
@@ -7,11 +7,11 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppTheme } from '../../../../theme/ThemeContext';
-import { lessonRepository } from '../../../../db_local/repositories';
+import { useModuleProgress } from '../../hooks/useModuleProgress';
 import { HomeStackParamList } from '../../../home/navigation/HomeNavigation';
 import { PracticeTopicModal, PracticeMode } from '../../../learning/components/practice/PracticeTopicModal';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,7 +19,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 
 type NavProp = NativeStackNavigationProp<HomeStackParamList>;
 
-const CARD_HEIGHT = 320; // Doubled height as requested
+const CARD_HEIGHT = 320;
 
 interface LessonSummary {
     id: string;
@@ -32,39 +32,48 @@ interface LessonSummary {
 
 /**
  * ContinueWhereLeftOff
- *
- * Left  ~50%  – Next lesson card (real data)
- * Right ~50%  – 2x2 Grid of compact PracticeCards
+ * 
+ * Interfaz premium que permite al usuario retomar su última lección
+ * o acceder a modos de práctica rápida.
  */
 export const ContinueWhereLeftOff = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<NavProp>();
     const { t } = useTranslation();
 
-    const [nextLesson, setNextLesson] = useState<LessonSummary | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { modules, isLoading: modulesLoading } = useModuleProgress();
 
-    // Practice modal state
+    const nextLesson = useMemo(() => {
+        if (!modules || modules.length === 0) return null;
+
+        const sortedModules = [...modules].sort((a, b) => a.order_index - b.order_index);
+        
+        for (const mod of sortedModules) {
+            const sortedLessons = [...mod.lessons].sort((a, b) => a.order_index - b.order_index);
+            
+            for (let i = 0; i < sortedLessons.length; i++) {
+                const lesson = sortedLessons[i];
+                
+                // Si la lección está disponible (no completada), es la que debemos sugerir
+                if (lesson.status === 'available') {
+                    return {
+                        id: lesson.id,
+                        title: lesson.title,
+                        order_index: lesson.order_index,
+                        module_title: mod.title,
+                        module_order_index: mod.order_index,
+                        local_lesson_index: i + 1,
+                    } as LessonSummary;
+                }
+            }
+        }
+        return null;
+    }, [modules]);
+
+    const loading = modulesLoading && modules.length === 0;
+
     const [modalVisible, setModalVisible] = useState(false);
     const [modalMode, setModalMode] = useState<PracticeMode | null>(null);
-
-    const loadData = useCallback(async () => {
-        try {
-            setLoading(true);
-            const lesson = await lessonRepository.getNextLesson();
-            setNextLesson(lesson);
-        } catch (e) {
-            console.error('[ContinueWhereLeftOff] Error loading next lesson', e);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useFocusEffect(
-        useCallback(() => {
-            loadData();
-        }, [loadData])
-    );
 
     const handlePressLesson = () => {
         if (!nextLesson) return;
@@ -156,7 +165,7 @@ export const ContinueWhereLeftOff = () => {
                     </View>
                 </TouchableOpacity>
 
-                {/* ── Right: Stack of 4 Practice Cards ───────────────── */}
+                {/* ── Right: Practice Column ─────────────────────────── */}
                 <View style={styles.rightColumn}>
                     <MiniPracticeCard
                         iconName="infinite-outline"
@@ -198,7 +207,15 @@ export const ContinueWhereLeftOff = () => {
     );
 };
 
-const MiniPracticeCard = ({ iconName, color, onPress, title, styles }: any) => {
+interface MiniCardProps {
+    iconName: keyof typeof Ionicons.glyphMap;
+    color: string;
+    onPress: () => void;
+    title: string;
+    styles: any;
+}
+
+const MiniPracticeCard = ({ iconName, color, onPress, title, styles }: MiniCardProps) => {
     const theme = useAppTheme();
     return (
         <TouchableOpacity
@@ -222,7 +239,7 @@ const MiniPracticeCard = ({ iconName, color, onPress, title, styles }: any) => {
     );
 };
 
-const makeStyles = (theme: ReturnType<typeof import('../../../../theme/ThemeContext').useAppTheme>) =>
+const makeStyles = (theme: any) =>
     StyleSheet.create({
         wrapper: {
             marginTop: 16,
@@ -240,9 +257,6 @@ const makeStyles = (theme: ReturnType<typeof import('../../../../theme/ThemeCont
             fontFamily: 'Nunito-Bold',
             textTransform: 'uppercase',
             letterSpacing: 1,
-        },
-        seeAll: {
-            // Unused
         },
         row: {
             flexDirection: 'row',
