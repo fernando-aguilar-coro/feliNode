@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import { useNodesStore } from '../../../store/NodesStore';
-import { getModuleProgressView } from '../services/ModuleProgress.service';
 import { audioService } from '../../settings/services/audio.service';
 import { LessonService } from '../../learning/services/Lesson.service';
 
@@ -9,42 +8,24 @@ export const useModuleProgress = () => {
     const isFocused = useIsFocused();
     const modules = useNodesStore(state => state.modules);
     const isLoading = useNodesStore(state => state.isModulesLoading);
-    const setModules = useNodesStore(state => state.setModules);
-    const setModulesLoading = useNodesStore(state => state.setModulesLoading);
+    const fetchModules = useNodesStore(state => state.fetchModules);
 
     const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set());
 
     const loadData = useCallback(async () => {
-        console.log('[useModuleProgress] loadData started, modules count:', useNodesStore.getState().modules.length);
-        if (useNodesStore.getState().modules.length === 0) {
-            setModulesLoading(true);
+        await fetchModules();
+        
+        // Auto-expand first module if needed
+        if (expandedModules.size === 0 && modules.length > 0) {
+            setExpandedModules(new Set([modules[0].id]));
         }
-        try {
-            const data = await getModuleProgressView();
-            setModules(data);
-
-            setExpandedModules(prev => {
-                // Expand the first module by default if none are expanded
-                if (data.length > 0 && prev.size === 0) {
-                    return new Set([data[0].id]);
-                }
-                return prev;
-            });
-        } catch (error) {
-            console.error('[useModuleProgress] Failed to load module progress:', error);
-        } finally {
-            console.log('[useModuleProgress] loadData finished');
-            setModulesLoading(false);
-        }
-    }, [setModules, setModulesLoading]);
-
-    const refreshTrigger = useNodesStore(state => state.refreshTrigger);
+    }, [fetchModules, modules.length, expandedModules.size]);
 
     useEffect(() => {
         if (isFocused) {
             loadData();
         }
-    }, [isFocused, loadData, refreshTrigger]);
+    }, [isFocused, loadData]);
 
     const toggleModule = useCallback((moduleId: number) => {
         audioService.playClickSound();
@@ -62,11 +43,11 @@ export const useModuleProgress = () => {
     const markLessonAsCompleted = useCallback(async (lessonId: string) => {
         try {
             await LessonService.markAsCompletedManually(lessonId);
-            await loadData();
+            await fetchModules(true); // Force reload after manual change
         } catch (error) {
             console.error('Failed to mark lesson as completed', error);
         }
-    }, [loadData]);
+    }, [fetchModules]);
 
     return {
         modules,
@@ -74,6 +55,6 @@ export const useModuleProgress = () => {
         expandedModules,
         toggleModule,
         markLessonAsCompleted,
-        refresh: loadData
+        refresh: () => fetchModules(true)
     };
 };

@@ -20,7 +20,7 @@ const minCount = 1;
 
 export const Navigation = () => {
     const { isAuthenticated, isGuest, checkSession } = useUserStore();
-    const { hasDecidedPlacementTest } = useSettingsStore();
+    const { hasDecidedPlacementTest, language } = useSettingsStore();
     const netInfo = useNetInfo();
     
     const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
@@ -60,7 +60,7 @@ export const Navigation = () => {
         };
 
         checkInitialData();
-    }, [isAuthenticated]);
+    }, [isAuthenticated, language]);
 
     if (!isAuthenticated) {
         return (

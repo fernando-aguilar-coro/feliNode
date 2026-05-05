@@ -1,11 +1,8 @@
 import { create } from 'zustand';
 import { TreeNode, TreeLink } from '../features/nodes/types/NodeTypes';
-import { ModuleProgress } from '../features/nodes/services/ModuleProgress.service';
+import { ModuleProgress, getModuleProgressView } from '../features/nodes/services/ModuleProgress.service';
 
 interface NodesStoreState {
-    refreshTrigger: number;
-    triggerRefresh: () => void;
-
     // Global Tree Data
     nodes: TreeNode[];
     links: TreeLink[];
@@ -29,12 +26,11 @@ interface NodesStoreState {
     isSyncingData: boolean;
     setSyncProgress: (progress: number) => void;
     setIsSyncingData: (syncing: boolean) => void;
+
+    fetchModules: (force?: boolean) => Promise<void>;
 }
 
 export const useNodesStore = create<NodesStoreState>((set) => ({
-    refreshTrigger: 0,
-    triggerRefresh: () => set((state) => ({ refreshTrigger: state.refreshTrigger + 1 })),
-
     nodes: [],
     links: [],
     canvasWidth: 400,
@@ -56,4 +52,26 @@ export const useNodesStore = create<NodesStoreState>((set) => ({
     isSyncingData: false,
     setSyncProgress: (syncProgress) => set({ syncProgress }),
     setIsSyncingData: (isSyncingData) => set({ isSyncingData }),
+
+    fetchModules: async (force = false) => {
+        const { isModulesLoading, modules } = useNodesStore.getState();
+        
+        // Prevent concurrent fetches unless forced
+        if (isModulesLoading && !force) return;
+        
+        // Only show loading if we don't have modules yet
+        if (modules.length === 0) {
+            set({ isModulesLoading: true });
+        }
+
+        try {
+            console.log('[NodesStore] fetchModules starting...');
+            const data = await getModuleProgressView();
+            set({ modules: data, isModulesLoading: false });
+            console.log('[NodesStore] fetchModules completed, count:', data.length);
+        } catch (error) {
+            console.error('[NodesStore] Error fetching modules:', error);
+            set({ isModulesLoading: false });
+        }
+    },
 }));

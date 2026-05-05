@@ -12,21 +12,24 @@ import { useNodesStore } from '../../../store/NodesStore';
 
 export const useAppSync = () => {
     const netInfo = useNetInfo();
+    const isSyncingRef = useRef(false);
     const [isSyncing, setIsSyncing] = useState(false);
     const hasSyncedOnStart = useRef(false);
     const language = useSettingsStore(state => state.language);
     const isAuthenticated = useUserStore(state => state.isAuthenticated);
     const prevLanguage = useRef(language);
 
+    // When language changes, allow a fresh sync
     useEffect(() => {
         if (language !== prevLanguage.current) {
+            console.log(`[useAppSync] Language changed: ${prevLanguage.current} -> ${language}, resetting sync flag`);
             hasSyncedOnStart.current = false;
             prevLanguage.current = language;
         }
     }, [language]);
 
     useEffect(() => {
-        if (!netInfo.isConnected || hasSyncedOnStart.current || isSyncing || !isAuthenticated) {
+        if (!netInfo.isConnected || hasSyncedOnStart.current || isSyncingRef.current || !isAuthenticated) {
             return;
         }
 
@@ -35,8 +38,10 @@ export const useAppSync = () => {
         const runBackgroundSync = async () => {
             if (!isMounted) return;
             
+            isSyncingRef.current = true;
             setIsSyncing(true);
             hasSyncedOnStart.current = true;
+            console.log(`[useAppSync] Starting sync for language=${language}`);
 
             try {
                 // Run background tasks concurrently where possible
@@ -50,13 +55,12 @@ export const useAppSync = () => {
 
                 // Update stores after sync
                 useCurrencyStore.getState().loadCurrencies();
-                useNodesStore.getState().triggerRefresh();
+                await useNodesStore.getState().fetchModules(true);
                 console.log('[useAppSync] Background sync completed successfully');
             } catch (error) {
                 console.error('[useAppSync] Background sync failed:', error);
-                // Do not reset hasSyncedOnStart here to avoid infinite loops.
-                // We'll only retry on network reconnect or language change.
             } finally {
+                isSyncingRef.current = false;
                 if (isMounted) {
                     setIsSyncing(false);
                 }
@@ -68,7 +72,7 @@ export const useAppSync = () => {
         return () => {
             isMounted = false;
         };
-    }, [netInfo.isConnected, language, isSyncing]);
+    }, [netInfo.isConnected, language, isAuthenticated]);
 
     return {
         isSyncing,
