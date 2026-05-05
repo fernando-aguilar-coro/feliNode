@@ -28,7 +28,12 @@ const auth: Translation['auth'] = {
     // Social
     googleSignInError: "谷歌登录出错",
     continueWithGoogle: "继续使用 Google"
-  }
+  },
+  nativeLanguage: "您的母语",
+  nativeLanguageHint: "您目前使用的语言",
+  uiLanguage: "应用语言",
+  uiLangNative: "原生",
+  uiLangEn: "英语"
 };
 
 export default auth;

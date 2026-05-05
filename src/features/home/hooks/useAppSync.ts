@@ -7,12 +7,15 @@ import { syncInfinityStats } from '../../../api/syncInfinityStats';
 import { CurrencyService } from '../../gamification/services/Currency.service';
 import { useCurrencyStore } from '../../../store/CurrencyStore';
 import { useSettingsStore } from '../../../store/SettingsStore';
+import { useUserStore } from '../../../store/UserStore';
+import { useNodesStore } from '../../../store/NodesStore';
 
 export const useAppSync = () => {
     const netInfo = useNetInfo();
     const [isSyncing, setIsSyncing] = useState(false);
     const hasSyncedOnStart = useRef(false);
     const language = useSettingsStore(state => state.language);
+    const isAuthenticated = useUserStore(state => state.isAuthenticated);
     const prevLanguage = useRef(language);
 
     useEffect(() => {
@@ -23,7 +26,7 @@ export const useAppSync = () => {
     }, [language]);
 
     useEffect(() => {
-        if (!netInfo.isConnected || hasSyncedOnStart.current || isSyncing) {
+        if (!netInfo.isConnected || hasSyncedOnStart.current || isSyncing || !isAuthenticated) {
             return;
         }
 
@@ -47,10 +50,12 @@ export const useAppSync = () => {
 
                 // Update stores after sync
                 useCurrencyStore.getState().loadCurrencies();
+                useNodesStore.getState().triggerRefresh();
+                console.log('[useAppSync] Background sync completed successfully');
             } catch (error) {
                 console.error('[useAppSync] Background sync failed:', error);
-                // Allow retry if it failed completely
-                hasSyncedOnStart.current = false;
+                // Do not reset hasSyncedOnStart here to avoid infinite loops.
+                // We'll only retry on network reconnect or language change.
             } finally {
                 if (isMounted) {
                     setIsSyncing(false);

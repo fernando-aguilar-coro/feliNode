@@ -2,10 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { RewardedAd, RewardedAdEventType, TestIds, AdEventType } from 'react-native-google-mobile-ads';
 import { useCurrencyStore } from '../store/CurrencyStore';
 
-export const REWARDED_AD_UNIT_ID = __DEV__
-    ? TestIds.REWARDED
-    : 'ca-app-pub-4304821010375937/1912250687'; // Placeholder for rewarded
-
+export const REWARDED_AD_UNIT_ID = 'ca-app-pub-4304821010375937/8765401166';
 export const useAppRewardedAd = () => {
     const inventory = useCurrencyStore((state) => state.currencies.inventory);
     const removeAds = inventory?.remove_ads === true;
@@ -15,7 +12,7 @@ export const useAppRewardedAd = () => {
 
     const loadAd = useCallback(() => {
         if (removeAds) return; // Don't load if premium
-        
+
         const rewarded = RewardedAd.createForAdRequest(REWARDED_AD_UNIT_ID, {
             requestNonPersonalizedAdsOnly: true,
         });
@@ -30,7 +27,7 @@ export const useAppRewardedAd = () => {
 
     useEffect(() => {
         loadAd();
-        
+
         return () => {
             if (rewardedAdRef.current) {
                 // Cannot easily unsubscribe all without the specific return functions,

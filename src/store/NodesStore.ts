@@ -23,6 +23,12 @@ interface NodesStoreState {
     isModulesLoading: boolean;
     setModules: (modules: ModuleProgress[]) => void;
     setModulesLoading: (loading: boolean) => void;
+
+    // Sync state
+    syncProgress: number;
+    isSyncingData: boolean;
+    setSyncProgress: (progress: number) => void;
+    setIsSyncingData: (syncing: boolean) => void;
 }
 
 export const useNodesStore = create<NodesStoreState>((set) => ({
@@ -45,4 +51,9 @@ export const useNodesStore = create<NodesStoreState>((set) => ({
     isModulesLoading: true,
     setModules: (modules) => set({ modules, isModulesLoading: false }),
     setModulesLoading: (isModulesLoading) => set({ isModulesLoading }),
+
+    syncProgress: 0,
+    isSyncingData: false,
+    setSyncProgress: (syncProgress) => set({ syncProgress }),
+    setIsSyncingData: (isSyncingData) => set({ isSyncingData }),
 }));

@@ -13,6 +13,7 @@ import { HomeNavigation } from '../features/home/navigation/HomeNavigation';
 import { useUserStore } from '../store/UserStore';
 import { useSettingsStore } from '../store/SettingsStore';
 import { getUserCompletedLessons } from '../api/getUserCompletedLessons';
+import { useAppSync } from '../features/home/hooks/useAppSync';
 
 const Stack = createNativeStackNavigator();
 const minCount = 1;
@@ -25,6 +26,9 @@ export const Navigation = () => {
     const [completedLessonsCount, setCompletedLessonsCount] = useState(0);
     const [isCheckingData, setIsCheckingData] = useState(true);
     const [hasData, setHasData] = useState(false);
+
+    // Start background sync
+    useAppSync();
 
     useEffect(() => {
         checkSession();
@@ -44,6 +48,7 @@ export const Navigation = () => {
                     hasMinimumData(),
                     getUserCompletedLessons()
                 ]);
+                console.log(`[Navigation] checkInitialData: hasData=${dataReady}, completed=${count}`);
                 setHasData(dataReady);
                 setCompletedLessonsCount(count);
             } catch (error) {
@@ -69,17 +74,8 @@ export const Navigation = () => {
         );
     }
 
-    // Only block if we are absolutely sure there is NO data and we are checking
-    // If there is data, or if we are offline but have data, proceed.
-    // If there is NO data and we are online, we should probably still proceed and let Home handle the "Downloading" state,
-    // but for now, we can show a brief "Initializing" screen.
-    if (isCheckingData || (!hasData && netInfo.isConnected !== false)) {
-        // If we don't have data, we stay in LoadingScreen until the background sync (handled by Home or App) 
-        // seeds the database. BUT wait, if Navigation blocks here, Home is never mounted, so useAppSync never runs!
-        // To fix this, we should let it pass to Home even if !hasData, and let Home show skeletons.
-        if (isCheckingData) {
-            return <LoadingScreen type='progress' />;
-        }
+    if (isCheckingData) {
+        return <LoadingScreen type='progress' />;
     }
 
     return (

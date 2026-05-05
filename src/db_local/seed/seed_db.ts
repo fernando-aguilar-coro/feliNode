@@ -5,6 +5,7 @@ import { ensureModule, ensureLessons } from './seed_config';
 import { SeedModule, SeedLesson } from './types';
 import { getAllLessons, getAllModuleDependencies } from '../../api/GetAllLessons';
 import { useSettingsStore } from '../../store/SettingsStore';
+import { useNodesStore } from '../../store/NodesStore';
 let db: SQLite.SQLiteDatabase | null = null;
 
 const init = async () => {
@@ -78,6 +79,8 @@ export const seedDatabase = async () => {
         }
 
         // Seed from Supabase
+        useNodesStore.getState().setIsSyncingData(true);
+        useNodesStore.getState().setSyncProgress(0.1); // 10% for fetching
         let supabaseLessons = await getAllLessons(languageCode);
 
         let retryCount = 0;
@@ -112,6 +115,9 @@ export const seedDatabase = async () => {
 
             // Seed each module and register Supabase → local ID mapping. 
             await dbInstance.withTransactionAsync(async () => {
+                let processedModules = 0;
+                const totalModules = lessonsByModule.size;
+
                 for (const [modId, lessons] of lessonsByModule.entries()) {
                     const info = moduleInfo.get(modId)!;
                     const modData: SeedModule = {
@@ -125,6 +131,11 @@ export const seedDatabase = async () => {
                     if (dbModId) {
                         await ensureLessons(dbInstance, dbModId, lessons);
                     }
+                    
+                    processedModules++;
+                    // Progress from 10% to 90%
+                    const progress = 0.1 + (processedModules / totalModules) * 0.8;
+                    useNodesStore.getState().setSyncProgress(progress);
                 }
             });
 
@@ -153,5 +164,8 @@ export const seedDatabase = async () => {
     } catch (error) {
         console.error('[DB_SEED] Error during database seeding:', error);
         await AsyncStorage.removeItem('HAS_SEEDED_DB');
+    } finally {
+        useNodesStore.getState().setSyncProgress(1);
+        useNodesStore.getState().setIsSyncingData(false);
     }
 };

@@ -15,6 +15,7 @@ export const useModuleProgress = () => {
     const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set());
 
     const loadData = useCallback(async () => {
+        console.log('[useModuleProgress] loadData started, modules count:', useNodesStore.getState().modules.length);
         if (useNodesStore.getState().modules.length === 0) {
             setModulesLoading(true);
         }
@@ -30,17 +31,20 @@ export const useModuleProgress = () => {
                 return prev;
             });
         } catch (error) {
-            console.error('Failed to load module progress', error);
+            console.error('[useModuleProgress] Failed to load module progress:', error);
         } finally {
+            console.log('[useModuleProgress] loadData finished');
             setModulesLoading(false);
         }
     }, [setModules, setModulesLoading]);
+
+    const refreshTrigger = useNodesStore(state => state.refreshTrigger);
 
     useEffect(() => {
         if (isFocused) {
             loadData();
         }
-    }, [isFocused, loadData]);
+    }, [isFocused, loadData, refreshTrigger]);
 
     const toggleModule = useCallback((moduleId: number) => {
         audioService.playClickSound();

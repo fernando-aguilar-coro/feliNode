@@ -1,7 +1,9 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, Dimensions } from 'react-native';
 import { useModuleProgress } from '../hooks/useModuleProgress';
+import { useNodesStore } from '../../../store/NodesStore';
 import { useAppTheme } from '../../../theme/ThemeContext';
+import { AppText } from '../../../components/AppText';
 import { PathNode } from '../components/PathNode';
 import { ModuleHeader } from '../components/ModuleHeader';
 import { PathConnector } from '../components/PathConnector';
@@ -29,6 +31,8 @@ export const CoursePathScreen = () => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
     const { modules, isLoading } = useModuleProgress();
+    const isSyncingData = useNodesStore(state => state.isSyncingData);
+    const syncProgress = useNodesStore(state => state.syncProgress);
     const listRef = useRef<FlatList>(null);
     const { getPoint, ITEM_HEIGHT } = usePathLayout();
 
@@ -135,11 +139,27 @@ export const CoursePathScreen = () => {
         }
     }, [isLoading, flattenedData]);
 
-    if (isLoading && modules.length === 0) {
+    if (modules.length === 0 && (isLoading || isSyncingData)) {
+        if (isSyncingData) {
+            return (
+                <LinearGradient colors={bgColors} style={styles.center}>
+                    <View style={styles.progressContainer}>
+                        <AppText weight="bold" color={theme.colors.text} align="center">
+                            Preparando tus lecciones...
+                        </AppText>
+                        <View style={[styles.progressBarBackground, { backgroundColor: theme.dark ? '#333' : '#E5E5EA' }]}>
+                            <View style={[styles.progressBarFill, { width: `${Math.max(5, syncProgress * 100)}%`, backgroundColor: theme.colors.primary }]} />
+                        </View>
+                        <AppText variant="sm" color={theme.colors.textSecondary} align="center">
+                            {Math.round(syncProgress * 100)}%
+                        </AppText>
+                    </View>
+                </LinearGradient>
+            );
+        }
         return (
             <LinearGradient colors={bgColors} style={styles.center}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
-
             </LinearGradient>
         );
     }
@@ -234,5 +254,20 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: ITEM_HEIGHT,
+    },
+    progressContainer: {
+        width: '80%',
+        alignItems: 'center',
+        gap: 16,
+    },
+    progressBarBackground: {
+        width: '100%',
+        height: 12,
+        borderRadius: 6,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        borderRadius: 6,
     }
 });
